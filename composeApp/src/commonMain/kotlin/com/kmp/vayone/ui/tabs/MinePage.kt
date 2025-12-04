@@ -2,42 +2,69 @@ package com.kmp.vayone.ui.tabs
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kmp.vayone.data.Strings
+import com.kmp.vayone.navigation.Screen
 import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import theme.C_2B2621
+import theme.C_524F4C
+import theme.C_B4B0AD
 import theme.C_FC7700
 import theme.C_FFBB48
+import theme.C_FFD64F
+import theme.C_FFF4E6
 import theme.white
 import vayone.composeapp.generated.resources.Res
 import vayone.composeapp.generated.resources.avatar
 import vayone.composeapp.generated.resources.avatar_bg
+import vayone.composeapp.generated.resources.mine_about
+import vayone.composeapp.generated.resources.mine_account
+import vayone.composeapp.generated.resources.mine_cert
+import vayone.composeapp.generated.resources.mine_contact
 import vayone.composeapp.generated.resources.mine_icon
+import vayone.composeapp.generated.resources.mine_language
+import vayone.composeapp.generated.resources.mine_order
+import vayone.composeapp.generated.resources.mine_payback_bg
+import vayone.composeapp.generated.resources.mine_privacy
+import vayone.composeapp.generated.resources.mine_right
+import vayone.composeapp.generated.resources.mine_set
 
 
 @Composable
-fun MinePage() {
+fun MinePage(navigate: (Screen) -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxWidth()
+            .wrapContentHeight()
             .background(white)
     ) {
         Box(
@@ -84,11 +111,286 @@ fun MinePage() {
                 modifier = Modifier.wrapContentSize().align(Alignment.TopStart)
                     .padding(start = 92.dp, top = 116.dp)
             )
-            Row(modifier = Modifier.fillMaxWidth()
-                .height(125.dp)
-                .align(Alignment.BottomCenter)
-                .background(color = white.copy(0.3f), shape = RoundedCornerShape(24.dp))) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(125.dp)
+                    .align(Alignment.BottomCenter)
+                    .background(color = white.copy(0.3f), shape = RoundedCornerShape(24.dp))
+                    .padding(horizontal = 26.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clickable {
 
+                        },
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Image(
+                        painter = painterResource(Res.drawable.mine_account),
+                        contentDescription = Strings["accounts"],
+                        modifier = Modifier.size(57.dp),
+                        alignment = Alignment.Center
+                    )
+                    Text(
+                        modifier = Modifier.padding(top = 9.dp),
+                        text = Strings["accounts"],
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = C_2B2621,
+                    )
+                }
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clickable {
+
+                        },
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Image(
+                        painter = painterResource(Res.drawable.mine_order),
+                        contentDescription = Strings["order_center"],
+                        modifier = Modifier.size(57.dp),
+                        alignment = Alignment.Center
+                    )
+                    Text(
+                        modifier = Modifier.padding(top = 9.dp),
+                        text = Strings["order_center"],
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = C_2B2621,
+                    )
+                }
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clickable {
+
+                        },
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Image(
+                        painter = painterResource(Res.drawable.mine_cert),
+                        contentDescription = Strings["certification"],
+                        modifier = Modifier.size(57.dp),
+                        alignment = Alignment.Center
+                    )
+                    Text(
+                        modifier = Modifier.padding(top = 9.dp),
+                        text = Strings["certification"],
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = C_2B2621,
+                    )
+                }
+            }
+        }
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp)
+                .padding(top = 10.dp)
+                .fillMaxWidth()
+                .height(61.dp)
+                .background(shape = RoundedCornerShape(12.dp), color = C_FFD64F),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                modifier = Modifier.weight(1f).align(Alignment.CenterVertically),
+                text = Strings["quick_repayment"],
+                color = C_2B2621,
+                fontWeight = FontWeight.Bold,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center
+            )
+            Box(
+                modifier = Modifier.height(48.dp).align(Alignment.CenterVertically)
+                    .padding(end = 7.dp)
+            ) {
+                Image(
+                    painter = painterResource(Res.drawable.mine_payback_bg),
+                    contentDescription = null,
+                )
+                Text(
+                    modifier = Modifier.padding(bottom = 9.dp).align(Alignment.Center).clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                        onClick = {
+
+                        }
+                    ),
+                    text = Strings["pay_back_now"],
+                    color = white,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+        LazyColumn(
+            modifier = Modifier
+                .padding(vertical = 10.dp, horizontal = 16.dp)
+        ) {
+            item {
+                Column(
+                    modifier = Modifier.fillMaxWidth()
+                        .wrapContentHeight()
+                        .background(color = C_FFF4E6, shape = RoundedCornerShape(16.dp))
+                )
+                {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().height(44.dp).clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                            onClick = {
+
+                            }
+                        ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Image(
+                            painter = painterResource(Res.drawable.mine_language),
+                            contentDescription = null,
+                            modifier = Modifier.padding(start = 10.dp).size(24.dp)
+                        )
+                        Text(
+                            modifier = Modifier.weight(1f).padding(start = 16.dp),
+                            text = Strings["language"],
+                            color = C_524F4C,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Start
+                        )
+                        Image(
+                            painter = painterResource(Res.drawable.mine_right),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth().height(44.dp).clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                            onClick = {
+
+                            }
+                        ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Image(
+                            painter = painterResource(Res.drawable.mine_privacy),
+                            contentDescription = null,
+                            modifier = Modifier.padding(start = 10.dp).size(24.dp)
+                        )
+                        Text(
+                            modifier = Modifier.weight(1f).padding(start = 16.dp),
+                            text = Strings["privacy_policy"],
+                            color = C_524F4C,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Start
+                        )
+                        Image(
+                            painter = painterResource(Res.drawable.mine_right),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth().height(44.dp).clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                            onClick = {
+
+                            }
+                        ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Image(
+                            painter = painterResource(Res.drawable.mine_set),
+                            contentDescription = null,
+                            modifier = Modifier.padding(start = 10.dp).size(24.dp)
+                        )
+                        Text(
+                            modifier = Modifier.weight(1f).padding(start = 16.dp),
+                            text = Strings["settings"],
+                            color = C_524F4C,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Start
+                        )
+                        Image(
+                            painter = painterResource(Res.drawable.mine_right),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth().height(44.dp).clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                            onClick = {
+
+                            }
+                        ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Image(
+                            painter = painterResource(Res.drawable.mine_contact),
+                            contentDescription = null,
+                            modifier = Modifier.padding(start = 10.dp).size(24.dp)
+                        )
+                        Text(
+                            modifier = Modifier.weight(1f).padding(start = 16.dp),
+                            text = Strings["contact_us"],
+                            color = C_524F4C,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Start
+                        )
+                        Image(
+                            painter = painterResource(Res.drawable.mine_right),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth().height(44.dp).clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                            onClick = {
+
+                            }
+                        ),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Image(
+                            painter = painterResource(Res.drawable.mine_about),
+                            contentDescription = null,
+                            modifier = Modifier.padding(start = 10.dp).size(24.dp)
+                        )
+                        Text(
+                            modifier = Modifier.weight(1f).padding(start = 16.dp),
+                            text = Strings["about_us"],
+                            color = C_524F4C,
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 13.sp,
+                            textAlign = TextAlign.Start
+                        )
+                        Image(
+                            painter = painterResource(Res.drawable.mine_right),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
             }
         }
     }
@@ -97,5 +399,5 @@ fun MinePage() {
 @Preview
 @Composable
 fun PreMine() {
-    MinePage()
+    MinePage {}
 }
