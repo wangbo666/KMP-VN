@@ -1,7 +1,19 @@
+@file:OptIn(ExperimentalComposeUiApi::class)
+
 package com.kmp.vayone
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.backhandler.BackHandler
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.AboutUsScreen
 import com.kmp.vayone.ui.ChangePasswordScreen
@@ -13,22 +25,38 @@ import com.kmp.vayone.ui.PrivacyScreen
 import com.kmp.vayone.ui.SettingsScreen
 import com.kmp.vayone.ui.SplashScreen
 import com.kmp.vayone.ui.WebViewScreen
+import com.kmp.vayone.ui.widget.ToastHost
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun App() {
+
+    // 用于判断是前进还是后退
+    var isNavigatingForward by remember { mutableStateOf(true) }
+    val previousStackSize = remember { mutableStateOf(1) }
+    val animationDuration = 300
 
     // back stack（第一个为初始页面）
     var backStack by remember { mutableStateOf(listOf<Screen>(Screen.Splash)) }
 
     // 当前页面永远是栈顶
-    val currentScreen = backStack.last()
+    var currentScreen by remember { mutableStateOf<Screen>(Screen.Splash) }
+
+    // 协程作用域
+    val scope = rememberCoroutineScope()
 
     // 跳转：push
     fun navigate(to: Screen) {
-        backStack = if (to is Screen.Home) {
-            listOf(to)
-        } else {
-            backStack + to
+        isNavigatingForward = true
+        currentScreen = to
+        val launch = scope.launch {
+            delay(animationDuration.toLong())
+            backStack = if (to is Screen.Home) {
+                listOf(to)
+            } else {
+                backStack + to
+            }
         }
     }
 //
@@ -39,58 +67,130 @@ fun App() {
     // 返回：pop
     fun goBack() {
         if (backStack.size > 1) {
-            backStack = backStack.dropLast(1)
+            isNavigatingForward = false
+            val previousScreen = backStack[backStack.size - 2]
+            currentScreen = previousScreen
+            scope.launch {
+                delay(animationDuration.toLong())
+                backStack = backStack.dropLast(1)
+            }
         }
     }
 
     var homeTabIndex by remember { mutableStateOf(0) }
 
     fun navigateAsRoot(to: Screen) {
-        backStack = listOf(to)  // 只保留一个页面
+        isNavigatingForward = true
+        currentScreen = to
+        scope.launch {
+            delay(animationDuration.toLong())
+            backStack = listOf(to)
+        }
+    }
+
+
+    var showToast by remember { mutableStateOf(false) }
+    var toastMessage by remember { mutableStateOf("") }
+
+
+    LaunchedEffect(backStack.size) {
+        isNavigatingForward = backStack.size > previousStackSize.value
+        previousStackSize.value = backStack.size
     }
 
     MaterialTheme {
-        when (currentScreen) {
-            Screen.Splash ->
-                SplashScreen { navigate(it) }
-
-            Screen.Privacy ->
-                PrivacyScreen(onBack = {
-                    exitApp()
-                }) {
-                    navigate(it)
-                }
-
-            Screen.Login ->
-                LoginScreen { navigate(it) }
-
-            Screen.Home -> {
-                HomeScreen(
-                    selectedIndex = homeTabIndex,
-                    onTabChange = { homeTabIndex = it })
-                { navigate(it) }
+        Box {
+            BackHandler(enabled = backStack.size > 1) {
+                goBack()
             }
+            AnimatedContent(
+                targetState = currentScreen,
+                transitionSpec = {
+                    if (isNavigatingForward) {
+                        // 前进动画：从右往左滑入
+                        slideInHorizontally(
+                            initialOffsetX = { it },
+                            animationSpec = tween(300)
+                        ) + fadeIn(animationSpec = tween(300)) togetherWith
+                                slideOutHorizontally(
+                                    targetOffsetX = { -it / 3 },
+                                    animationSpec = tween(300)
+                                ) + fadeOut(animationSpec = tween(300))
+                    } else {
+                        // 后退动画：从左往右滑出
+                        slideInHorizontally(
+                            initialOffsetX = { -it / 3 },
+                            animationSpec = tween(300)
+                        ) + fadeIn(animationSpec = tween(300)) togetherWith
+                                slideOutHorizontally(
+                                    targetOffsetX = { it },
+                                    animationSpec = tween(300)
+                                ) + fadeOut(animationSpec = tween(300))
+                    }
+                },
+                label = "screen_transition"
+            ) {screen ->
+                when (screen) {
+                    Screen.Splash ->
+                        SplashScreen { navigate(it) }
 
-            Screen.AboutUs ->
-                AboutUsScreen { goBack() }
+                    Screen.Privacy ->
+                        PrivacyScreen(toast = { show, toast ->
+                            showToast = show
+                            toastMessage = toast
+                        }, onBack = {
+                            exitApp()
+                        }) {
+                            navigate(it)
+                        }
 
-            Screen.Settings ->
-                SettingsScreen({ goBack() }) { navigate(it) }
+                    Screen.Login ->
+                        LoginScreen { navigate(it) }
 
-            is Screen.WebView -> {
-                WebViewScreen(currentScreen.title, currentScreen.url) {
-                    goBack()
+                    Screen.Home -> {
+                        HomeScreen(
+                            selectedIndex = homeTabIndex,
+                            onTabChange = { homeTabIndex = it })
+                        { navigate(it) }
+                    }
+
+                    Screen.AboutUs ->
+                        AboutUsScreen { goBack() }
+
+                    Screen.Settings ->
+                        SettingsScreen(toast = { show, toast ->
+                            showToast = show
+                            toastMessage = toast
+                        }, { goBack() }) { navigate(it) }
+
+                    is Screen.WebView -> {
+                        WebViewScreen(screen.title, screen.url) {
+                            goBack()
+                        }
+                    }
+
+                    Screen.ChangePassword ->
+                        ChangePasswordScreen({ goBack() }) { navigate(it) }
+
+                    Screen.Feedback ->
+                        FeedbackScreen(toast = { show, toast ->
+                            showToast = show
+                            toastMessage = toast
+                        }) {
+                            goBack()
+                        }
+
+                    Screen.Logout ->
+                        LogoutScreen({ goBack() }) { navigate(it) }
                 }
+                ToastHost(
+                    message = toastMessage,
+                    show = showToast,
+                    onDismiss = {
+                        showToast = false
+                    }
+                )
             }
-
-            Screen.ChangePassword ->
-                ChangePasswordScreen({ goBack() }) { navigate(it) }
-
-            Screen.Feedback ->
-                FeedbackScreen { goBack() }
-
-            Screen.Logout ->
-                LogoutScreen({ goBack() }) { navigate(it) }
         }
     }
 }

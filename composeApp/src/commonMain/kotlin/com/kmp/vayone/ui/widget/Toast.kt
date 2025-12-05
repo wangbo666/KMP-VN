@@ -22,14 +22,13 @@ fun ToastHost(message: String, show: Boolean = true, onDismiss: () -> Unit = {})
     if (show) {
         Box(
             modifier = Modifier.fillMaxSize().padding(32.dp),
-            contentAlignment = Alignment.BottomCenter
+            contentAlignment = Alignment.Center
         ) {
             AnimatedVisibility(visible = show) {
                 Text(
                     text = message,
                     color = Color.White,
                     modifier = Modifier
-                        .padding(bottom = 100.dp)
                         .background(Color.Black.copy(alpha = 0.8f), RoundedCornerShape(8.dp))
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                     textAlign = TextAlign.Center

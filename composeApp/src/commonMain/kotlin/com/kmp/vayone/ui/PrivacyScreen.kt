@@ -28,7 +28,6 @@ import com.kmp.vayone.data.Strings
 import com.kmp.vayone.exitApp
 import com.kmp.vayone.ui.widget.ColoredTextPart
 import com.kmp.vayone.ui.widget.MultiColoredText
-import com.kmp.vayone.ui.widget.ToastHost
 import com.kmp.vayone.ui.widget.TopBar
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -40,12 +39,14 @@ import vayone.composeapp.generated.resources.permission_check
 import vayone.composeapp.generated.resources.permission_uncheck
 
 @Composable
-fun PrivacyScreen(onBack: () -> Unit, onNavigate: (Screen) -> Unit) {
+fun PrivacyScreen(
+    toast: (show: Boolean, message: String) -> Unit,
+    onBack: () -> Unit,
+    onNavigate: (Screen) -> Unit,
+) {
     var agreeCollection by remember { mutableStateOf(true) }
     var agreePrivacy by remember { mutableStateOf(true) }
 
-    var showToast by remember { mutableStateOf(false) }
-    var toastMessage by remember { mutableStateOf("") }
     Scaffold(
         modifier = Modifier.fillMaxSize()
             .background(white)
@@ -163,13 +164,15 @@ fun PrivacyScreen(onBack: () -> Unit, onNavigate: (Screen) -> Unit) {
                             .clickable {
                                 when {
                                     !agreeCollection -> {
-                                        toastMessage = Strings["privacy_toast_agree1"]
-                                        showToast = true
+                                        val toastMessage = Strings["privacy_toast_agree1"]
+                                        val showToast = true
+                                        toast(showToast, toastMessage)
                                     }
 
                                     !agreePrivacy -> {
-                                        toastMessage = Strings["privacy_toast_agree2"]
-                                        showToast = true
+                                        val toastMessage = Strings["privacy_toast_agree2"]
+                                        val showToast = true
+                                        toast(showToast, toastMessage)
                                     }
 
                                     else -> {
@@ -183,160 +186,154 @@ fun PrivacyScreen(onBack: () -> Unit, onNavigate: (Screen) -> Unit) {
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().background(white)) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(paddingValues = paddingValues),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                item {
-                    Column(
-                        modifier = Modifier.fillMaxSize()
-                            .padding(horizontal = 20.dp, vertical = 10.dp)
-                    ) {
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = Strings["permissions"].uppercase(),
-                            color = C_FC7700,
-                            fontSize = 16.sp,
-                            lineHeight = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = Strings["permission_desc"],
-                            color = C_40495C,
-                            fontSize = 13.sp,
-                            lineHeight = 14.sp,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = Strings["permission_location_title"],
-                            color = C_FC7700,
-                            fontSize = 16.sp,
-                            lineHeight = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = Strings["permission_location_content"],
-                            color = C_40495C,
-                            fontSize = 13.sp,
-                            lineHeight = 14.sp,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = Strings["permission_camera_title"],
-                            color = C_FC7700,
-                            fontSize = 16.sp,
-                            lineHeight = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = Strings["permission_camera_content"],
-                            color = C_40495C,
-                            fontSize = 13.sp,
-                            lineHeight = 14.sp,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = Strings["permission_phone_title"],
-                            color = C_FC7700,
-                            fontSize = 16.sp,
-                            lineHeight = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = Strings["permission_phone_content"],
-                            color = C_40495C,
-                            fontSize = 13.sp,
-                            lineHeight = 14.sp,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = Strings["permission_installed_title"],
-                            color = C_FC7700,
-                            fontSize = 16.sp,
-                            lineHeight = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = Strings["permission_installed_content"],
-                            color = C_40495C,
-                            fontSize = 13.sp,
-                            lineHeight = 14.sp,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = Strings["permissions_notification_title"],
-                            color = C_FC7700,
-                            fontSize = 16.sp,
-                            lineHeight = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = Strings["permissions_notification_content"],
-                            color = C_40495C,
-                            fontSize = 13.sp,
-                            lineHeight = 14.sp,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = Strings["permission_sms_title"],
-                            color = C_FC7700,
-                            fontSize = 16.sp,
-                            lineHeight = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = Strings["permission_sms_content"],
-                            color = C_40495C,
-                            fontSize = 13.sp,
-                            lineHeight = 14.sp,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = Strings["permission_call_title"],
-                            color = C_FC7700,
-                            fontSize = 16.sp,
-                            lineHeight = 18.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = Strings["permission_call_content"],
-                            color = C_40495C,
-                            fontSize = 13.sp,
-                            lineHeight = 14.sp,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().background(white)
+                .padding(paddingValues = paddingValues),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            item {
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                        .padding(horizontal = 20.dp, vertical = 10.dp)
+                ) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Strings["permissions"].uppercase(),
+                        color = C_FC7700,
+                        fontSize = 16.sp,
+                        lineHeight = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Strings["permission_desc"],
+                        color = C_40495C,
+                        fontSize = 13.sp,
+                        lineHeight = 14.sp,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Strings["permission_location_title"],
+                        color = C_FC7700,
+                        fontSize = 16.sp,
+                        lineHeight = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Strings["permission_location_content"],
+                        color = C_40495C,
+                        fontSize = 13.sp,
+                        lineHeight = 14.sp,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Strings["permission_camera_title"],
+                        color = C_FC7700,
+                        fontSize = 16.sp,
+                        lineHeight = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Strings["permission_camera_content"],
+                        color = C_40495C,
+                        fontSize = 13.sp,
+                        lineHeight = 14.sp,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Strings["permission_phone_title"],
+                        color = C_FC7700,
+                        fontSize = 16.sp,
+                        lineHeight = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Strings["permission_phone_content"],
+                        color = C_40495C,
+                        fontSize = 13.sp,
+                        lineHeight = 14.sp,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Strings["permission_installed_title"],
+                        color = C_FC7700,
+                        fontSize = 16.sp,
+                        lineHeight = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Strings["permission_installed_content"],
+                        color = C_40495C,
+                        fontSize = 13.sp,
+                        lineHeight = 14.sp,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Strings["permissions_notification_title"],
+                        color = C_FC7700,
+                        fontSize = 16.sp,
+                        lineHeight = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Strings["permissions_notification_content"],
+                        color = C_40495C,
+                        fontSize = 13.sp,
+                        lineHeight = 14.sp,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Strings["permission_sms_title"],
+                        color = C_FC7700,
+                        fontSize = 16.sp,
+                        lineHeight = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Strings["permission_sms_content"],
+                        color = C_40495C,
+                        fontSize = 13.sp,
+                        lineHeight = 14.sp,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Strings["permission_call_title"],
+                        color = C_FC7700,
+                        fontSize = 16.sp,
+                        lineHeight = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = Strings["permission_call_content"],
+                        color = C_40495C,
+                        fontSize = 13.sp,
+                        lineHeight = 14.sp,
+                        textAlign = TextAlign.Center,
+                    )
                 }
             }
-            ToastHost(
-                message = toastMessage,
-                show = showToast,
-                onDismiss = { showToast = false }
-            )
         }
     }
 }
@@ -344,7 +341,7 @@ fun PrivacyScreen(onBack: () -> Unit, onNavigate: (Screen) -> Unit) {
 @Preview
 @Composable
 fun PreViewPermission() {
-    PrivacyScreen({}) {
+    PrivacyScreen({ _, _ -> }, {}) {
 
     }
 }
