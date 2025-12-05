@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalComposeUiApi::class)
-
 package com.kmp.vayone
 
 import androidx.compose.animation.AnimatedContent
@@ -13,14 +11,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.backhandler.BackHandler
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.AboutUsScreen
 import com.kmp.vayone.ui.ChangePasswordScreen
+import com.kmp.vayone.ui.ContactUsScreen
 import com.kmp.vayone.ui.FeedbackScreen
 import com.kmp.vayone.ui.HomeScreen
 import com.kmp.vayone.ui.LoginScreen
 import com.kmp.vayone.ui.LogoutScreen
+import com.kmp.vayone.ui.LogoutSuccessScreen
 import com.kmp.vayone.ui.PrivacyScreen
 import com.kmp.vayone.ui.SettingsScreen
 import com.kmp.vayone.ui.SplashScreen
@@ -29,6 +28,7 @@ import com.kmp.vayone.ui.widget.ToastHost
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun App() {
 
@@ -46,13 +46,16 @@ fun App() {
     // 协程作用域
     val scope = rememberCoroutineScope()
 
+    var homeTabIndex by remember { mutableStateOf(0) }
+
     // 跳转：push
     fun navigate(to: Screen) {
         isNavigatingForward = true
         currentScreen = to
-        val launch = scope.launch {
+        scope.launch {
             delay(animationDuration.toLong())
             backStack = if (to is Screen.Home) {
+                homeTabIndex = to.selectedIndex
                 listOf(to)
             } else {
                 backStack + to
@@ -77,7 +80,6 @@ fun App() {
         }
     }
 
-    var homeTabIndex by remember { mutableStateOf(0) }
 
     fun navigateAsRoot(to: Screen) {
         isNavigatingForward = true
@@ -100,9 +102,9 @@ fun App() {
 
     MaterialTheme {
         Box {
-            BackHandler(enabled = backStack.size > 1) {
-                goBack()
-            }
+//            BackHandler(enabled = backStack.size > 1) {
+//                goBack()
+//            }
             AnimatedContent(
                 targetState = currentScreen,
                 transitionSpec = {
@@ -129,7 +131,7 @@ fun App() {
                     }
                 },
                 label = "screen_transition"
-            ) {screen ->
+            ) { screen ->
                 when (screen) {
                     Screen.Splash ->
                         SplashScreen { navigate(it) }
@@ -147,7 +149,7 @@ fun App() {
                     Screen.Login ->
                         LoginScreen { navigate(it) }
 
-                    Screen.Home -> {
+                    is Screen.Home -> {
                         HomeScreen(
                             selectedIndex = homeTabIndex,
                             onTabChange = { homeTabIndex = it })
@@ -181,7 +183,18 @@ fun App() {
                         }
 
                     Screen.Logout ->
-                        LogoutScreen({ goBack() }) { navigate(it) }
+                        LogoutScreen(toast = { show, toast ->
+                            showToast = show
+                            toastMessage = toast
+                        }, { goBack() }) { navigate(it) }
+
+                    Screen.LogoutSuccess ->
+                        LogoutSuccessScreen {
+                            navigate(it)
+                        }
+
+                    Screen.ContactUs ->
+                        ContactUsScreen { goBack() }
                 }
                 ToastHost(
                     message = toastMessage,

@@ -32,7 +32,7 @@ fun SplashScreen(onNavigate: (Screen) -> Unit) {
     LaunchedEffect(Unit) {
         delay(1500)
         if (CacheManager.isAgreedPrivacy()) {
-            onNavigate(Screen.Home)
+            onNavigate(Screen.Home())
         } else {
             onNavigate(Screen.Privacy)
         }

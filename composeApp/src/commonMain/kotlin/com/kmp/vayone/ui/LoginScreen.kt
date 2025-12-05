@@ -22,7 +22,7 @@ fun LoginScreen(navigate: (Screen) -> Unit) {
 
         Button(onClick = {
             CacheManager.setLoggedIn(true)
-            navigate(Screen.Home)
+            navigate(Screen.Home())
         }) {
             Text("登录")
         }

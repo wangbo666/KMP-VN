@@ -1,7 +1,9 @@
 package com.kmp.vayone.ui.tabs
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -16,13 +18,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,8 +39,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.Strings
+import com.kmp.vayone.exitApp
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.widget.AutoSizeText
 import org.jetbrains.compose.resources.imageResource
@@ -68,6 +76,7 @@ import vayone.composeapp.generated.resources.mine_set
 fun MinePage(
     navigate: (Screen) -> Unit,
 ) {
+    var isShowLanguageDialog by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier.fillMaxWidth()
             .wrapContentHeight()
@@ -261,7 +270,7 @@ fun MinePage(
                         modifier = Modifier.fillMaxWidth().height(44.dp)
                             .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
                             .clickable {
-
+                                isShowLanguageDialog = true
                             },
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -346,7 +355,7 @@ fun MinePage(
                         modifier = Modifier.fillMaxWidth().height(44.dp)
                             .clip(RoundedCornerShape(0.dp))
                             .clickable {
-
+                                navigate(Screen.ContactUs)
                             },
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -400,11 +409,103 @@ fun MinePage(
                 }
             }
         }
+        chooseLanguageDialog(isShowLanguageDialog, navigate) {
+            isShowLanguageDialog = false
+        }
+    }
+}
+
+@Composable
+fun chooseLanguageDialog(
+    show: Boolean,
+    navigate: (Screen) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    if (show) {
+        Dialog(onDismissRequest = onDismiss) {
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(horizontal = 0.dp)
+                    .background(shape = RoundedCornerShape(16.dp), color = white),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    modifier = Modifier.wrapContentSize()
+                        .padding(start = 16.dp, end = 16.dp, top = 35.dp),
+                    text = "Please choose language",
+                    color = C_2B2621,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    modifier = Modifier.wrapContentSize()
+                        .padding(start = 16.dp, end = 16.dp, top = 12.dp),
+                    text = "Vui lÃng chon ngón ngür",
+                    color = C_2B2621,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    textAlign = TextAlign.Center
+                )
+                Row(
+                    modifier = Modifier.padding(top = 25.dp, bottom = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier.weight(1f)
+                            .padding(start = 16.dp, end = 6.dp)
+                            .height(40.dp)
+                            .clip(RoundedCornerShape(30.dp))
+                            .background(color = C_FFF4E6)
+                            .clickable {
+                                onDismiss()
+                                if (CacheManager.getLanguage() != "en") {
+                                    Strings.setLang("en")
+                                    navigate(Screen.Home())
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "English",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = C_FC7700,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                    Box(
+                        modifier = Modifier.weight(1f)
+                            .padding(end = 16.dp, start = 6.dp)
+                            .height(40.dp)
+                            .clip(RoundedCornerShape(30.dp))
+                            .background(color = C_FC7700)
+                            .clickable {
+                                onDismiss()
+                                if (CacheManager.getLanguage() == "en") {
+                                    Strings.setLang("vi")
+                                    navigate(Screen.Home())
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Tiếng Việt",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = white,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
 @Preview
 @Composable
 fun PreMine() {
-    MinePage {}
+    chooseLanguageDialog(true, {}) {}
 }

@@ -128,12 +128,7 @@ fun PrivacyScreen(
                     modifier = Modifier.padding(vertical = 20.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = Strings["reject"],
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = C_FC7700,
-                        textAlign = TextAlign.Center,
+                    Box(
                         modifier = Modifier.weight(1f)
                             .padding(end = 6.dp)
                             .height(44.dp)
@@ -144,23 +139,24 @@ fun PrivacyScreen(
                             )
                             .clip(RoundedCornerShape(30.dp))
                             .background(color = white)
-                            .wrapContentHeight(Alignment.CenterVertically)
                             .clickable {
                                 exitApp()
-                            },
-                    )
-                    Text(
-                        text = Strings["agree"],
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = white,
-                        textAlign = TextAlign.Center,
+                            }) {
+                        Text(
+                            text = Strings["reject"],
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = C_FC7700,
+                            textAlign = TextAlign.Center,
+
+                            )
+                    }
+                    Box(
                         modifier = Modifier.weight(1f)
                             .padding(start = 6.dp)
                             .height(44.dp)
                             .clip(RoundedCornerShape(30.dp))
                             .background(color = C_FC7700)
-                            .wrapContentHeight(Alignment.CenterVertically)
                             .clickable {
                                 when {
                                     !agreeCollection -> {
@@ -177,11 +173,18 @@ fun PrivacyScreen(
 
                                     else -> {
                                         CacheManager.setAgreedPrivacy(true)
-                                        onNavigate(Screen.Home)
+                                        onNavigate(Screen.Home())
                                     }
                                 }
-                            },
-                    )
+                            }) {
+                        Text(
+                            text = Strings["agree"],
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = white,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
         }
