@@ -3,9 +3,14 @@ package com.kmp.vayone
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import com.kmp.vayone.navigation.Screen
+import com.kmp.vayone.ui.AboutUsScreen
+import com.kmp.vayone.ui.ChangePasswordScreen
+import com.kmp.vayone.ui.FeedbackScreen
 import com.kmp.vayone.ui.HomeScreen
 import com.kmp.vayone.ui.LoginScreen
+import com.kmp.vayone.ui.LogoutScreen
 import com.kmp.vayone.ui.PrivacyScreen
+import com.kmp.vayone.ui.SettingsScreen
 import com.kmp.vayone.ui.SplashScreen
 import com.kmp.vayone.ui.WebViewScreen
 
@@ -20,18 +25,28 @@ fun App() {
 
     // 跳转：push
     fun navigate(to: Screen) {
-        backStack = backStack + to
+        backStack = if (to is Screen.Home) {
+            listOf(to)
+        } else {
+            backStack + to
+        }
     }
-
-    fun navigateToWebView(url: String, title: String) {
-        backStack = backStack + Screen.WebView(url, title)
-    }
+//
+//    fun navigateToWebView(url: String, title: String) {
+//        backStack = backStack + Screen.WebView(url, title)
+//    }
 
     // 返回：pop
     fun goBack() {
         if (backStack.size > 1) {
             backStack = backStack.dropLast(1)
         }
+    }
+
+    var homeTabIndex by remember { mutableStateOf(0) }
+
+    fun navigateAsRoot(to: Screen) {
+        backStack = listOf(to)  // 只保留一个页面
     }
 
     MaterialTheme {
@@ -49,8 +64,18 @@ fun App() {
             Screen.Login ->
                 LoginScreen { navigate(it) }
 
-            Screen.Home ->
-                HomeScreen { navigate(it) }
+            Screen.Home -> {
+                HomeScreen(
+                    selectedIndex = homeTabIndex,
+                    onTabChange = { homeTabIndex = it })
+                { navigate(it) }
+            }
+
+            Screen.AboutUs ->
+                AboutUsScreen { goBack() }
+
+            Screen.Settings ->
+                SettingsScreen({ goBack() }) { navigate(it) }
 
             is Screen.WebView -> {
                 WebViewScreen(currentScreen.title, currentScreen.url) {
@@ -58,6 +83,14 @@ fun App() {
                 }
             }
 
+            Screen.ChangePassword ->
+                ChangePasswordScreen({ goBack() }) { navigate(it) }
+
+            Screen.Feedback ->
+                FeedbackScreen { goBack() }
+
+            Screen.Logout ->
+                LogoutScreen({ goBack() }) { navigate(it) }
         }
     }
 }

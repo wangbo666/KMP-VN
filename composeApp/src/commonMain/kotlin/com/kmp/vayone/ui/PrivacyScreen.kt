@@ -17,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -133,12 +134,6 @@ fun PrivacyScreen(onBack: () -> Unit, onNavigate: (Screen) -> Unit) {
                         color = C_FC7700,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.weight(1f)
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) {
-                                exitApp()
-                            }
                             .padding(end = 6.dp)
                             .height(44.dp)
                             .border(
@@ -146,11 +141,12 @@ fun PrivacyScreen(onBack: () -> Unit, onNavigate: (Screen) -> Unit) {
                                 color = C_FC7700,             // 边线颜色
                                 shape = RoundedCornerShape(30.dp) // 圆角
                             )
-                            .background(
-                                color = white,       // 填充颜色
-                                shape = RoundedCornerShape(30.dp)
-                            )
-                            .wrapContentHeight(Alignment.CenterVertically),
+                            .clip(RoundedCornerShape(30.dp))
+                            .background(color = white)
+                            .wrapContentHeight(Alignment.CenterVertically)
+                            .clickable {
+                                exitApp()
+                            },
                     )
                     Text(
                         text = Strings["agree"],
@@ -159,10 +155,12 @@ fun PrivacyScreen(onBack: () -> Unit, onNavigate: (Screen) -> Unit) {
                         color = white,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.weight(1f)
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) {
+                            .padding(start = 6.dp)
+                            .height(44.dp)
+                            .clip(RoundedCornerShape(30.dp))
+                            .background(color = C_FC7700)
+                            .wrapContentHeight(Alignment.CenterVertically)
+                            .clickable {
                                 when {
                                     !agreeCollection -> {
                                         toastMessage = Strings["privacy_toast_agree1"]
@@ -173,18 +171,13 @@ fun PrivacyScreen(onBack: () -> Unit, onNavigate: (Screen) -> Unit) {
                                         toastMessage = Strings["privacy_toast_agree2"]
                                         showToast = true
                                     }
-                                    else->{
+
+                                    else -> {
                                         CacheManager.setAgreedPrivacy(true)
                                         onNavigate(Screen.Home)
                                     }
                                 }
-                            }
-                            .padding(start = 6.dp)
-                            .height(44.dp)
-                            .background(
-                                color = C_FC7700,       // 填充颜色
-                                shape = RoundedCornerShape(30.dp)
-                            ).wrapContentHeight(Alignment.CenterVertically),
+                            },
                     )
                 }
             }

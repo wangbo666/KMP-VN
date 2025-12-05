@@ -41,8 +41,11 @@ import vayone.composeapp.generated.resources.order_normal
 import vayone.composeapp.generated.resources.order_select
 
 @Composable
-fun HomeScreen(navigate: (Screen) -> Unit) {
-    var selectedIndex by remember { mutableStateOf(0) }
+fun HomeScreen(
+    selectedIndex: Int,
+    onTabChange: (Int) -> Unit,
+    navigate: (Screen) -> Unit,
+) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize().navigationBarsPadding(),
@@ -59,7 +62,7 @@ fun HomeScreen(navigate: (Screen) -> Unit) {
             BottomNavigationBar(
                 items = navItems,
                 selectedIndex = selectedIndex,
-                onItemSelected = { selectedIndex = it }
+                onItemSelected = onTabChange
             )
         }
     ) {
@@ -87,7 +90,7 @@ fun BottomNavigationBar(
     items: List<BottomNavItem>,
     modifier: Modifier = Modifier,
     selectedIndex: Int = 0,
-    onItemSelected: (index: Int) -> Unit,
+    onItemSelected: (Int) -> Unit,
 ) {
     Row(
         modifier = modifier.height(54.dp)

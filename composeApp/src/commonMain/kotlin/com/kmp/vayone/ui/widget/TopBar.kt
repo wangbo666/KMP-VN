@@ -53,7 +53,7 @@ fun TopBar(
         AutoSizeText(
             text = title,
             color = tintColor,
-            maxFontSize = 24.sp,
+            maxFontSize = 20.sp,
             minFontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f).padding(end = 16.dp),

@@ -25,14 +25,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
+import com.kmp.vayone.ui.widget.AutoSizeText
 import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -61,7 +65,9 @@ import vayone.composeapp.generated.resources.mine_set
 
 
 @Composable
-fun MinePage(navigate: (Screen) -> Unit) {
+fun MinePage(
+    navigate: (Screen) -> Unit,
+) {
     Column(
         modifier = Modifier.fillMaxWidth()
             .wrapContentHeight()
@@ -117,12 +123,13 @@ fun MinePage(navigate: (Screen) -> Unit) {
                     .height(125.dp)
                     .align(Alignment.BottomCenter)
                     .background(color = white.copy(0.3f), shape = RoundedCornerShape(24.dp))
-                    .padding(horizontal = 26.dp)
             ) {
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
+                        .clip(RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp))
+                        .background(Color.Transparent)
                         .clickable {
 
                         },
@@ -159,18 +166,22 @@ fun MinePage(navigate: (Screen) -> Unit) {
                         modifier = Modifier.size(57.dp),
                         alignment = Alignment.Center
                     )
-                    Text(
-                        modifier = Modifier.padding(top = 9.dp),
+                    AutoSizeText(
+                        modifier = Modifier.fillMaxWidth().padding(top = 9.dp),
                         text = Strings["order_center"],
-                        fontSize = 14.sp,
+                        maxFontSize = 14.sp,
+                        minFontSize = 10.sp,
                         fontWeight = FontWeight.Normal,
                         color = C_2B2621,
+                        textAlign = TextAlign.Center
                     )
                 }
                 Column(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
+                        .clip(RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp))
+                        .background(Color.Transparent)
                         .clickable {
 
                         },
@@ -214,17 +225,19 @@ fun MinePage(navigate: (Screen) -> Unit) {
                     .padding(end = 7.dp)
             ) {
                 Image(
+                    modifier = Modifier.wrapContentSize(),
                     painter = painterResource(Res.drawable.mine_payback_bg),
                     contentDescription = null,
                 )
                 Text(
-                    modifier = Modifier.padding(bottom = 9.dp).align(Alignment.Center).clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() },
-                        onClick = {
+                    modifier = Modifier.padding(bottom = 9.dp)
+                        .align(Alignment.Center).clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() },
+                            onClick = {
 
-                        }
-                    ),
+                            }
+                        ),
                     text = Strings["pay_back_now"],
                     color = white,
                     fontWeight = FontWeight.Bold,
@@ -245,13 +258,11 @@ fun MinePage(navigate: (Screen) -> Unit) {
                 )
                 {
                     Row(
-                        modifier = Modifier.fillMaxWidth().height(44.dp).clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() },
-                            onClick = {
+                        modifier = Modifier.fillMaxWidth().height(44.dp)
+                            .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                            .clickable {
 
-                            }
-                        ),
+                            },
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Image(
@@ -270,17 +281,19 @@ fun MinePage(navigate: (Screen) -> Unit) {
                         Image(
                             painter = painterResource(Res.drawable.mine_right),
                             contentDescription = null,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.padding(end = 10.dp).size(24.dp)
                         )
                     }
                     Row(
-                        modifier = Modifier.fillMaxWidth().height(44.dp).clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() },
-                            onClick = {
-
-                            }
-                        ),
+                        modifier = Modifier.fillMaxWidth().height(44.dp)
+                            .clip(RoundedCornerShape(0.dp)).clickable {
+                                navigate(
+                                    Screen.WebView(
+                                        Strings["privacy_policy"],
+                                        CacheManager.PRIVACY_POLICY
+                                    )
+                                )
+                            },
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Image(
@@ -299,17 +312,15 @@ fun MinePage(navigate: (Screen) -> Unit) {
                         Image(
                             painter = painterResource(Res.drawable.mine_right),
                             contentDescription = null,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.padding(end = 10.dp).size(24.dp)
                         )
                     }
                     Row(
-                        modifier = Modifier.fillMaxWidth().height(44.dp).clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() },
-                            onClick = {
-
-                            }
-                        ),
+                        modifier = Modifier.fillMaxWidth().height(44.dp)
+                            .clip(RoundedCornerShape(0.dp))
+                            .clickable {
+                                navigate(Screen.Settings)
+                            },
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Image(
@@ -328,17 +339,15 @@ fun MinePage(navigate: (Screen) -> Unit) {
                         Image(
                             painter = painterResource(Res.drawable.mine_right),
                             contentDescription = null,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.padding(end = 10.dp).size(24.dp)
                         )
                     }
                     Row(
-                        modifier = Modifier.fillMaxWidth().height(44.dp).clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() },
-                            onClick = {
+                        modifier = Modifier.fillMaxWidth().height(44.dp)
+                            .clip(RoundedCornerShape(0.dp))
+                            .clickable {
 
-                            }
-                        ),
+                            },
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Image(
@@ -357,17 +366,16 @@ fun MinePage(navigate: (Screen) -> Unit) {
                         Image(
                             painter = painterResource(Res.drawable.mine_right),
                             contentDescription = null,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.padding(end = 10.dp).size(24.dp)
                         )
                     }
                     Row(
-                        modifier = Modifier.fillMaxWidth().height(44.dp).clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() },
-                            onClick = {
-
-                            }
-                        ),
+                        modifier = Modifier.fillMaxWidth()
+                            .height(44.dp)
+                            .clip(RoundedCornerShape(bottomStart = 10.dp, bottomEnd = 10.dp))
+                            .clickable {
+                                navigate(Screen.AboutUs)
+                            },
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Image(
@@ -386,10 +394,9 @@ fun MinePage(navigate: (Screen) -> Unit) {
                         Image(
                             painter = painterResource(Res.drawable.mine_right),
                             contentDescription = null,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.padding(end = 10.dp).size(24.dp)
                         )
                     }
-                    Spacer(modifier = Modifier.height(10.dp))
                 }
             }
         }

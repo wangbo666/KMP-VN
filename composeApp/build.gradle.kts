@@ -14,7 +14,6 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_17)
         }
     }
-
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -22,6 +21,8 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            // 添加部署目标版本设置
+            linkerOpts.add("-miphoneos-version-min=15.1")
         }
     }
 
@@ -58,8 +59,8 @@ android {
         applicationId = "com.kmp.vayone"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
+        versionCode = 100
     }
     packaging {
         resources {

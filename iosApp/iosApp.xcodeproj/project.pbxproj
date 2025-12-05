@@ -7,10 +7,23 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		F0ED8E69CCDA2CA0CDA8CFD4 /* .app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = .app; sourceTree = BUILT_PRODUCTS_DIR; };
+		18B09AE12EE271EE00D234B1 /* iosApp copy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "iosApp copy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		18B09AE22EE271EE00D234B1 /* iosApp copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "iosApp copy-Info.plist"; path = "/Users/apple/Desktop/KMP/iosApp/iosApp copy-Info.plist"; sourceTree = "<absolute>"; };
+		F0ED8E69CCDA2CA0CDA8CFD4 /* VayOne2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VayOne2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		18B09AE32EE271EE00D234B1 /* Exceptions for "iosApp" folder in "iosApp copy" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Assets.xcassets,
+				ContentView.swift,
+				Info.plist,
+				iOSApp.swift,
+				"Preview Content/Preview Assets.xcassets",
+			);
+			target = 18B09AD92EE271EE00D234B1 /* iosApp copy */;
+		};
 		AF595B069A2E7AF5B1041845 /* Exceptions for "iosApp" folder in "iosApp" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -25,6 +38,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				AF595B069A2E7AF5B1041845 /* Exceptions for "iosApp" folder in "iosApp" target */,
+				18B09AE32EE271EE00D234B1 /* Exceptions for "iosApp" folder in "iosApp copy" target */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -37,6 +51,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		18B09ADC2EE271EE00D234B1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		52AD0E11EE4ACD2533D73BF4 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -50,7 +71,8 @@
 		0503CD1E9483EECA7012BC3B /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F0ED8E69CCDA2CA0CDA8CFD4 /* .app */,
+				F0ED8E69CCDA2CA0CDA8CFD4 /* VayOne2.app */,
+				18B09AE12EE271EE00D234B1 /* iosApp copy.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -60,6 +82,7 @@
 			children = (
 				B9ECBB83C41AB705B480C024 /* Configuration */,
 				AAE83E50C3811393EAA0D90C /* iosApp */,
+				18B09AE22EE271EE00D234B1 /* iosApp copy-Info.plist */,
 				0503CD1E9483EECA7012BC3B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -67,6 +90,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		18B09AD92EE271EE00D234B1 /* iosApp copy */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 18B09ADE2EE271EE00D234B1 /* Build configuration list for PBXNativeTarget "iosApp copy" */;
+			buildPhases = (
+				18B09ADA2EE271EE00D234B1 /* Compile Kotlin Framework */,
+				18B09ADB2EE271EE00D234B1 /* Sources */,
+				18B09ADC2EE271EE00D234B1 /* Frameworks */,
+				18B09ADD2EE271EE00D234B1 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				AAE83E50C3811393EAA0D90C /* iosApp */,
+			);
+			name = "iosApp copy";
+			packageProductDependencies = (
+			);
+			productName = iosApp;
+			productReference = 18B09AE12EE271EE00D234B1 /* iosApp copy.app */;
+			productType = "com.apple.product-type.application";
+		};
 		57E9A62155C8516AFA94DFA1 /* iosApp */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 301DC1A5E247EB9222D33E2F /* Build configuration list for PBXNativeTarget "iosApp" */;
@@ -87,7 +133,7 @@
 			packageProductDependencies = (
 			);
 			productName = iosApp;
-			productReference = F0ED8E69CCDA2CA0CDA8CFD4 /* .app */;
+			productReference = F0ED8E69CCDA2CA0CDA8CFD4 /* VayOne2.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -120,11 +166,19 @@
 			projectRoot = "";
 			targets = (
 				57E9A62155C8516AFA94DFA1 /* iosApp */,
+				18B09AD92EE271EE00D234B1 /* iosApp copy */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		18B09ADD2EE271EE00D234B1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		C8E16BE1454EC8A9E4FE50A9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -135,6 +189,25 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		18B09ADA2EE271EE00D234B1 /* Compile Kotlin Framework */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Compile Kotlin Framework";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ \"YES\" = \"$OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED\" ]; then\n  echo \"Skipping Gradle build task invocation due to OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED environment variable set to \\\"YES\\\"\"\n  exit 0\nfi\ncd \"$SRCROOT/..\"\n./gradlew :composeApp:embedAndSignAppleFrameworkForXcode\n";
+		};
 		82604FD2CD98B903E018393B /* Compile Kotlin Framework */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -157,6 +230,13 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		18B09ADB2EE271EE00D234B1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4CDA5C6255CA15585F85058C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -167,6 +247,66 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		18B09ADF2EE271EE00D234B1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
+				DEVELOPMENT_TEAM = W7PW85C6F8;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iosApp copy-Info.plist";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		18B09AE02EE271EE00D234B1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = arm64;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
+				DEVELOPMENT_TEAM = W7PW85C6F8;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iosApp copy-Info.plist";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		41928126A24CF0D9BD09B78F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReferenceAnchor = B9ECBB83C41AB705B480C024 /* Configuration */;
@@ -308,6 +448,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -336,6 +477,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -349,6 +491,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		18B09ADE2EE271EE00D234B1 /* Build configuration list for PBXNativeTarget "iosApp copy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				18B09ADF2EE271EE00D234B1 /* Debug */,
+				18B09AE02EE271EE00D234B1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		301DC1A5E247EB9222D33E2F /* Build configuration list for PBXNativeTarget "iosApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
