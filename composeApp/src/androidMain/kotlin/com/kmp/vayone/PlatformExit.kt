@@ -7,3 +7,5 @@ import kotlin.system.exitProcess
 actual fun exitApp() {
     exitProcess(0)
 }
+
+actual fun currentTimeMillis() = System.currentTimeMillis()

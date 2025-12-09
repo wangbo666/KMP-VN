@@ -23,11 +23,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.tabs.HomePage
 import com.kmp.vayone.ui.tabs.MinePage
 import com.kmp.vayone.ui.tabs.OrderPage
+import com.kmp.vayone.util.isLoggedIn
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import theme.C_2B2621
@@ -46,7 +48,6 @@ fun HomeScreen(
     onTabChange: (Int) -> Unit,
     navigate: (Screen) -> Unit,
 ) {
-
     Scaffold(
         modifier = Modifier.fillMaxSize().navigationBarsPadding(),
         bottomBar = {
@@ -60,6 +61,7 @@ fun HomeScreen(
                 BottomNavItem(Strings["mine"], Res.drawable.mine_select, Res.drawable.mine_normal)
             )
             BottomNavigationBar(
+                navigate,
                 items = navItems,
                 selectedIndex = selectedIndex,
                 onItemSelected = onTabChange
@@ -87,6 +89,7 @@ data class BottomNavItem(
 
 @Composable
 fun BottomNavigationBar(
+    navigate: (Screen) -> Unit,
     items: List<BottomNavItem>,
     modifier: Modifier = Modifier,
     selectedIndex: Int = 0,
@@ -105,7 +108,12 @@ fun BottomNavigationBar(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .clickable { onItemSelected(index) },
+                    .clickable {
+                        if (index > 0 && !isLoggedIn()) {
+                            navigate(Screen.Login)
+                        } else
+                            onItemSelected(index)
+                    },
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {

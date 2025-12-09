@@ -21,7 +21,6 @@ fun LoginScreen(navigate: (Screen) -> Unit) {
         Spacer(modifier = Modifier.height(20.dp))
 
         Button(onClick = {
-            CacheManager.setLoggedIn(true)
             navigate(Screen.Home())
         }) {
             Text("登录")

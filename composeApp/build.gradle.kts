@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    kotlin("plugin.serialization")
 }
 
 kotlin {
@@ -30,6 +31,7 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation("io.ktor:ktor-client-android:2.3.7")
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -44,6 +46,18 @@ kotlin {
             implementation(libs.multiplatform.settings.no.arg)
 //            implementation(libs.webview.multiplatform.mobile)
             implementation("io.github.kevinnzou:compose-webview-multiplatform:2.0.3")
+
+            implementation("io.ktor:ktor-client-core:2.3.7")
+            implementation ("io.ktor:ktor-client-content-negotiation:2.3.7")
+            implementation ("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
+            implementation ("io.ktor:ktor-client-logging:2.3.7")
+            implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+            implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+        }
+        iosMain {
+            dependencies {
+                implementation("io.ktor:ktor-client-darwin:2.3.7")
+            }
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

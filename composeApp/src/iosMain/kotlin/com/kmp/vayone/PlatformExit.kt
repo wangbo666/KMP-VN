@@ -31,3 +31,5 @@ actual fun exitApp() {
     // 关闭模态视图
     currentVC?.dismissViewControllerAnimated(false, null)
 }
+
+actual fun currentTimeMillis() = (NSDate().timeIntervalSince1970 * 1000).toLong()

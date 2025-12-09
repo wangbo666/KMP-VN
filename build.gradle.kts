@@ -7,4 +7,5 @@ plugins {
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.moko.resources) apply false
+    kotlin("plugin.serialization") version "1.9.23" apply false
 }
