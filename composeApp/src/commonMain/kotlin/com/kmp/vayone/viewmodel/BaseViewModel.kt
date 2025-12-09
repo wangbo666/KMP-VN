@@ -44,8 +44,9 @@ open class BaseViewModel : ViewModel() {
                 "responseCode: ${response.code}, message: ${response.message}".log()
                 // 检查业务层状态码
                 if (response.code == 200) {
-                    // 成功
-                    onSuccess(response.data)
+                    withContext(Dispatchers.Main) {
+                        onSuccess(response.data)
+                    }
                 } else {
                     // 失败 (500, -1 或其他)
                     if (isShowErrorToast) {

@@ -28,7 +28,8 @@ class LoginViewModel : BaseViewModel() {
     val customer: StateFlow<HomeBean?> = _customer
 
     fun getCustomer() {
-        launch({ UserRepository.getHomeUnCertData() }) {
+        launch({ UserRepository.getHomeUnCertData() }, true) {
+            ("TAG:" + it?.customerPhone).log()
             _customer.value = it
         }
     }

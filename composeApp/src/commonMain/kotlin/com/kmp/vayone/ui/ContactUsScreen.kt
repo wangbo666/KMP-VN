@@ -127,15 +127,22 @@ fun ContactUsItem(
                 lineHeight = 18.sp,
                 fontWeight = FontWeight.Normal,
                 modifier = Modifier.padding(start = 16.dp),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Start
             )
         }
-        Box(
-            modifier = Modifier.height(32.dp)
-                .widthIn(min = 73.dp)
+        Text(
+            text = Strings[when (type) {
+                0, 2 -> "call"
+                else -> "copy"
+            }],
+            color = white,
+            fontSize = 14.sp,
+            lineHeight = 32.sp,
+            fontWeight = FontWeight.Normal,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.size(75.dp, 32.dp)
                 .clip(RoundedCornerShape(28.dp))
                 .background(shape = RoundedCornerShape(28.dp), color = C_FC7700)
-                .padding(horizontal = 25.dp)
                 .clickable {
                     if (type == 0 || type == 2) {//call
 
@@ -143,18 +150,7 @@ fun ContactUsItem(
 
                     }
                 },
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = Strings[when (type) {
-                    0, 2 -> "call"
-                    else -> "copy"
-                }],
-                color = white,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Normal,
-            )
-        }
+        )
     }
 }
 

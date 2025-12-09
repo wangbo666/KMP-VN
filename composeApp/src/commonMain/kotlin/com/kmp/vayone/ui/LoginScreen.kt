@@ -44,6 +44,7 @@ import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.HomeBean
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.ui.widget.ColoredTextPart
+import com.kmp.vayone.ui.widget.LoadingDialog
 import com.kmp.vayone.ui.widget.MultiColoredText
 import com.kmp.vayone.util.format
 import com.kmp.vayone.util.isValidPhoneNumber
@@ -64,6 +65,9 @@ import theme.C_FEB201
 import theme.C_FFF4E6
 import theme.white
 import vayone.composeapp.generated.resources.Res
+import vayone.composeapp.generated.resources.contact_email
+import vayone.composeapp.generated.resources.contact_phone
+import vayone.composeapp.generated.resources.contact_tel
 import vayone.composeapp.generated.resources.dialog_close
 import vayone.composeapp.generated.resources.dialog_customer
 import vayone.composeapp.generated.resources.dialog_customer_bg
@@ -82,6 +86,8 @@ fun LoginScreen(
     toast: (show: Boolean, message: String) -> Unit = { _, _ -> },
     onNavigate: (Screen) -> Unit
 ) {
+    // remember prevents recreating a new instance on each recomposition
+    val loginViewModel = remember { viewModel }
     val keyboardController = LocalSoftwareKeyboardController.current
     var loginType by remember { mutableStateOf(0) }
     var phone by remember { mutableStateOf("") }
@@ -91,9 +97,9 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var isHidePassword by remember { mutableStateOf(false) }
 
-    val customerData by viewModel.customer.collectAsState()
+    val customerData by loginViewModel.customer.collectAsState()
     var isShowCustomerDialog by remember { mutableStateOf(false) }
-
+    val isLoading by viewModel.isLoading.collectAsState()
     // 每秒递减
     LaunchedEffect(key1 = isCounting) {
         if (isCounting) {
@@ -107,7 +113,7 @@ fun LoginScreen(
         }
     }
     LaunchedEffect(Unit) {
-        viewModel.errorEvent.collect { event ->
+        loginViewModel.errorEvent.collect { event ->
             toast(event.showToast, event.message)
         }
     }
@@ -127,7 +133,7 @@ fun LoginScreen(
                 .align(Alignment.TopEnd)
                 .clickable {
                     isShowCustomerDialog = true
-                    viewModel.getCustomer()
+                    loginViewModel.getCustomer()
                 },
             painter = painterResource(Res.drawable.login_customer),
             contentDescription = null,
@@ -486,27 +492,36 @@ fun LoginScreen(
                     .padding(start = 16.dp, end = 16.dp, bottom = 13.dp)
             )
         }
-        if (isShowCustomerDialog && customerData != null) {
-            CustomerDialog(customerData) {
+        CustomerDialog(
+            show = isShowCustomerDialog && customerData != null,
+            homeBean = customerData,
+            onDismiss = {
                 isShowCustomerDialog = false
             }
-        }
+        )
+        LoadingDialog(isLoading)
     }
 }
 
 @Composable
-fun CustomerDialog(homeBean: HomeBean?, onDismiss: () -> Unit) {
+fun CustomerDialog(
+    show: Boolean,
+    homeBean: HomeBean?,
+    onDismiss: () -> Unit
+) {
+    if (!show) return
     Dialog(onDismissRequest = onDismiss) {
         Box(
             modifier = Modifier.fillMaxWidth()
                 .wrapContentHeight()
+                .background(white, RoundedCornerShape(12.dp))
+                .padding(bottom = 12.dp)
         ) {
             Image(
-                modifier = Modifier.fillMaxWidth()
-                    .wrapContentHeight(),
+                modifier = Modifier.fillMaxWidth(),
                 painter = painterResource(Res.drawable.dialog_customer_bg),
                 contentDescription = null,
-                contentScale = ContentScale.FillBounds,
+                contentScale = ContentScale.FillWidth,
             )
             Image(
                 modifier = Modifier.padding(10.dp).size(24.dp).clickable {
@@ -525,16 +540,35 @@ fun CustomerDialog(homeBean: HomeBean?, onDismiss: () -> Unit) {
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 homeBean?.customerPhone?.let {
-                    ContactUsItem(0, Strings["phone_number"], it)
+                    ContactUsItem(
+                        0, Strings["phone_number"], it,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 24.dp, end = 24.dp, top = 8.dp)
+                            .height(64.dp)
+                            .background(white),
+                    )
                 }
                 homeBean?.customerEmail?.let {
-                    ContactUsItem(1, Strings["email"], it)
+                    ContactUsItem(
+                        1, Strings["email"], it,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 24.dp, end = 24.dp, top = 0.dp)
+                            .height(64.dp)
+                            .background(white),
+                    )
                 }
                 homeBean?.customerConfigs?.forEach {
                     ContactUsItem(
                         if (it.buttonType == 2) 2 else 3,
                         if (CacheManager.getLanguage() == "vi") it.vernacularTitle else it.enTitle,
-                        it.content
+                        it.content,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 24.dp, end = 24.dp, top = 0.dp)
+                            .height(64.dp)
+                            .background(white),
                     )
                 }
             }
@@ -545,7 +579,7 @@ fun CustomerDialog(homeBean: HomeBean?, onDismiss: () -> Unit) {
 @Preview
 @Composable
 fun PreViewLogin() {
-    CustomerDialog(HomeBean()) {
+    CustomerDialog(true, HomeBean()) {
 
     }
 }
