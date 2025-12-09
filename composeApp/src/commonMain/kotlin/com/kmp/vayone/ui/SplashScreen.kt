@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.sp
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.Strings
-import com.kmp.vayone.viewmodel.SplashViewModel
+import com.kmp.vayone.viewmodel.LoginViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import theme.white
@@ -28,7 +28,7 @@ import vayone.composeapp.generated.resources.splash_icon
 
 @Composable
 fun SplashScreen(
-    viewModel: SplashViewModel = SplashViewModel(),
+    viewModel: LoginViewModel = LoginViewModel(),
     onNavigate: (Screen) -> Unit
 ) {
     LaunchedEffect(Unit) {

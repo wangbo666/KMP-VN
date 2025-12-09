@@ -128,10 +128,9 @@ fun PrivacyScreen(
                     modifier = Modifier.padding(vertical = 20.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
+                    Text(
                         modifier = Modifier.weight(1f)
                             .padding(end = 6.dp)
-                            .height(44.dp)
                             .border(
                                 width = 1.dp,                  // 边线宽度
                                 color = C_FC7700,             // 边线颜色
@@ -141,20 +140,17 @@ fun PrivacyScreen(
                             .background(color = white)
                             .clickable {
                                 exitApp()
-                            }) {
-                        Text(
-                            text = Strings["reject"],
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = C_FC7700,
-                            textAlign = TextAlign.Center,
-
-                            )
-                    }
-                    Box(
+                            },
+                        text = Strings["reject"],
+                        fontSize = 16.sp,
+                        lineHeight = 44.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = C_FC7700,
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
                         modifier = Modifier.weight(1f)
                             .padding(start = 6.dp)
-                            .height(44.dp)
                             .clip(RoundedCornerShape(30.dp))
                             .background(color = C_FC7700)
                             .clickable {
@@ -176,15 +172,14 @@ fun PrivacyScreen(
                                         onNavigate(Screen.Home())
                                     }
                                 }
-                            }) {
-                        Text(
-                            text = Strings["agree"],
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = white,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                            },
+                        lineHeight = 44.sp,
+                        text = Strings["agree"],
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = white,
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }

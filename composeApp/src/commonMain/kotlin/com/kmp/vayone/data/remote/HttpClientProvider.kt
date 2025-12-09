@@ -21,8 +21,10 @@ class HttpClientProvider(private val isDebug: Boolean = false) {
                 isLenient = true
                 ignoreUnknownKeys = true
                 encodeDefaults = true
+                explicitNulls = false         // 不序列化 null 值
             })
         }
+        expectSuccess = false
 
         // 日志插件
         if (isDebug) {

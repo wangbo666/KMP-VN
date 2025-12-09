@@ -1,7 +1,11 @@
 package com.kmp.vayone.data.remote
 
 import com.kmp.vayone.data.CacheManager
+import com.kmp.vayone.data.HomeBean
 import com.kmp.vayone.data.SignBean
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
 
 // 使用示例
 object UserRepository {
@@ -10,8 +14,12 @@ object UserRepository {
         isDebug = CacheManager.isDebug
     )
 
-    suspend fun getSecret(): NetworkResult<ApiResponse<SignBean>> {
+    suspend fun getSecret(): ApiResponse<SignBean?> {
         return networkManager.get("api/user/app/common/secret")
+    }
+
+    suspend fun getHomeUnCertData(): ApiResponse<HomeBean?> {
+        return networkManager.post("api/loan/app/common/index")
     }
 
     // GET 请求

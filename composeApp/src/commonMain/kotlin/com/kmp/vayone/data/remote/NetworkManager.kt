@@ -2,7 +2,9 @@ package com.kmp.vayone.data.remote
 
 import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.CacheManager.APPCODE
+import com.kmp.vayone.data.ParamBean
 import com.kmp.vayone.data.version_Name
+import com.kmp.vayone.util.log
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.forms.submitFormWithBinaryData
@@ -15,6 +17,9 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.content.PartData
 import io.ktor.http.contentType
+import io.ktor.util.AttributeKey
+import kotlinx.serialization.json.Json
+import kotlin.String
 
 class NetworkManager(
     private val baseUrl: String = CacheManager.HTTP_HOST,
@@ -30,7 +35,7 @@ class NetworkManager(
             "version" to version_Name,
             "mobileType" to "1",
         )
-    ): NetworkResult<T> {
+    ): ApiResponse<T> {
         return request {
             httpClient.get(buildUrl(path)) {
                 params.forEach { (key, value) ->
@@ -43,12 +48,13 @@ class NetworkManager(
     // POST 请求
     suspend inline fun <reified T> post(
         path: String,
-        body: Any? = null
-    ): NetworkResult<T> {
+        body: ParamBean? = ParamBean(version_Name, "1", APPCODE)
+    ): ApiResponse<T> {
         return request {
+            val bodyJson = body?.let { json.encodeToString(it) } ?: "{}"
             httpClient.post(buildUrl(path)) {
                 contentType(ContentType.Application.Json)
-                body?.let { setBody(it) }
+                setBody(bodyJson)
             }
         }
     }
@@ -57,7 +63,7 @@ class NetworkManager(
     suspend inline fun <reified T> put(
         path: String,
         body: Any? = null
-    ): NetworkResult<T> {
+    ): ApiResponse<T> {
         return request {
             httpClient.put(buildUrl(path)) {
                 contentType(ContentType.Application.Json)
@@ -69,7 +75,7 @@ class NetworkManager(
     // DELETE 请求
     suspend inline fun <reified T> delete(
         path: String
-    ): NetworkResult<T> {
+    ): ApiResponse<T> {
         return request {
             httpClient.delete(buildUrl(path))
         }
@@ -79,7 +85,7 @@ class NetworkManager(
     suspend inline fun <reified T> postMultipart(
         path: String,
         formData: List<PartData>
-    ): NetworkResult<T> {
+    ): ApiResponse<T> {
         return request {
             httpClient.submitFormWithBinaryData(
                 url = buildUrl(path),
@@ -88,27 +94,47 @@ class NetworkManager(
         }
     }
 
-    // 统一请求处理
+    // 统一请求处理 - 直接返回 ApiResponse<T>
     suspend inline fun <reified T> request(
         crossinline block: suspend () -> HttpResponse
-    ): NetworkResult<T> {
+    ): ApiResponse<T> {
         return try {
             val response = block()
-            when (response.status.value) {
+            val statusCode = response.status.value
+            "requestStatus: $statusCode".log()
+
+            when (statusCode) {
                 in 200..299 -> {
-                    val data = response.body<T>()
-                    NetworkResult.Success(data)
+                    // HTTP 成功，解析响应体
+                    response.body<ApiResponse<T>>()
                 }
 
                 else -> {
-                    NetworkResult.Error(
-                        code = response.status.value,
-                        message = response.status.description
-                    )
+                    // HTTP 错误 (500, 404 等)
+                    try {
+                        // 尝试解析服务器返回的错误 JSON
+                        val errorResponse = response.body<ApiResponse<T>>()
+                        errorResponse
+                    } catch (e: Exception) {
+                        // 如果解析失败，构造一个错误响应
+                        ApiResponse(
+                            code = statusCode,
+                            message = response.status.description,
+                            showToast = true,
+                            data = null
+                        )
+                    }
                 }
             }
         } catch (e: Exception) {
-            NetworkResult.Exception(e)
+            "requestError: ${e.message}".log()
+            // 异常情况返回 -1
+            ApiResponse(
+                code = -1,
+                message = e.message ?: "Unknown error",
+                showToast = true,
+                data = null
+            )
         }
     }
 

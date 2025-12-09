@@ -31,7 +31,7 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
-            implementation("io.ktor:ktor-client-android:2.3.7")
+            implementation(libs.ktor.ktor.client.android)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -45,18 +45,18 @@ kotlin {
             implementation(libs.multiplatform.settings)
             implementation(libs.multiplatform.settings.no.arg)
 //            implementation(libs.webview.multiplatform.mobile)
-            implementation("io.github.kevinnzou:compose-webview-multiplatform:2.0.3")
+            implementation(libs.compose.webview.multiplatform)
 
-            implementation("io.ktor:ktor-client-core:2.3.7")
-            implementation ("io.ktor:ktor-client-content-negotiation:2.3.7")
-            implementation ("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
-            implementation ("io.ktor:ktor-client-logging:2.3.7")
-            implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-            implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+            implementation(libs.ktor.client.core)
+            implementation (libs.ktor.ktor.client.content.negotiation)
+            implementation (libs.ktor.ktor.serialization.kotlinx.json)
+            implementation (libs.ktor.ktor.client.logging)
+            implementation (libs.kotlinx.coroutines.core)
+            implementation (libs.kotlinx.serialization.json)
         }
         iosMain {
             dependencies {
-                implementation("io.ktor:ktor-client-darwin:2.3.7")
+                implementation(libs.ktor.ktor.client.darwin)
             }
         }
         commonTest.dependencies {

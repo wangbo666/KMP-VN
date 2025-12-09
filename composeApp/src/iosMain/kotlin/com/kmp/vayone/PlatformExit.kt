@@ -33,3 +33,6 @@ actual fun exitApp() {
 }
 
 actual fun currentTimeMillis() = (NSDate().timeIntervalSince1970 * 1000).toLong()
+
+
+actual fun convertToMD5(t: String) = ""

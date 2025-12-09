@@ -19,7 +19,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun ToastHost(message: String, show: Boolean = true, onDismiss: () -> Unit = {}) {
-    if (show) {
+    if (show && message.isNotBlank()) {
         Box(
             modifier = Modifier.fillMaxSize().padding(32.dp),
             contentAlignment = Alignment.Center

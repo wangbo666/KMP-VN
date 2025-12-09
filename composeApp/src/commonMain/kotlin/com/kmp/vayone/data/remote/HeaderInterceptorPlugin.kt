@@ -18,7 +18,7 @@ val HeaderInterceptorPlugin = createClientPlugin("HeaderInterceptor") {
         request.headers {
             append("Content-Type", "application/json")
             append("Content-Encoding", "gzip")
-            append("User-Agent", "Android")
+            append("User-Agent", "IOS")
 
             // 语言设置
             val lang = if (getLanguage() == "vi") "vi_VN" else "en_US"

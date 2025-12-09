@@ -147,7 +147,12 @@ fun App() {
                         }
 
                     Screen.Login ->
-                        LoginScreen { navigate(it) }
+                        LoginScreen(
+                            toast = { show, toast ->
+                                showToast = show
+                                toastMessage = toast
+                            },
+                        ) { navigate(it) }
 
                     is Screen.Home -> {
                         HomeScreen(

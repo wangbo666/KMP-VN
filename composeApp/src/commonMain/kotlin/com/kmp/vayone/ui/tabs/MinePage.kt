@@ -1,24 +1,19 @@
 package com.kmp.vayone.ui.tabs
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -42,15 +36,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.Strings
-import com.kmp.vayone.exitApp
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.widget.AutoSizeText
-import org.jetbrains.compose.resources.imageResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import theme.C_2B2621
 import theme.C_524F4C
-import theme.C_B4B0AD
 import theme.C_FC7700
 import theme.C_FFBB48
 import theme.C_FFD64F
@@ -409,14 +400,14 @@ fun MinePage(
                 }
             }
         }
-        chooseLanguageDialog(isShowLanguageDialog, navigate) {
+        ChooseLanguageDialog(isShowLanguageDialog, navigate) {
             isShowLanguageDialog = false
         }
     }
 }
 
 @Composable
-fun chooseLanguageDialog(
+fun ChooseLanguageDialog(
     show: Boolean,
     navigate: (Screen) -> Unit,
     onDismiss: () -> Unit,
@@ -507,5 +498,5 @@ fun chooseLanguageDialog(
 @Preview
 @Composable
 fun PreMine() {
-    chooseLanguageDialog(true, {}) {}
+    ChooseLanguageDialog(true, {}) {}
 }

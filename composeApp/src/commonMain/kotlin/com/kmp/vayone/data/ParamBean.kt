@@ -4,9 +4,11 @@ import com.kmp.vayone.data.CacheManager.APPCODE
 import com.kmp.vayone.util.isCertPass
 import kotlinx.serialization.Serializable
 
+
+@Serializable
 data class ParamBean(
     val version: String? = version_Name,
-    val mobileType: String = "2",
+    val mobileType: String = "1",
     val appCode: String = APPCODE,
     val phone: String? = null,
     val company: String? = null,
@@ -81,13 +83,14 @@ data class ParamBean(
     val imgType: String? = null,
 )
 
+@Serializable
 data class RelativesBean(
     val relatives: Int?,
     val relativesName: String? = null,
     val relativesMobile: String? = null,
 )
 
-
+@Serializable
 data class HomeBean(
     val maxAmount: String? = null,
     val annualizedInterestRate: String? = null,
@@ -103,6 +106,7 @@ data class HomeBean(
 @Serializable
 data class SignBean(val verifySignSecret: String?)
 
+@Serializable
 data class LoginBean(
     val token: String,
     val id: Long,
@@ -112,6 +116,7 @@ data class LoginBean(
     val passwdSign: Int,
 )
 
+@Serializable
 data class UserAuthBean(
     val id: Long = 0,
     val userId: Long = 0,
@@ -143,7 +148,7 @@ data class UserAuthBean(
         return bankCardState == "30"
     }
 }
-
+@Serializable
 data class KycInfoBean(
     val id: Long,
     val userId: Long,
@@ -151,7 +156,7 @@ data class KycInfoBean(
     val backImageUrl: String? = null,
     val liveImageUrl: String? = null,
 )
-
+@Serializable
 data class PersonalInfoEnumBean(
     val gender: MutableList<EnumBean>? = null,
     val language: MutableList<EnumBean>? = null,
@@ -159,7 +164,7 @@ data class PersonalInfoEnumBean(
     val purpose: MutableList<EnumBean>? = null,
     val education: MutableList<EnumBean>? = null,
 )
-
+@Serializable
 data class WorkInfoEnumBean(
     val relatives: MutableList<EnumBean>? = null,
     val salaryRange: MutableList<EnumBean>? = null,
@@ -167,13 +172,13 @@ data class WorkInfoEnumBean(
     val jobnature: MutableList<EnumBean>? = null,
     val staffSize: MutableList<EnumBean>? = null,
 )
-
+@Serializable
 data class EnumBean(
     val id: Int = 0,
     val state: Int = 0,
     val info: String,
-) 
-
+)
+@Serializable
 data class PersonalInfoBean(
     val id: Long,
     val userId: Long,
@@ -203,7 +208,7 @@ data class PersonalInfoBean(
     val email: String? = null,
     val zaloAccount: String? = null,
 )
-
+@Serializable
 data class AddressBean(
     val id: Int,
     val parentId: Long,
@@ -211,8 +216,8 @@ data class AddressBean(
     val otherName: String? = null,
     val type: Int,
     val countryId: Int,
-) 
-
+)
+@Serializable
 data class CallLogBean(
     var name: String? = "",
     var phone: String? = "",
@@ -220,7 +225,7 @@ data class CallLogBean(
     var lastCallTime: String? = "",
     var callTime: Int = 0,
 )
-
+@Serializable
 data class ContactsInfoBean(
     val id: Long,
     val userId: Long,
@@ -250,7 +255,7 @@ data class ContactsInfoBean(
     val industryStr: String? = null,
     val companyAddress: String? = null,
 )
-
+@Serializable
 data class PayChannelBean(
     val id: Int,
     var status: Int = 0,
@@ -261,7 +266,7 @@ data class PayChannelBean(
     var isSelect: Boolean = false,
     var countryId: Long? = null,
 )
-
+@Serializable
 data class BankCardBean(
     var id: Long? = 0,
     var countryId: Int = 0,
@@ -288,7 +293,7 @@ data class BankCardBean(
     val branchName: String? = null,
     val bankAccount: String? = null,
 )
-
+@Serializable
 data class HomeLoanBean(
     val customerPhone: String? = null,
     val customerEmail: String? = null,
@@ -315,7 +320,7 @@ data class HomeLoanBean(
     val usedAmount: String? = null,
     val userCreditStatus: Int? = null,
 )
-
+@Serializable
 data class ProductBean(
     val productId: Long,
     val productName: String? = null,
@@ -366,7 +371,7 @@ data class ProductBean(
     }
 }
 
-
+@Serializable
 data class ProductPlanBean(
     val planPart: Int? = null,
     val planPartStr: String? = null,
@@ -419,7 +424,7 @@ data class ProductPlanBean(
     }
 }
 
-
+@Serializable
 data class ProductDetailBean(
     val firstRepayment: String? = null,
     val productId: Long? = null,
@@ -475,17 +480,17 @@ data class ProductDetailBean(
     val repayInterestAmountRate: String? = null,
     val repayActualAmount: String? = null,
     val loanTermConfigDTOList: List<ProductDetailBean>? = null,
-) 
+)
 
-
+@Serializable
 data class ProductFeeBean(
     val productId: Long,
     val name: String? = null,
     val nameConfig: String? = null,
     val amount: String? = null,
-) 
+)
 
-
+@Serializable
 data class LoanTermBean(
     val id: Long? = null,
     val name: String? = null,
@@ -503,9 +508,9 @@ data class LoanTermBean(
     val actualRepayAmount: String? = null,
     val repayTimeStr: String? = null,
     val applySign: Int? = null,
-) 
+)
 
-
+@Serializable
 data class OrderDetailBean(
     val appOrderInfoDto: OrderBean? = null,
     val appOrderRepayDto: OrderBean? = null,
@@ -528,9 +533,9 @@ data class OrderDetailBean(
     val deductionFee: String? = null,
     val userCouponName: String? = null,
     val installmentRepaymentPlanDTOList: List<ProductPlanBean>? = null,
-) 
+)
 
-
+@Serializable
 data class OrderBean(
     val id: Long? = null,
     val userId: Long? = null,
@@ -555,15 +560,15 @@ data class OrderBean(
     val actualNeedRepayAmount: String? = null,
     val penaltyAmount: String? = null,
     val payGoUrl: String? = null,
-) 
+)
 
-
+@Serializable
 data class MessagePageBean(
     val total: Int = 0,
     val list: MutableList<MessageBean>? = null,
-) 
+)
 
-
+@Serializable
 data class MessageBean(
     val id: Long? = null,
     var readStatus: Int = 1,
@@ -573,15 +578,15 @@ data class MessageBean(
     val theme: String? = null,
     val unreadMark: Boolean = false,
     val unreadCount: Int = 0,
-) 
-
+)
+@Serializable
 data class HomeConfigBean(
     val enTitle: String? = null,
     val vernacularTitle: String? = null,
     val content: String? = null,
     val buttonType: Int? = null,
 )
-
+@Serializable
 data class AuthBean(
     var src: Int = 0,
     var title: String = "",
@@ -589,7 +594,7 @@ data class AuthBean(
     var isCertified: Boolean = false,
     val authConfig: String? = "",
 )
-
+@Serializable
 data class BannerBean(
     val id: Long? = null,
     val name: String? = null,
@@ -597,7 +602,7 @@ data class BannerBean(
     val activityPicUrl: String? = null,
     val activityH5Url: String? = null,
 )
-
+@Serializable
 data class TogetherRepaymentBean(
     val payUrl: String? = null,
     val reloanButtonSign: String? = null,
@@ -607,6 +612,7 @@ data class TogetherRepaymentBean(
 //    private int FACE_COMPARE;   //FACE_COMPARE 人脸对比 0-不需要对比 1-需要对比
 //    private int KYC_FRONT;  //KYC_FRONT 身份证正面 0-不需要上传 1-上传 2- 上传并完成OCR
 //    private int FACE;       //FACE      人脸      0-不需要上传 1-拍照（自拍） 2-活体
+@Serializable
 data class KycConfigBean(
     val KYC_BACK: Int,
     val FACE_COMPARE: Int,

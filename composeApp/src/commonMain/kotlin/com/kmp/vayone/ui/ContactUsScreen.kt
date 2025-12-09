@@ -86,8 +86,8 @@ fun ContactUsScreen(
 @Composable
 fun ContactUsItem(
     type: Int = 0,
-    title: String = "",
-    content: String = "",
+    title: String? = "",
+    content: String? = "",
     modifier: Modifier = Modifier
         .fillMaxWidth()
         .padding(start = 20.dp, end = 20.dp, top = 8.dp)
@@ -112,7 +112,7 @@ fun ContactUsItem(
         )
         Column(modifier = Modifier.weight(1f).align(Alignment.CenterVertically)) {
             Text(
-                text = title,
+                text = title ?: "",
                 color = C_B4B0AD,
                 fontSize = 12.sp,
                 lineHeight = 17.sp,
@@ -121,7 +121,7 @@ fun ContactUsItem(
                 textAlign = TextAlign.Start
             )
             Text(
-                text = content,
+                text = content ?: "",
                 color = C_2B2621,
                 fontSize = 13.sp,
                 lineHeight = 18.sp,
@@ -137,9 +137,9 @@ fun ContactUsItem(
                 .background(shape = RoundedCornerShape(28.dp), color = C_FC7700)
                 .padding(horizontal = 25.dp)
                 .clickable {
-                    if (type == 0) {
+                    if (type == 0 || type == 2) {//call
 
-                    } else {
+                    } else {//copy
 
                     }
                 },
@@ -147,7 +147,7 @@ fun ContactUsItem(
         ) {
             Text(
                 text = Strings[when (type) {
-                    0 -> "call"
+                    0, 2 -> "call"
                     else -> "copy"
                 }],
                 color = white,
