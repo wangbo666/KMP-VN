@@ -4,6 +4,7 @@ import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.CacheManager.APPCODE
 import com.kmp.vayone.data.ParamBean
 import com.kmp.vayone.data.version_Name
+import com.kmp.vayone.mobileType
 import com.kmp.vayone.util.log
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
@@ -33,7 +34,7 @@ class NetworkManager(
         params: Map<String, String> = mapOf(
             "appCode" to APPCODE,
             "version" to version_Name,
-            "mobileType" to "1",
+            "mobileType" to mobileType(),
         )
     ): ApiResponse<T> {
         return request {
@@ -48,13 +49,12 @@ class NetworkManager(
     // POST 请求
     suspend inline fun <reified T> post(
         path: String,
-        body: ParamBean? = ParamBean(version_Name, "1", APPCODE)
+        body: ParamBean = ParamBean(version_Name, mobileType(), APPCODE)
     ): ApiResponse<T> {
         return request {
-            val bodyJson = body?.let { json.encodeToString(it) } ?: "{}"
             httpClient.post(buildUrl(path)) {
                 contentType(ContentType.Application.Json)
-                setBody(bodyJson)
+                setBody(body)
             }
         }
     }

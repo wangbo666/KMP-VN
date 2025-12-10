@@ -1,3 +1,4 @@
+import org.gradle.kotlin.dsl.implementation
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -32,6 +33,9 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.ktor.client.android)
+            implementation(libs.appsflyer.android)
+            implementation(libs.installreferrer)
+//            implementation(libs.github.xxpermissions)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -53,6 +57,13 @@ kotlin {
             implementation (libs.ktor.ktor.client.logging)
             implementation (libs.kotlinx.coroutines.core)
             implementation (libs.kotlinx.serialization.json)
+
+            implementation(libs.permissions)
+            implementation(libs.moko.permissions.compose)
+            implementation("dev.icerock.moko:permissions-camera:0.20.1")
+            implementation("dev.icerock.moko:permissions-location:0.20.1")
+            implementation("dev.icerock.moko:permissions-notifications:0.20.1")
+
         }
         iosMain {
             dependencies {

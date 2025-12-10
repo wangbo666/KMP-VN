@@ -16,3 +16,7 @@ actual fun convertToMD5(t: String): String {
     val bytes = md.digest(t.toByteArray())
     return bytes.joinToString("") { "%02x".format(it) }
 }
+
+actual fun mobileType(): String {
+    return "2"
+}

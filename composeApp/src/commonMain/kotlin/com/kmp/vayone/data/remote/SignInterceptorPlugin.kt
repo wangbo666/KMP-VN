@@ -5,6 +5,7 @@ import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.CacheManager.APPCODE
 import com.kmp.vayone.data.ParamBean
 import com.kmp.vayone.data.version_Name
+import com.kmp.vayone.mobileType
 import com.kmp.vayone.util.log
 import com.kmp.vayone.util.toMD5
 import io.ktor.client.plugins.api.*
@@ -25,7 +26,7 @@ val SignInterceptorPlugin = createClientPlugin("SignInterceptor") {
         if (requestUrl.contains(CacheManager.TRACK_HOST)) {
             return@onRequest
         }
-
+        "contentTAG:$content".log()
         // 根据请求类型提取 body JSON
         val bodyJson = when (content) {
             // JSON 请求
@@ -48,8 +49,14 @@ val SignInterceptorPlugin = createClientPlugin("SignInterceptor") {
                     ""
                 }
             }
+            is ParamBean -> json.encodeToString(ParamBean.serializer(), content)
 
-            else -> ""
+            else -> try {
+                json.encodeToString(content)
+            } catch (e: Exception) {
+                "Exception:${e.message}".log()
+                ""
+            }
         }
 
         // 生成签名
@@ -137,7 +144,7 @@ private fun generateSign(bodyJson: String): Pair<String, String> {
     // 处理空 body
     val finalJson = if (bodyJson.isBlank() || bodyJson == "{}") {
         "ParamBeanJson:${json.encodeToString(ParamBean())}".log()
-        json.encodeToString(ParamBean(version_Name, "1", APPCODE))
+        json.encodeToString(ParamBean(version_Name, mobileType(), APPCODE))
     } else {
         bodyJson
     }

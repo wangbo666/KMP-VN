@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -18,7 +16,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.mutableStateSetOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -34,7 +31,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,26 +44,20 @@ import com.kmp.vayone.ui.widget.LoadingDialog
 import com.kmp.vayone.ui.widget.MultiColoredText
 import com.kmp.vayone.util.format
 import com.kmp.vayone.util.isValidPhoneNumber
-import com.kmp.vayone.util.log
 import com.kmp.vayone.viewmodel.LoginViewModel
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import theme.C_132247
 import theme.C_2B2621
 import theme.C_524F4C
 import theme.C_7E7B79
 import theme.C_B4B0AD
 import theme.C_E3E0DD
-import theme.C_F5F5F5
 import theme.C_FC7700
 import theme.C_FEB201
 import theme.C_FFF4E6
 import theme.white
 import vayone.composeapp.generated.resources.Res
-import vayone.composeapp.generated.resources.contact_email
-import vayone.composeapp.generated.resources.contact_phone
-import vayone.composeapp.generated.resources.contact_tel
 import vayone.composeapp.generated.resources.dialog_close
 import vayone.composeapp.generated.resources.dialog_customer
 import vayone.composeapp.generated.resources.dialog_customer_bg
@@ -82,12 +72,12 @@ import vayone.composeapp.generated.resources.splash
 
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel = LoginViewModel(),
+    loginViewModel: LoginViewModel = remember { LoginViewModel() },
     toast: (show: Boolean, message: String) -> Unit = { _, _ -> },
     onNavigate: (Screen) -> Unit
 ) {
     // remember prevents recreating a new instance on each recomposition
-    val loginViewModel = remember { viewModel }
+//    val loginViewModel = remember { viewModel }
     val keyboardController = LocalSoftwareKeyboardController.current
     var loginType by remember { mutableStateOf(0) }
     var phone by remember { mutableStateOf("") }
@@ -99,7 +89,8 @@ fun LoginScreen(
 
     val customerData by loginViewModel.customer.collectAsState()
     var isShowCustomerDialog by remember { mutableStateOf(false) }
-    val isLoading by viewModel.isLoading.collectAsState()
+    val isLoading by loginViewModel.isLoading.collectAsState()
+
     // 每秒递减
     LaunchedEffect(key1 = isCounting) {
         if (isCounting) {
@@ -113,8 +104,18 @@ fun LoginScreen(
         }
     }
     LaunchedEffect(Unit) {
+        loginViewModel.sendOtpResult.collect {
+            isCounting = true
+        }
+    }
+    LaunchedEffect(Unit) {
         loginViewModel.errorEvent.collect { event ->
             toast(event.showToast, event.message)
+        }
+    }
+    LaunchedEffect(Unit) {
+        loginViewModel.loginResult.collect {
+
         }
     }
 
@@ -355,7 +356,7 @@ fun LoginScreen(
                                     toast(true, Strings["please_check_phone"])
                                     return@clickable
                                 }
-                                isCounting = true
+                                loginViewModel.sendOTP(phone)
                             }
                     )
                 }
@@ -457,6 +458,11 @@ fun LoginScreen(
                             toast(true, Strings["password_not_empty"])
                             return@clickable
                         }
+                        loginViewModel.login(
+                            phone,
+                            if (loginType == 0) otp else null,
+                            if (loginType != 0) password else null
+                        )
                     },
                 color = white,
                 fontSize = 18.sp,
@@ -579,7 +585,6 @@ fun CustomerDialog(
 @Preview
 @Composable
 fun PreViewLogin() {
-    CustomerDialog(true, HomeBean()) {
-
+    LoginScreen {
     }
 }

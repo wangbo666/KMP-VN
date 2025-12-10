@@ -6,9 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		DB3BA1D82EE91738008D6EF9 /* AppsFlyerLib-Static in Frameworks */ = {isa = PBXBuildFile; productRef = DB3BA1D72EE91738008D6EF9 /* AppsFlyerLib-Static */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		18B09AE12EE271EE00D234B1 /* iosApp copy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "iosApp copy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		18B09AE22EE271EE00D234B1 /* iosApp copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "iosApp copy-Info.plist"; path = "/Users/apple/Desktop/KMP/iosApp/iosApp copy-Info.plist"; sourceTree = "<absolute>"; };
 		F0ED8E69CCDA2CA0CDA8CFD4 /* VayOne2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VayOne2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -62,6 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DB3BA1D82EE91738008D6EF9 /* AppsFlyerLib-Static in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,7 +86,6 @@
 			children = (
 				B9ECBB83C41AB705B480C024 /* Configuration */,
 				AAE83E50C3811393EAA0D90C /* iosApp */,
-				18B09AE22EE271EE00D234B1 /* iosApp copy-Info.plist */,
 				0503CD1E9483EECA7012BC3B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -131,6 +134,7 @@
 			);
 			name = iosApp;
 			packageProductDependencies = (
+				DB3BA1D72EE91738008D6EF9 /* AppsFlyerLib-Static */,
 			);
 			productName = iosApp;
 			productReference = F0ED8E69CCDA2CA0CDA8CFD4 /* VayOne2.app */;
@@ -160,6 +164,9 @@
 			);
 			mainGroup = C4541797AE59A3C617CB9832;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				DB3BA1D62EE91738008D6EF9 /* XCRemoteSwiftPackageReference "AppsFlyerFramework-Static" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0503CD1E9483EECA7012BC3B /* Products */;
 			projectDirPath = "";
@@ -519,6 +526,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		DB3BA1D62EE91738008D6EF9 /* XCRemoteSwiftPackageReference "AppsFlyerFramework-Static" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AppsFlyerSDK/AppsFlyerFramework-Static";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.17.8;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DB3BA1D72EE91738008D6EF9 /* AppsFlyerLib-Static */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DB3BA1D62EE91738008D6EF9 /* XCRemoteSwiftPackageReference "AppsFlyerFramework-Static" */;
+			productName = "AppsFlyerLib-Static";
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CCAE221019DE8443F50D9EA2 /* Project object */;
 }

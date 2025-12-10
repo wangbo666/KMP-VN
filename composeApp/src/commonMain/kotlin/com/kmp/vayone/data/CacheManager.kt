@@ -30,6 +30,31 @@ object CacheManager {
         settings.putString("language", lang)
     }
 
+    // --- AppsFlyer ---
+    fun saveAfSource(value: String) {
+        settings.putString("afSource", value)
+    }
+
+    fun getAfSource(): String = settings.getString("afSource", "")
+
+    fun saveAppFlyer(value: String) {
+        settings.putString("appFlyer", value)
+    }
+
+    fun getAppFlyer(): String = settings.getString("appFlyer", "")
+
+    fun saveRefer(value: String) {
+        settings.putString("refer", value)
+    }
+
+    fun getRefer(): String = settings.getString("refer", "")
+
+    fun saveAppsFlyerUID(value: String) {
+        settings.putString("appsFlyerUID", value)
+    }
+
+    fun getAppsFlyerUID(): String = settings.getString("appsFlyerUID", "")
+
     const val PRIVACY_POLICY = "https://www.vayone-fast.com/agreement/protocol_privacy_index.html"
     const val AGREEMENT_ABOUT = "https://www.vayone-fast.com/agreement/about.html"
     const val AGREEMENT_REGISTER = "https://www.vayone-fast.com/agreement/register.html"

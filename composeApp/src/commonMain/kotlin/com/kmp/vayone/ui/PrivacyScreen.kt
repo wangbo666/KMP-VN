@@ -29,6 +29,7 @@ import com.kmp.vayone.exitApp
 import com.kmp.vayone.ui.widget.ColoredTextPart
 import com.kmp.vayone.ui.widget.MultiColoredText
 import com.kmp.vayone.ui.widget.TopBar
+import com.kmp.vayone.util.format
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import theme.C_40495C
@@ -324,7 +325,7 @@ fun PrivacyScreen(
                     )
                     Text(
                         modifier = Modifier.fillMaxWidth(),
-                        text = Strings["permission_call_content"],
+                        text = Strings["permission_call_content"].format(CacheManager.HTTP_HOST),
                         color = C_40495C,
                         fontSize = 13.sp,
                         lineHeight = 14.sp,
