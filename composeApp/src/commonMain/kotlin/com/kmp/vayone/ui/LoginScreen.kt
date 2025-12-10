@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -17,13 +18,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.changedToUp
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -39,13 +45,18 @@ import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.HomeBean
 import com.kmp.vayone.data.Strings
+import com.kmp.vayone.getLastKnownLocation
 import com.kmp.vayone.ui.widget.ColoredTextPart
 import com.kmp.vayone.ui.widget.LoadingDialog
 import com.kmp.vayone.ui.widget.MultiColoredText
 import com.kmp.vayone.util.format
 import com.kmp.vayone.util.isValidPhoneNumber
+import com.kmp.vayone.util.log
 import com.kmp.vayone.viewmodel.LoginViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import theme.C_2B2621
@@ -72,13 +83,13 @@ import vayone.composeapp.generated.resources.splash
 
 @Composable
 fun LoginScreen(
-    loginViewModel: LoginViewModel = remember { LoginViewModel() },
     toast: (show: Boolean, message: String) -> Unit = { _, _ -> },
     onNavigate: (Screen) -> Unit
 ) {
     // remember prevents recreating a new instance on each recomposition
-//    val loginViewModel = remember { viewModel }
+    val loginViewModel = remember { LoginViewModel() }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
     var loginType by remember { mutableStateOf(0) }
     var phone by remember { mutableStateOf("") }
     var otp by remember { mutableStateOf("") }
@@ -91,6 +102,7 @@ fun LoginScreen(
     var isShowCustomerDialog by remember { mutableStateOf(false) }
     val isLoading by loginViewModel.isLoading.collectAsState()
 
+    val scope = rememberCoroutineScope()
     // 每秒递减
     LaunchedEffect(key1 = isCounting) {
         if (isCounting) {
@@ -115,12 +127,28 @@ fun LoginScreen(
     }
     LaunchedEffect(Unit) {
         loginViewModel.loginResult.collect {
-
+            CacheManager.setLoginInfo(it)
+            CacheManager.setToken(it?.token ?: "")
+            loginViewModel.postDeviceInfo()
+        }
+    }
+    LaunchedEffect(Unit) {
+        loginViewModel.postDeviceResult.collect {
+            if (CacheManager.getLoginInfo()?.passwdSign == 0) {
+                onNavigate(Screen.SetPassword)
+            } else {
+                onNavigate(Screen.Home(0))
+            }
         }
     }
 
     Box(
         modifier = Modifier.fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    focusManager.clearFocus(force = true)
+                })
+            }
     ) {
         Image(
             modifier = Modifier.fillMaxSize(),
@@ -163,6 +191,7 @@ fun LoginScreen(
                 .statusBarsPadding()
                 .navigationBarsPadding()
                 .fillMaxSize()
+                .imePadding()
                 .padding(top = 103.dp, end = 34.dp, bottom = 20.dp)
         ) {
             Text(
@@ -458,11 +487,18 @@ fun LoginScreen(
                             toast(true, Strings["password_not_empty"])
                             return@clickable
                         }
-                        loginViewModel.login(
-                            phone,
-                            if (loginType == 0) otp else null,
-                            if (loginType != 0) password else null
-                        )
+                        scope.launch {
+                            "startLocation".log()
+                            if (CacheManager.getLocation().first == 0.0) {
+                                CacheManager.saveLocation(getLastKnownLocation() ?: Pair(0.0, 0.0))
+                            }
+                            "endLocation:${CacheManager.getLocation().first}".log()
+                            loginViewModel.login(
+                                phone,
+                                if (loginType == 0) otp else null,
+                                if (loginType != 0) password else null
+                            )
+                        }
                     },
                 color = white,
                 fontSize = 18.sp,
@@ -495,7 +531,7 @@ fun LoginScreen(
                     },
                 ),
                 modifier = Modifier.fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, bottom = 13.dp)
+                    .padding(start = 16.dp, end = 16.dp, bottom = 13.dp),
             )
         }
         CustomerDialog(

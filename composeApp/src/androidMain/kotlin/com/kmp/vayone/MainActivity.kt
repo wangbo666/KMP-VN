@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import dev.icerock.moko.permissions.PermissionsController
 
 class MainActivity : ComponentActivity() {
 
@@ -16,10 +15,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         instance = this
-        val viewModel = MyViewModel(PermissionsController(applicationContext))
-
-        // Binds the permissions controller to the activity lifecycle.
-        viewModel.permissionsController.bind(this)
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContent {

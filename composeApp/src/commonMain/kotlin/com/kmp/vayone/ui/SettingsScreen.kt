@@ -30,9 +30,11 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.data.version_Name
 import com.kmp.vayone.navigation.Screen
+import com.kmp.vayone.ui.widget.ConfirmDialog
 import com.kmp.vayone.ui.widget.ToastHost
 import com.kmp.vayone.ui.widget.TopBar
 import org.jetbrains.compose.resources.painterResource
@@ -53,112 +55,134 @@ fun SettingsScreen(
     onNavigate: (Screen) -> Unit,
 ) {
 
+    var isShowConfirmDialog by remember { mutableStateOf(false) }
     Scaffold(modifier = Modifier.fillMaxSize().statusBarsPadding(), topBar = {
         TopBar(Strings["settings"]) {
             onBack()
         }
     }) {
-        Column(
-            modifier = Modifier.fillMaxSize().background(white).padding(it)
-        ) {
-            Image(
-                painter = painterResource(Res.drawable.logo),
-                contentDescription = null,
-                modifier = Modifier.padding(top = 46.dp).size(65.dp).clip(RoundedCornerShape(16.dp))
-                    .align(Alignment.CenterHorizontally)
-            )
-            Text(
-                text = Strings["app_name"],
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = C_524F4C,
-                modifier = Modifier.padding(top = 18.dp).align(Alignment.CenterHorizontally)
-            )
-            Text(
-                text = version_Name,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = C_E3E0DD,
-                modifier = Modifier.padding(top = 3.dp).align(Alignment.CenterHorizontally)
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 36.dp)
-                    .height(54.dp).clip(RoundedCornerShape(8.dp)).background(C_F9F9F9).clickable(
-                        interactionSource = remember { MutableInteractionSource() },
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier.fillMaxSize().background(white).padding(it)
+            ) {
+                Image(
+                    painter = painterResource(Res.drawable.logo),
+                    contentDescription = null,
+                    modifier = Modifier.padding(top = 46.dp).size(65.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .align(Alignment.CenterHorizontally)
+                )
+                Text(
+                    text = Strings["app_name"],
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = C_524F4C,
+                    modifier = Modifier.padding(top = 18.dp).align(Alignment.CenterHorizontally)
+                )
+                Text(
+                    text = version_Name,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = C_E3E0DD,
+                    modifier = Modifier.padding(top = 3.dp).align(Alignment.CenterHorizontally)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 36.dp)
+                        .height(54.dp).clip(RoundedCornerShape(8.dp)).background(C_F9F9F9)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
 //
-                    ) {
-                        onNavigate(Screen.ChangePassword)
-                    }, verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = Strings["change_password"],
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = C_524F4C,
-                    modifier = Modifier.padding(horizontal = 24.dp).weight(1f)
-                )
-                Image(
-                    painter = painterResource(Res.drawable.mine_right),
-                    contentDescription = null,
-                    modifier = Modifier.padding(end = 24.dp).size(24.dp)
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 10.dp)
-                    .height(54.dp).clip(RoundedCornerShape(8.dp)).background(color = C_F9F9F9)
-                    .clickable {
-                        onNavigate(Screen.Logout)
-                    }, verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = Strings["close_account"],
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = C_524F4C,
-                    modifier = Modifier.padding(horizontal = 24.dp).weight(1f)
-                )
-                Image(
-                    painter = painterResource(Res.drawable.mine_right),
-                    contentDescription = null,
-                    modifier = Modifier.padding(end = 24.dp).size(24.dp)
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 10.dp)
-                    .height(54.dp).clip(RoundedCornerShape(8.dp)).background(color = C_F9F9F9)
-                    .clickable {
-                        onNavigate(Screen.Feedback)
-                    }, verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = Strings["feedback"],
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = C_524F4C,
-                    modifier = Modifier.padding(horizontal = 24.dp).weight(1f)
-                )
-                Image(
-                    painter = painterResource(Res.drawable.mine_right),
-                    contentDescription = null,
-                    modifier = Modifier.padding(end = 24.dp).size(24.dp)
-                )
-            }
-            Box(
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 36.dp)
-                    .height(44.dp)
-                    .border(width = 1.dp, color = C_FC7700, shape = RoundedCornerShape(30.dp))
-                    .clip(RoundedCornerShape(30.dp))
-                    .clickable {
-
-                    },
-            ) {
-                Text(
-                    text = Strings["logout"],
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = C_FC7700,
-                    modifier = Modifier.align(Alignment.Center)
-                )
+                        ) {
+                            onNavigate(Screen.ChangePassword)
+                        }, verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = Strings["change_password"],
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = C_524F4C,
+                        modifier = Modifier.padding(horizontal = 24.dp).weight(1f)
+                    )
+                    Image(
+                        painter = painterResource(Res.drawable.mine_right),
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 24.dp).size(24.dp)
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 10.dp)
+                        .height(54.dp).clip(RoundedCornerShape(8.dp)).background(color = C_F9F9F9)
+                        .clickable {
+                            onNavigate(Screen.Logout)
+                        }, verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = Strings["close_account"],
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = C_524F4C,
+                        modifier = Modifier.padding(horizontal = 24.dp).weight(1f)
+                    )
+                    Image(
+                        painter = painterResource(Res.drawable.mine_right),
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 24.dp).size(24.dp)
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 10.dp)
+                        .height(54.dp).clip(RoundedCornerShape(8.dp)).background(color = C_F9F9F9)
+                        .clickable {
+                            onNavigate(Screen.Feedback)
+                        }, verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = Strings["feedback"],
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = C_524F4C,
+                        modifier = Modifier.padding(horizontal = 24.dp).weight(1f)
+                    )
+                    Image(
+                        painter = painterResource(Res.drawable.mine_right),
+                        contentDescription = null,
+                        modifier = Modifier.padding(end = 24.dp).size(24.dp)
+                    )
+                }
+                Box(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 36.dp)
+                        .height(44.dp)
+                        .border(width = 1.dp, color = C_FC7700, shape = RoundedCornerShape(30.dp))
+                        .clip(RoundedCornerShape(30.dp))
+                        .clickable {
+                            isShowConfirmDialog = true
+                        },
+                ) {
+                    Text(
+                        text = Strings["logout"],
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = C_FC7700,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                ConfirmDialog(
+                    isShowConfirmDialog,
+                    "",
+                    Strings["sure_logout"],
+                    Strings["closed", Strings["sure"]],
+                    confirmAction = {
+                        CacheManager.setLoginInfo(null)
+                        CacheManager.setToken("")
+                        onNavigate(Screen.Home())
+                    }
+                ) {
+                    isShowConfirmDialog = false
+                }
             }
         }
     }

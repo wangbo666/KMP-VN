@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
+import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.AboutUsScreen
 import com.kmp.vayone.ui.ChangePasswordScreen
@@ -21,6 +22,8 @@ import com.kmp.vayone.ui.LoginScreen
 import com.kmp.vayone.ui.LogoutScreen
 import com.kmp.vayone.ui.LogoutSuccessScreen
 import com.kmp.vayone.ui.PrivacyScreen
+import com.kmp.vayone.ui.SetPasswordScreen
+import com.kmp.vayone.ui.SetPasswordSuccessScreen
 import com.kmp.vayone.ui.SettingsScreen
 import com.kmp.vayone.ui.SplashScreen
 import com.kmp.vayone.ui.WebViewScreen
@@ -177,7 +180,10 @@ fun App() {
                     }
 
                     Screen.ChangePassword ->
-                        ChangePasswordScreen({ goBack() }) { navigate(it) }
+                        ChangePasswordScreen(toast = { show, toast ->
+                            showToast = show
+                            toastMessage = toast
+                        }, onBack = { goBack() }) { navigate(it) }
 
                     Screen.Feedback ->
                         FeedbackScreen(toast = { show, toast ->
@@ -191,7 +197,7 @@ fun App() {
                         LogoutScreen(toast = { show, toast ->
                             showToast = show
                             toastMessage = toast
-                        }, { goBack() }) { navigate(it) }
+                        }, onBack = { goBack() }) { navigate(it) }
 
                     Screen.LogoutSuccess ->
                         LogoutSuccessScreen {
@@ -199,7 +205,23 @@ fun App() {
                         }
 
                     Screen.ContactUs ->
-                        ContactUsScreen { goBack() }
+                        ContactUsScreen(toast = { show, toast ->
+                            showToast = show
+                            toastMessage = toast
+                        }) { goBack() }
+
+                    Screen.SetPassword -> SetPasswordScreen(toast = { show, toast ->
+                        showToast = show
+                        toastMessage = toast
+                    }) {
+                        navigate(it)
+                    }
+
+                    is Screen.SetPasswordSuccess -> SetPasswordSuccessScreen(
+                        title = screen.title,
+                    ) {
+                        navigate(it)
+                    }
                 }
                 ToastHost(
                     message = toastMessage,

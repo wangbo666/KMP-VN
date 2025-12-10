@@ -1,8 +1,11 @@
 package com.kmp.vayone.data
 
+import com.kmp.vayone.data.remote.json
 import com.russhwolf.settings.Settings
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.serialization.builtins.PairSerializer
+import kotlinx.serialization.builtins.serializer
 
 object CacheManager {
     private val settings = Settings()
@@ -51,6 +54,42 @@ object CacheManager {
 
     fun saveAppsFlyerUID(value: String) {
         settings.putString("appsFlyerUID", value)
+    }
+
+    fun getLoginInfo(): LoginBean? {
+        val info = settings.getString("loginInfo", "")
+        return try {
+            json.decodeFromString<LoginBean>(info)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun setLoginInfo(l: LoginBean?) {
+        if (l == null) {
+            settings.remove("loginInfo")
+        } else {
+            try {
+                settings.putString("loginInfo", json.encodeToString(l))
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+
+    fun getLocation(): Pair<Double, Double> {
+        val info = settings.getString("location", "")
+        return try {
+            json.decodeFromString(PairSerializer(Double.serializer(), Double.serializer()), info)
+        } catch (e: Exception) {
+            Pair(0.0, 0.0)
+        }
+    }
+
+    fun saveLocation(p: Pair<Double, Double>) {
+        val info = json.encodeToString(PairSerializer(Double.serializer(), Double.serializer()), p)
+        settings.putString("location", info)
     }
 
     fun getAppsFlyerUID(): String = settings.getString("appsFlyerUID", "")

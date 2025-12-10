@@ -1,11 +1,5 @@
 package com.kmp.vayone
 
-import dev.icerock.moko.permissions.DeniedAlwaysException
-import dev.icerock.moko.permissions.DeniedException
-import dev.icerock.moko.permissions.Permission
-import dev.icerock.moko.permissions.PermissionsController
-import dev.icerock.moko.permissions.location.COARSE_LOCATION
-
 expect fun exitApp()
 
 expect fun currentTimeMillis(): Long
@@ -14,17 +8,28 @@ expect fun convertToMD5(t: String): String
 
 expect fun mobileType(): String
 
+expect fun getPhoneModel(): String
+expect fun getPhoneBrand(): String
 
-class MyViewModel(val permissionsController: PermissionsController) {
-    suspend fun requestLocation() {
-        try {
-            permissionsController.providePermission(Permission.COARSE_LOCATION)
-            // 权限通过，可以继续逻辑
-        } catch (e: DeniedAlwaysException) {
-            // 永久拒绝
-        } catch (e: DeniedException) {
-            // 暂时拒绝
-        }
-    }
-}
+expect suspend fun getLastKnownLocation(): Pair<Double, Double>?
 
+/**
+ * 跨平台设备唯一标识符
+ * 特点：卸载应用后保持不变
+ * 不需要任何权限
+ */
+expect suspend fun getDeviceId(): String
+
+/**
+ * 打开系统的应用权限设置页
+ */
+expect fun openSystemPermissionSettings()
+
+/**
+ * KMP 通用权限请求，Android 请求：粗略定位、通知、读取电话状态、读取短信、读取通话记录；
+ * iOS 请求：通知、粗略定位（近似定位由系统控制为“精确/模糊”）
+ */
+expect suspend fun postAllPermissions(
+    refuseAction: (isNever: Boolean, permissions: List<String>) -> Unit = { _, _ -> },
+    action: (permissions: List<String>) -> Unit,
+)

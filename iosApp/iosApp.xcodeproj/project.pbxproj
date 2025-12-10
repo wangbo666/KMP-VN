@@ -12,11 +12,12 @@
 
 /* Begin PBXFileReference section */
 		18B09AE12EE271EE00D234B1 /* iosApp copy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "iosApp copy.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		BF85D8D8BE915B7C1F68D1FE /* DeviceIdHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceIdHelper.swift; sourceTree = "<group>"; };
 		F0ED8E69CCDA2CA0CDA8CFD4 /* VayOne2.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VayOne2.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		18B09AE32EE271EE00D234B1 /* Exceptions for "iosApp" folder in "iosApp copy" target */ = {
+		18B09AE32EE271EE00D234B1 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Assets.xcassets,
@@ -27,7 +28,7 @@
 			);
 			target = 18B09AD92EE271EE00D234B1 /* iosApp copy */;
 		};
-		AF595B069A2E7AF5B1041845 /* Exceptions for "iosApp" folder in "iosApp" target */ = {
+		AF595B069A2E7AF5B1041845 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -40,8 +41,8 @@
 		AAE83E50C3811393EAA0D90C /* iosApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				AF595B069A2E7AF5B1041845 /* Exceptions for "iosApp" folder in "iosApp" target */,
-				18B09AE32EE271EE00D234B1 /* Exceptions for "iosApp" folder in "iosApp copy" target */,
+				AF595B069A2E7AF5B1041845 /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
+				18B09AE32EE271EE00D234B1 /* PBXFileSystemSynchronizedBuildFileExceptionSet */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";

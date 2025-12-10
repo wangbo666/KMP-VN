@@ -31,4 +31,23 @@ object UserRepository {
     suspend fun login(paramBean: ParamBean): ApiResponse<LoginBean?> {
         return networkManager.post("api/user/app/login", paramBean)
     }
+
+    suspend fun postDeviceInfo(paramBean: ParamBean): ApiResponse<String?> {
+        return networkManager.post("api/user/app/userEquipment/save", paramBean)
+    }
+
+    suspend fun setPassword(paramBean: ParamBean): ApiResponse<LoginBean?> {
+        return networkManager.post("api/user/app/password/set", paramBean)
+    }
+
+    suspend fun logout(): ApiResponse<String?> {
+        return networkManager.post(
+            "api/user/app/delete/user",
+            ParamBean(rid = CacheManager.getLoginInfo()?.id)
+        )
+    }
+
+    suspend fun updatePassword(paramBean: ParamBean): ApiResponse<LoginBean?>{
+        return networkManager.post("api/user/app/password/update",paramBean)
+    }
 }

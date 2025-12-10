@@ -18,6 +18,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,9 +30,11 @@ import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.widget.TopBar
+import com.kmp.vayone.viewmodel.LoginViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import theme.C_132247
@@ -46,8 +52,22 @@ import vayone.composeapp.generated.resources.contact_tel
 
 @Composable
 fun ContactUsScreen(
+    toast: (show: Boolean, message: String) -> Unit = { _, _ -> },
     onBack: () -> Unit,
 ) {
+    val loginViewModel = remember { LoginViewModel() }
+
+    val customerData by loginViewModel.customer.collectAsState()
+
+    LaunchedEffect(Unit) {
+        loginViewModel.getCustomer()
+    }
+    LaunchedEffect(Unit) {
+        loginViewModel.errorEvent.collect { event ->
+            toast(event.showToast, event.message)
+        }
+    }
+
     Scaffold(modifier = Modifier.fillMaxSize().statusBarsPadding(), topBar = {
         TopBar(Strings["contact_us"]) {
             onBack()
@@ -75,10 +95,21 @@ fun ContactUsScreen(
                     .padding(top = 7.dp, start = 20.dp, end = 20.dp, bottom = 4.dp),
                 textAlign = TextAlign.Center
             )
-            ContactUsItem(0, Strings["phone_number"], "11111")
-            ContactUsItem(1, Strings["email"], "11111")
-            ContactUsItem(2, Strings["email"], "11111")
-            ContactUsItem(2, Strings["email"], "11111")
+            customerData?.let { data ->
+                data.customerPhone?.let { it1 ->
+                    ContactUsItem(0, Strings["phone_number"], it1)
+                }
+                data.customerEmail?.let { it1 ->
+                    ContactUsItem(0, Strings["email"], it1)
+                }
+                data.customerConfigs?.forEach { it1 ->
+                    ContactUsItem(
+                        if (it1.buttonType == 2) 2 else 3,
+                        if (CacheManager.getLanguage() == "vi") it1.vernacularTitle else it1.enTitle,
+                        it1.content,
+                    )
+                }
+            }
         }
     }
 }

@@ -18,9 +18,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,8 +37,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kmp.vayone.data.Strings
+import com.kmp.vayone.ui.widget.LoadingDialog
 import com.kmp.vayone.ui.widget.ToastHost
 import com.kmp.vayone.ui.widget.TopBar
+import com.kmp.vayone.viewmodel.LoginViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import theme.C_2B2621
 import theme.C_B4B0AD
@@ -50,8 +56,11 @@ fun FeedbackScreen(
     toast: (show: Boolean, message: String) -> Unit,
     onBack: () -> Unit,
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
+    val loginViewModel = remember { LoginViewModel() }
+    val isLoading by loginViewModel.isLoading.collectAsState()
+    val scope = rememberCoroutineScope()
 
+    val keyboardController = LocalSoftwareKeyboardController.current
     Scaffold(modifier = Modifier.fillMaxSize().statusBarsPadding(), topBar = {
         TopBar(Strings["feedback"]) {
             onBack()
@@ -110,10 +119,16 @@ fun FeedbackScreen(
                                 val showToast = true
                                 toast(showToast, toastMessage)
                             } else {
-                                val toastMessage = Strings["feedback_success"]
-                                val showToast = true
-                                toast(showToast, toastMessage)
-                                onBack()
+                                scope.launch {
+                                    keyboardController?.hide()
+                                    loginViewModel.showLoading()
+                                    delay(1500)
+                                    loginViewModel.hideLoading()
+                                    val toastMessage = Strings["feedback_success"]
+                                    val showToast = true
+                                    toast(showToast, toastMessage)
+                                    onBack()
+                                }
                             }
                         }
                 ) {
@@ -127,6 +142,7 @@ fun FeedbackScreen(
                     )
                 }
             }
+            LoadingDialog((isLoading))
         }
     }
 }

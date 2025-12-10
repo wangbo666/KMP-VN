@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,9 +30,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
+import com.kmp.vayone.ui.widget.ConfirmDialog
 import com.kmp.vayone.ui.widget.TopBar
+import com.kmp.vayone.viewmodel.LoginViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import theme.C_132247
@@ -54,6 +58,20 @@ fun LogoutScreen(
     onBack: () -> Unit,
     onNavigate: (Screen) -> Unit,
 ) {
+
+    val loginViewModel = remember { LoginViewModel() }
+    LaunchedEffect(Unit) {
+        loginViewModel.logoutResult.collect {
+            CacheManager.setToken("")
+            CacheManager.setLoginInfo(null)
+            onNavigate(Screen.LogoutSuccess)
+        }
+    }
+    LaunchedEffect(Unit) {
+        loginViewModel.errorEvent.collect { event ->
+            toast(event.showToast, event.message)
+        }
+    }
     Scaffold(modifier = Modifier.fillMaxSize().statusBarsPadding(), topBar = {
         TopBar(Strings["close_account"]) {
             onBack()
@@ -61,138 +79,140 @@ fun LogoutScreen(
     }) {
         var selectedItems by remember { mutableStateOf(setOf<Int>()) }
 
-        Column(
-            modifier = Modifier.fillMaxSize().background(white).padding(it)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = 10.dp)
-                    .wrapContentHeight()
-                    .background(
-                        shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
-                        color = C_F9F9F9
-                    ),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = Strings["close_app_name"],
-                    color = C_6A707D,
-                    fontSize = 13.sp,
-                    lineHeight = 20.sp,
-                    modifier = Modifier.padding(start = 18.dp, top = 16.dp)
-                        .align(Alignment.CenterVertically),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = Strings["app_name"],
-                    color = C_132247,
-                    fontSize = 14.sp,
-                    lineHeight = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f).padding(end = 18.dp, top = 16.dp),
-                    textAlign = TextAlign.End
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp)
-                    .wrapContentHeight()
-                    .background(
-                        shape = RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp),
-                        color = C_F9F9F9
-                    ),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = Strings["close_app_name"],
-                    color = C_6A707D,
-                    fontSize = 13.sp,
-                    lineHeight = 20.sp,
-                    modifier = Modifier.padding(start = 18.dp)
-                        .align(Alignment.CenterVertically)
-                )
-                Text(
-                    text = Strings["app_name"],
-                    color = C_132247,
-                    fontSize = 14.sp,
-                    lineHeight = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f)
-                        .padding(end = 18.dp, top = 10.dp, bottom = 16.dp),
-                    textAlign = TextAlign.End
-                )
-            }
-            Text(
-                text = Strings["close_account_tips"],
-                color = C_ED4744,
-                fontSize = 12.sp,
-                lineHeight = 17.sp,
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp)
-            )
+        Box(modifier = Modifier.fillMaxSize()) {
             Column(
-                modifier = Modifier.fillMaxWidth().wrapContentHeight()
-                    .padding(start = 16.dp, end = 16.dp, top = 10.dp)
-                    .background(shape = RoundedCornerShape(12.dp), color = C_FFF4E6)
-                    .padding(18.dp)
+                modifier = Modifier.fillMaxSize().background(white).padding(it)
             ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 10.dp)
+                        .wrapContentHeight()
+                        .background(
+                            shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
+                            color = C_F9F9F9
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = Strings["close_app_name"],
+                        color = C_6A707D,
+                        fontSize = 13.sp,
+                        lineHeight = 20.sp,
+                        modifier = Modifier.padding(start = 18.dp, top = 16.dp)
+                            .align(Alignment.CenterVertically),
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = Strings["app_name"],
+                        color = C_132247,
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f).padding(end = 18.dp, top = 16.dp),
+                        textAlign = TextAlign.End
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp)
+                        .wrapContentHeight()
+                        .background(
+                            shape = RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp),
+                            color = C_F9F9F9
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = Strings["close_app_name"],
+                        color = C_6A707D,
+                        fontSize = 13.sp,
+                        lineHeight = 20.sp,
+                        modifier = Modifier.padding(start = 18.dp)
+                            .align(Alignment.CenterVertically)
+                    )
+                    Text(
+                        text = Strings["app_name"],
+                        color = C_132247,
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
+                            .padding(end = 18.dp, top = 10.dp, bottom = 16.dp),
+                        textAlign = TextAlign.End
+                    )
+                }
                 Text(
-                    text = Strings["close_account_reason"],
-                    color = C_132247,
-                    fontSize = 14.sp,
-                    lineHeight = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 8.dp)
+                    text = Strings["close_account_tips"],
+                    color = C_ED4744,
+                    fontSize = 12.sp,
+                    lineHeight = 17.sp,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp)
                 )
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 24.dp, start = 6.dp, end = 6.dp)
+                    modifier = Modifier.fillMaxWidth().wrapContentHeight()
+                        .padding(start = 16.dp, end = 16.dp, top = 10.dp)
+                        .background(shape = RoundedCornerShape(12.dp), color = C_FFF4E6)
+                        .padding(vertical = 18.dp)
                 ) {
-                    listOf(
-                        Strings["close_account_reason1"],
-                        Strings["close_account_reason2"],
-                        Strings["close_account_reason3"],
-                        Strings["close_account_reason4"]
-                    ).forEachIndexed { index, text ->
-                        MultiSelectItem(
-                            text = text,
-                            isSelected = selectedItems.contains(index),
-                            onClick = {
-                                selectedItems =
-                                    if (selectedItems.contains(index)) {
-                                        selectedItems - index
-                                    } else {
-                                        selectedItems + index
-                                    }
-                            }
-                        )
-                    }
-                }
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Box(
-                Modifier.padding(top = 10.dp, bottom = 20.dp, start = 20.dp, end = 20.dp)
-                    .fillMaxWidth()
-                    .height(48.dp)
-                    .clip(RoundedCornerShape(30.dp))
-                    .background(C_FC7700).clickable {
-                        if (selectedItems.isEmpty()) {
-                            val toastMessage = Strings["please_select_one"]
-                            val showToast = true
-                            toast(showToast, toastMessage)
-                        } else {
-                            onNavigate(Screen.LogoutSuccess)
+                    Text(
+                        text = Strings["close_account_reason"],
+                        color = C_132247,
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 8.dp, start = 18.dp, end = 18.dp)
+                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 24.dp, start = 6.dp, end = 6.dp)
+                    ) {
+                        listOf(
+                            Strings["close_account_reason1"],
+                            Strings["close_account_reason2"],
+                            Strings["close_account_reason3"],
+                            Strings["close_account_reason4"]
+                        ).forEachIndexed { index, text ->
+                            MultiSelectItem(
+                                text = text,
+                                isSelected = selectedItems.contains(index),
+                                onClick = {
+                                    selectedItems =
+                                        if (selectedItems.contains(index)) {
+                                            selectedItems - index
+                                        } else {
+                                            selectedItems + index
+                                        }
+                                }
+                            )
                         }
                     }
-            ) {
-                Text(
-                    modifier = Modifier.align(Alignment.Center),
-                    text = Strings["submit"],
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = white,
-                    textAlign = TextAlign.Center
-                )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Box(
+                    Modifier.padding(top = 10.dp, bottom = 20.dp, start = 20.dp, end = 20.dp)
+                        .fillMaxWidth()
+                        .height(48.dp)
+                        .clip(RoundedCornerShape(30.dp))
+                        .background(C_FC7700).clickable {
+                            if (selectedItems.isEmpty()) {
+                                val toastMessage = Strings["please_select_one"]
+                                val showToast = true
+                                toast(showToast, toastMessage)
+                            } else {
+                                loginViewModel.logout()
+                            }
+                        }
+                ) {
+                    Text(
+                        modifier = Modifier.align(Alignment.Center),
+                        text = Strings["submit"],
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = white,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }
@@ -211,7 +231,7 @@ fun MultiSelectItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(vertical = 10.dp),
+            .padding(vertical = 10.dp, horizontal = 18.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -233,7 +253,7 @@ fun MultiSelectItem(
 @Preview
 @Composable
 fun PreLogout() {
-    LogoutScreen({ _, _ -> }, {}) {
+    LogoutScreen(toast = { _, _ -> }, onBack = {}) {
 
     }
 }

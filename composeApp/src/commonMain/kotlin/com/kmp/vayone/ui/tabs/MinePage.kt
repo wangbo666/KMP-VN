@@ -110,7 +110,7 @@ fun MinePage(
                     .padding(start = 92.dp, top = 91.dp)
             )
             Text(
-                text = "",
+                text = CacheManager.getLoginInfo()?.phone ?: "",
                 color = white,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,

@@ -3,6 +3,9 @@ package com.kmp.vayone
 import platform.UIKit.UIApplication
 import platform.Foundation.NSLog
 import kotlinx.cinterop.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
 import platform.CoreGraphics.CGFloat
 import platform.Foundation.*
 import platform.UIKit.*
@@ -13,7 +16,11 @@ import platform.UIKit.UIColor
 import platform.UIKit.NSTextAlignmentCenter
 import platform.UIKit.UIViewAnimationOptionCurveEaseOut
 import platform.CoreGraphics.CGRectMake
+import platform.darwin.DISPATCH_TIME_FOREVER
 import platform.darwin.NSObject
+import platform.darwin.dispatch_semaphore_create
+import platform.darwin.dispatch_semaphore_signal
+import platform.darwin.dispatch_semaphore_wait
 
 // 实际实现
 @OptIn(ExperimentalForeignApi::class)
@@ -39,4 +46,70 @@ actual fun convertToMD5(t: String) = ""
 
 actual fun mobileType(): String {
     return "1"
+}
+
+actual fun getPhoneModel(): String = UIDevice.currentDevice.model
+actual fun getPhoneBrand(): String = "Apple"
+
+actual suspend fun getDeviceId(): String {
+    return withContext(Dispatchers.IO) {
+        UIDevice.currentDevice.identifierForVendor?.UUIDString ?: ""
+    }.replace("-","")
+}
+
+@OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
+actual fun openSystemPermissionSettings() {
+    val url = NSURL(string = UIApplicationOpenSettingsURLString)
+    if (UIApplication.sharedApplication.canOpenURL(url)) {
+        UIApplication.sharedApplication.openURL(url)
+    }
+}
+
+@OptIn(ExperimentalForeignApi::class)
+actual suspend fun postAllPermissions(
+    refuseAction: (isNever: Boolean, permissions: List<String>) -> Unit,
+    action: (permissions: List<String>) -> Unit,
+) {
+    val granted = mutableListOf<String>()
+
+    var notificationGranted = false
+    val semaphore = dispatch_semaphore_create(0)
+    val center = platform.UserNotifications.UNUserNotificationCenter.currentNotificationCenter()
+    center.requestAuthorizationWithOptions(
+        options = platform.UserNotifications.UNAuthorizationOptionAlert or
+                platform.UserNotifications.UNAuthorizationOptionSound or
+                platform.UserNotifications.UNAuthorizationOptionBadge,
+        completionHandler = { grantedFlag, error ->
+            notificationGranted = grantedFlag
+            dispatch_semaphore_signal(semaphore)
+        }
+    )
+    dispatch_semaphore_wait(semaphore, DISPATCH_TIME_FOREVER)
+
+    if (notificationGranted) {
+        granted += "Notification"
+    } else {
+        refuseAction(false, listOf("Notification"))
+        return
+    }
+
+    val locationManager = platform.CoreLocation.CLLocationManager()
+    val status = platform.CoreLocation.CLLocationManager.authorizationStatus()
+    if (status == platform.CoreLocation.kCLAuthorizationStatusNotDetermined) {
+        locationManager.requestWhenInUseAuthorization()
+    }
+    val finalStatus = platform.CoreLocation.CLLocationManager.authorizationStatus()
+    if (finalStatus == platform.CoreLocation.kCLAuthorizationStatusAuthorizedWhenInUse ||
+        finalStatus == platform.CoreLocation.kCLAuthorizationStatusAuthorizedAlways
+    ) {
+        granted += "Location"
+    } else if (finalStatus == platform.CoreLocation.kCLAuthorizationStatusDenied) {
+        refuseAction(true, listOf("Location"))
+        return
+    } else {
+        refuseAction(false, listOf("Location"))
+        return
+    }
+
+    action(granted)
 }

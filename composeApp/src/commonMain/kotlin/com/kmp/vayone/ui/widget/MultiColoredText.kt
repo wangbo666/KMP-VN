@@ -1,13 +1,17 @@
 package com.kmp.vayone.ui.widget
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
@@ -37,10 +41,10 @@ fun MultiColoredText(
     modifier: Modifier = Modifier,
     defaultColor: Color = C_7E7B79,
     defaultFontSize: TextUnit = 12.sp,
-    defaultFontWeight: FontWeight = FontWeight.Normal
+    defaultFontWeight: FontWeight = FontWeight.Normal,
+    textAlign: TextAlign = TextAlign.Start // 新增参数
 ) {
     val annotatedString = buildAnnotatedString {
-        // 遍历全文每个字符，先全部加默认样式
         append(fullText)
         addStyle(
             style = SpanStyle(
@@ -52,14 +56,11 @@ fun MultiColoredText(
             end = fullText.length
         )
 
-        // 添加有特殊样式的部分
         coloredParts.forEachIndexed { index, part ->
             val startIndex = fullText.indexOf(part.text)
             if (startIndex >= 0) {
                 val endIndex = startIndex + part.text.length
-
                 pushStringAnnotation(tag = "PART$index", annotation = part.text)
-
                 addStyle(
                     style = SpanStyle(
                         color = part.color ?: defaultColor,
@@ -75,17 +76,21 @@ fun MultiColoredText(
         }
     }
 
-    ClickableText(
-        text = annotatedString,
-        modifier = modifier,
-        onClick = { offset ->
-            coloredParts.forEachIndexed { index, part ->
-                val startIndex = fullText.indexOf(part.text)
-                val endIndex = startIndex + part.text.length
-                if (startIndex >= 0 && offset in startIndex until endIndex) {
-                    part.onClick?.invoke()
+    Box(modifier = modifier.fillMaxWidth()) {
+        ClickableText(
+            text = annotatedString,
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { offset ->
+                coloredParts.forEachIndexed { index, part ->
+                    val startIndex = fullText.indexOf(part.text)
+                    val endIndex = startIndex + part.text.length
+                    if (startIndex >= 0 && offset in startIndex until endIndex) {
+                        part.onClick?.invoke()
+                    }
                 }
-            }
-        }
-    )
+            },
+            style = TextStyle(textAlign = textAlign) // 使用 TextStyle 设置对齐
+        )
+    }
 }
+

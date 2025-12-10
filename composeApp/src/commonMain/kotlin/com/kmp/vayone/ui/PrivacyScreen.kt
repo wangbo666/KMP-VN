@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,10 +27,12 @@ import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.exitApp
+import com.kmp.vayone.postAllPermissions
 import com.kmp.vayone.ui.widget.ColoredTextPart
 import com.kmp.vayone.ui.widget.MultiColoredText
 import com.kmp.vayone.ui.widget.TopBar
 import com.kmp.vayone.util.format
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import theme.C_40495C
@@ -47,6 +50,8 @@ fun PrivacyScreen(
 ) {
     var agreeCollection by remember { mutableStateOf(true) }
     var agreePrivacy by remember { mutableStateOf(true) }
+
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         modifier = Modifier.fillMaxSize()
@@ -169,8 +174,17 @@ fun PrivacyScreen(
                                     }
 
                                     else -> {
-                                        CacheManager.setAgreedPrivacy(true)
-                                        onNavigate(Screen.Home())
+                                        scope.launch {
+                                            postAllPermissions(
+                                                refuseAction = { isNever, _ ->
+                                                    CacheManager.setAgreedPrivacy(true)
+                                                    onNavigate(Screen.Home())
+                                                }
+                                            ) {
+                                                CacheManager.setAgreedPrivacy(true)
+                                                onNavigate(Screen.Home())
+                                            }
+                                        }
                                     }
                                 }
                             },

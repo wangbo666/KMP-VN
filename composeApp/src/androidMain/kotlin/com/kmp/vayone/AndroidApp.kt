@@ -16,7 +16,7 @@ class AndroidApp : Application() {
     override fun onCreate() {
         super.onCreate()
         appContext = applicationContext
-        
+
         // Initialize AppsFlyer
         _appsFlyerManager = AppsFlyerManager(appContext)
         _appsFlyerManager?.initAppsFlyer("gW2odiT5txpMruKrCQkrTb")
