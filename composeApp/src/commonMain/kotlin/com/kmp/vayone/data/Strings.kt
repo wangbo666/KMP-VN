@@ -345,7 +345,7 @@ object Strings {
         "users_notice" to "User %s has made a payment successfully",
         "home_pre" to "Pre-approval Denied",
         "home_pre_tips" to "The current merchant credit limit is insufficient. Please repat he oan to maintain good credit and try again on %s",
-        "home_refuse_times" to "You need to wait for %ds...",
+        "home_refuse_times" to "You need to wait for %ss...",
         "home_refuse" to "Amount is under evaluation",
         "home_refuse_tips" to "Your pre-approval is under review and is expected to take about one minute.Please be patient.",
         "refresh" to "Refresh",
@@ -423,6 +423,8 @@ object Strings {
         "you_can_select_multi" to "You can select multiple options",
         "re_up" to "Re-upload",
         "please_select_one" to "Please select at least one reason.",
+        "empty_home" to "Sorry, there are no praducts available to borrow \n" +
+                "Please maintain good credit and look forward to the next products！"
     )
 
     private val vi = mapOf(
@@ -765,7 +767,7 @@ object Strings {
         "users_notice" to "Người dùng %s đã thanh toán thành công",
         "home_pre" to "Từ chối duyệt trước",
         "home_pre_tips" to "Hạn mức tín dụng của thương gia hiện tại không đủ. Vui lòng thanh toán khoản vay để duy trì tín dụng tốt và thử lại vào %s",
-        "home_refuse_times" to "Bạn cần đợi %ds...",
+        "home_refuse_times" to "Bạn cần đợi %ss...",
         "home_refuse" to "Số tiền đang được đánh giá",
         "home_refuse_tips" to "Duyệt trước của bạn đang được xem xét, dự kiến khoảng một phút. Vui lòng kiên nhẫn.",
         "refresh" to "Làm mới",
@@ -843,6 +845,7 @@ object Strings {
         "you_can_select_multi" to "Bạn có thể chọn nhiều tùy chọn",
         "re_up" to "Tải lên lại",
         "please_select_one" to "Vui lòng chọn ít nhất một lý do.",
+        "empty_home" to "Xin lỗi, hiện không có sản phẩm nào để mượn. Vui lòng duy trì uy tín tốt và mong chờ các sản phẩm tiếp theo!"
     )
 
     fun setLang(lang: String) {

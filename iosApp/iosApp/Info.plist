@@ -4,10 +4,17 @@
     <dict>
         <key>CADisableMinimumFrameDurationOnPhone</key>
         <true/>
+
         <key>NSLocationWhenInUseUsageDescription</key>
         <string>Allow approximate location to improve KYC and service experience.</string>
+
         <key>NSAppTransportSecurity</key>
         <dict>
+            <!-- 全局允许 HTTP 请求，保证 iOS 可以加载所有网络图片 -->
+            <key>NSAllowsArbitraryLoads</key>
+            <true/>
+
+            <!-- 可选：特定域名配置 -->
             <key>NSExceptionDomains</key>
             <dict>
                 <key>vn-cash-api.cc006e2ab86b64d7e843cbb0d774deebb.cn-hangzhou.alicontainer.com</key>

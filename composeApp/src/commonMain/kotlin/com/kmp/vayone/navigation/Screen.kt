@@ -1,5 +1,7 @@
 package com.kmp.vayone.navigation
 
+import com.kmp.vayone.data.MessageBean
+
 sealed interface Screen {
     data object Splash : Screen
     data object Privacy : Screen
@@ -17,4 +19,7 @@ sealed interface Screen {
     data class SetPasswordSuccess(val title: String) : Screen
 
     data object BatchRepayment : Screen
+
+    data object Message : Screen
+    data class MessageDetail(val data: MessageBean) : Screen
 }

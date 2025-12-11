@@ -22,6 +22,8 @@ import com.kmp.vayone.ui.HomeScreen
 import com.kmp.vayone.ui.LoginScreen
 import com.kmp.vayone.ui.LogoutScreen
 import com.kmp.vayone.ui.LogoutSuccessScreen
+import com.kmp.vayone.ui.MessageDetailScreen
+import com.kmp.vayone.ui.MessageScreen
 import com.kmp.vayone.ui.PrivacyScreen
 import com.kmp.vayone.ui.SetPasswordScreen
 import com.kmp.vayone.ui.SetPasswordSuccessScreen
@@ -230,6 +232,14 @@ fun App() {
 
                     Screen.BatchRepayment -> BatchRepayment(onBack = { goBack() }) {
                         navigate(it)
+                    }
+
+                    Screen.Message -> MessageScreen(onBack = { goBack() }) {
+                        navigate(it)
+                    }
+
+                    is Screen.MessageDetail -> MessageDetailScreen(message = screen.data) {
+                        goBack()
                     }
                 }
                 ToastHost(

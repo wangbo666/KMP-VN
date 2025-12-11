@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,7 +67,6 @@ import vayone.composeapp.generated.resources.mine_privacy
 import vayone.composeapp.generated.resources.mine_right
 import vayone.composeapp.generated.resources.mine_set
 
-
 @Composable
 fun MinePage(
     toast: (show: Boolean, message: String) -> Unit = { _, _ -> },
@@ -78,7 +78,7 @@ fun MinePage(
     var isShowPaybackDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        viewModel.homeAuthResult.collect {
+        viewModel.paybackResult.collect {
             if (it?.showMultipleRepaySign == 1) {
                 navigate(Screen.BatchRepayment)
             } else {

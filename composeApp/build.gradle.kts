@@ -58,10 +58,16 @@ kotlin {
             implementation (libs.kotlinx.coroutines.core)
             implementation (libs.kotlinx.serialization.json)
 
+            implementation(libs.coil.compose)
+            implementation(libs.coil3.coil.network.ktor)
+            implementation(libs.accompanist.swiperefresh)
+
+
         }
         iosMain {
             dependencies {
                 implementation(libs.ktor.ktor.client.darwin)
+//                implementation("io.coil-kt.coil3:coil-network-url:3.0.0")
             }
         }
         commonTest.dependencies {

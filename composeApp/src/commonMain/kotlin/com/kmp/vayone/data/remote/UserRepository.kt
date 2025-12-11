@@ -1,13 +1,17 @@
 package com.kmp.vayone.data.remote
 
+import com.kmp.vayone.data.AuthBean
+import com.kmp.vayone.data.BannerBean
 import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.HomeBean
 import com.kmp.vayone.data.HomeLoanBean
 import com.kmp.vayone.data.LoginBean
+import com.kmp.vayone.data.MessagePageBean
 import com.kmp.vayone.data.ParamBean
 import com.kmp.vayone.data.ProductBean
 import com.kmp.vayone.data.SignBean
 import com.kmp.vayone.data.TogetherRepaymentBean
+import com.kmp.vayone.data.UserAuthBean
 
 // 使用示例
 object UserRepository {
@@ -62,6 +66,24 @@ object UserRepository {
         return networkManager.post(
             "api/finance/app/multiple/order/repay",
             ParamBean(orderNoList = orderList)
+        )
+    }
+
+    suspend fun getAuthStatus(): ApiResponse<UserAuthBean?> {
+        return networkManager.post("api/user/app/userAuth/detail")
+    }
+
+    suspend fun getAuthConfig(): ApiResponse<AuthBean?> {
+        return networkManager.get("api/user/app/application/config/auth/config")
+    }
+
+    suspend fun getBannerList(): ApiResponse<List<BannerBean>?> {
+        return networkManager.get("api/user/app/activity/list")
+    }
+
+    suspend fun getMessageList(): ApiResponse<MessagePageBean?> {
+        return networkManager.post(
+            "api/data/app/fcm/sendRecord/list", ParamBean(pageNum = 1, pageSize = 999)
         )
     }
 }
