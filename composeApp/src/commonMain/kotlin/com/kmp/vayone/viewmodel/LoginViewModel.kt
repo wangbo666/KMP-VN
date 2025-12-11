@@ -11,6 +11,7 @@ import com.kmp.vayone.getDeviceId
 import com.kmp.vayone.getPhoneBrand
 import com.kmp.vayone.getPhoneModel
 import com.kmp.vayone.mobileType
+import com.kmp.vayone.ui.widget.UiState
 import com.kmp.vayone.util.isLoggedIn
 import com.kmp.vayone.util.log
 import com.kmp.vayone.util.toMD5
@@ -40,15 +41,26 @@ class LoginViewModel : BaseViewModel() {
     val customer: StateFlow<HomeBean?> = _customer
 
     fun getCustomer() {
-        launch({ UserRepository.getHomeUnCertData() }, true) {
+        _loadingState.value = UiState.Loading
+        launch({ UserRepository.getHomeUnCertData() }, true, onError = {
+            _loadingState.value = UiState.Error()
+            true
+        }) {
+            _loadingState.value = UiState.Success
             _customer.value = it
         }
     }
 
+    private val _loadingState = MutableStateFlow<UiState>(UiState.Loading)
+    val loadingState: StateFlow<UiState> = _loadingState
+
     private val _sendOtpResult = MutableSharedFlow<Boolean?>()
     val sendOtpResult: SharedFlow<Boolean?> = _sendOtpResult
     fun sendOTP(phone: String) {
-        launch({ UserRepository.sendOTP(phone) }, true) {
+        launch(
+            { UserRepository.sendOTP(phone) },
+            true,
+            onError = { true }) {
             _sendOtpResult.tryEmit(it)
         }
     }
@@ -130,7 +142,11 @@ class LoginViewModel : BaseViewModel() {
     fun changePassword(code: String, password: String) {
         launch({
             UserRepository.updatePassword(
-                ParamBean(phone = CacheManager.getLoginInfo()?.phone, smsCode = code, newPasswd = password.toMD5())
+                ParamBean(
+                    phone = CacheManager.getLoginInfo()?.phone,
+                    smsCode = code,
+                    newPasswd = password.toMD5()
+                )
             )
         }, true) {
             _changeResult.tryEmit(it)

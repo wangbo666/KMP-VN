@@ -19,4 +19,10 @@ val C_6A707D = Color(0xFF6A707D)
 val C_132247 = Color(0xFF132247)
 val C_ED4744 = Color(0xFFED4744)
 
-val C_FEB201=Color(0xFFFEB201)
+val C_FEB201 = Color(0xFFFEB201)
+
+val C_190E30 = Color(0xFF190E30)
+val C_F8F4F0 = Color(0xFFF8F4F0)
+val C_E5E0DC = Color(0xFFE5E0DC)
+val C_FFD8AE=Color(0xFFFFD8AE)
+val C_3E4845=Color(0xFF3E4845)

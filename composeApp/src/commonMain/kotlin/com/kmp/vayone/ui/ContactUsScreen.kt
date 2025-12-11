@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
+import com.kmp.vayone.ui.widget.LoadingBox
 import com.kmp.vayone.ui.widget.TopBar
 import com.kmp.vayone.viewmodel.LoginViewModel
 import org.jetbrains.compose.resources.painterResource
@@ -49,7 +50,6 @@ import vayone.composeapp.generated.resources.contact_email
 import vayone.composeapp.generated.resources.contact_phone
 import vayone.composeapp.generated.resources.contact_tel
 
-
 @Composable
 fun ContactUsScreen(
     toast: (show: Boolean, message: String) -> Unit = { _, _ -> },
@@ -58,6 +58,7 @@ fun ContactUsScreen(
     val loginViewModel = remember { LoginViewModel() }
 
     val customerData by loginViewModel.customer.collectAsState()
+    val loadingState by loginViewModel.loadingState.collectAsState()
 
     LaunchedEffect(Unit) {
         loginViewModel.getCustomer()
@@ -73,41 +74,46 @@ fun ContactUsScreen(
             onBack()
         }
     }) {
-        Column(
+        LoadingBox(
+            state = loadingState,
             modifier = Modifier.fillMaxSize().background(white).padding(it)
         ) {
-            Text(
-                text = Strings["contact_detail"],
-                color = C_FC7700,
-                fontSize = 16.sp,
-                lineHeight = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 15.dp),
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = Strings["contact_detail_desc"],
-                color = C_7E7B79,
-                fontSize = 13.sp,
-                lineHeight = 18.sp,
-                fontWeight = FontWeight.Normal,
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-                    .padding(top = 7.dp, start = 20.dp, end = 20.dp, bottom = 4.dp),
-                textAlign = TextAlign.Center
-            )
-            customerData?.let { data ->
-                data.customerPhone?.let { it1 ->
-                    ContactUsItem(0, Strings["phone_number"], it1)
-                }
-                data.customerEmail?.let { it1 ->
-                    ContactUsItem(0, Strings["email"], it1)
-                }
-                data.customerConfigs?.forEach { it1 ->
-                    ContactUsItem(
-                        if (it1.buttonType == 2) 2 else 3,
-                        if (CacheManager.getLanguage() == "vi") it1.vernacularTitle else it1.enTitle,
-                        it1.content,
-                    )
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                Text(
+                    text = Strings["contact_detail"],
+                    color = C_FC7700,
+                    fontSize = 16.sp,
+                    lineHeight = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 15.dp),
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = Strings["contact_detail_desc"],
+                    color = C_7E7B79,
+                    fontSize = 13.sp,
+                    lineHeight = 18.sp,
+                    fontWeight = FontWeight.Normal,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                        .padding(top = 7.dp, start = 20.dp, end = 20.dp, bottom = 4.dp),
+                    textAlign = TextAlign.Center
+                )
+                customerData?.let { data ->
+                    data.customerPhone?.let { it1 ->
+                        ContactUsItem(0, Strings["phone_number"], it1)
+                    }
+                    data.customerEmail?.let { it1 ->
+                        ContactUsItem(0, Strings["email"], it1)
+                    }
+                    data.customerConfigs?.forEach { it1 ->
+                        ContactUsItem(
+                            if (it1.buttonType == 2) 2 else 3,
+                            if (CacheManager.getLanguage() == "vi") it1.vernacularTitle else it1.enTitle,
+                            it1.content,
+                        )
+                    }
                 }
             }
         }

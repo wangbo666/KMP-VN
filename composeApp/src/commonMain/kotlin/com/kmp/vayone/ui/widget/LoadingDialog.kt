@@ -35,7 +35,7 @@ fun LoadingDialog(
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator(
-                modifier = Modifier.size(40.dp),
+                modifier = Modifier.size(35.dp),
                 color = C_FC7700 // 橙色
             )
         }

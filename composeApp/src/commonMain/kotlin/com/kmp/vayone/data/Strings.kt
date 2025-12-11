@@ -5,7 +5,7 @@ object Strings {
     private var language = "en"
 
     private val en = mapOf(
-        "app_name" to "AppName",
+        "app_name" to "VayOne",
         "loading" to "loading…",
         "net_error" to "Please check if your network status is good",
         "welcome_to_app" to "Welcome to\n %s",

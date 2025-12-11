@@ -11,3 +11,7 @@ fun isCertPass(configs: Map<String, Pair<Boolean, String?>>): Boolean {
 }
 
 fun isLoggedIn(): Boolean = CacheManager.getToken().isNotBlank()
+
+fun String?.toAmountString(symbol: String?): String {
+    return "${this ?: ""}${symbol ?: ""}"
+}

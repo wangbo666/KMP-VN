@@ -15,4 +15,6 @@ sealed interface Screen {
     data object ContactUs : Screen
     data object SetPassword : Screen
     data class SetPasswordSuccess(val title: String) : Screen
+
+    data object BatchRepayment : Screen
 }

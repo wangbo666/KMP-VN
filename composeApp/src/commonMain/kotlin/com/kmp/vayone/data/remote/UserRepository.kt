@@ -2,18 +2,17 @@ package com.kmp.vayone.data.remote
 
 import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.HomeBean
+import com.kmp.vayone.data.HomeLoanBean
 import com.kmp.vayone.data.LoginBean
 import com.kmp.vayone.data.ParamBean
+import com.kmp.vayone.data.ProductBean
 import com.kmp.vayone.data.SignBean
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.withContext
+import com.kmp.vayone.data.TogetherRepaymentBean
 
 // 使用示例
 object UserRepository {
     private val networkManager = NetworkManager(
-        baseUrl = CacheManager.HTTP_HOST,
-        isDebug = CacheManager.isDebug
+        baseUrl = CacheManager.HTTP_HOST
     )
 
     suspend fun getSecret(): ApiResponse<SignBean?> {
@@ -47,7 +46,22 @@ object UserRepository {
         )
     }
 
-    suspend fun updatePassword(paramBean: ParamBean): ApiResponse<LoginBean?>{
-        return networkManager.post("api/user/app/password/update",paramBean)
+    suspend fun updatePassword(paramBean: ParamBean): ApiResponse<LoginBean?> {
+        return networkManager.post("api/user/app/password/update", paramBean)
+    }
+
+    suspend fun getHomeAuthData(): ApiResponse<HomeLoanBean?> {
+        return networkManager.post("api/loan/app/index/v3")
+    }
+
+    suspend fun getTogetherRepaymentList(): ApiResponse<List<ProductBean>?> {
+        return networkManager.post("api/finance/app/multiple/order/list")
+    }
+
+    suspend fun togetherRepayment(orderList: List<String>): ApiResponse<TogetherRepaymentBean?> {
+        return networkManager.post(
+            "api/finance/app/multiple/order/repay",
+            ParamBean(orderNoList = orderList)
+        )
     }
 }

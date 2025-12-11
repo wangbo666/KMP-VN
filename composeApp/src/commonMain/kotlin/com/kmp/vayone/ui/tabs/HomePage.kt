@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 
 
 @Composable
-fun HomePage() {
+fun HomePage(
+    toast: (show: Boolean, message: String) -> Unit = { _, _ -> },) {
     Text("Home")
 }

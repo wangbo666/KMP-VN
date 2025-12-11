@@ -45,6 +45,7 @@ import vayone.composeapp.generated.resources.order_select
 @Composable
 fun HomeScreen(
     selectedIndex: Int,
+    toast: (show: Boolean, message: String) -> Unit = { _, _ -> },
     onTabChange: (Int) -> Unit,
     navigate: (Screen) -> Unit,
 ) {
@@ -73,9 +74,9 @@ fun HomeScreen(
                 .padding(bottom = it.calculateBottomPadding())
         ) {
             when (selectedIndex) {
-                0 -> HomePage()
-                1 -> OrderPage()
-                2 -> MinePage(navigate)
+                0 -> HomePage(toast)
+                1 -> OrderPage(toast)
+                2 -> MinePage(toast, navigate)
             }
         }
     }

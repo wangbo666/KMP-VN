@@ -1,5 +1,7 @@
 package com.kmp.vayone.data.remote
 
+import com.kmp.vayone.data.CacheManager
+import com.kmp.vayone.util.log
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
@@ -11,7 +13,7 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
-class HttpClientProvider(private val isDebug: Boolean = false) {
+class HttpClientProvider {
 
     val client = HttpClient {
         // JSON 序列化
@@ -22,17 +24,17 @@ class HttpClientProvider(private val isDebug: Boolean = false) {
                 ignoreUnknownKeys = true
                 encodeDefaults = true
                 explicitNulls = false         // 不序列化 null 值
+                coerceInputValues = true  // ⭐⭐ 自动把 null 转换成默认值
             })
         }
         expectSuccess = false
 
         // 日志插件
-        if (isDebug) {
+        if (CacheManager.isDebug) {
             install(Logging) {
                 logger = object : Logger {
                     override fun log(message: String) {
-//                        LogUtil.e("HttpIt -> $message")
-                        println("HttpIt -> $message")
+                        ("HttpIt -> $message").log()
                     }
                 }
                 level = LogLevel.ALL

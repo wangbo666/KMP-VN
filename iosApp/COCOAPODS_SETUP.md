@@ -68,3 +68,5 @@ pod update AppsFlyerFramework
 - 团队成员也需要运行 `pod install`
 - 永远使用 `.xcworkspace` 打开项目
 
+
+

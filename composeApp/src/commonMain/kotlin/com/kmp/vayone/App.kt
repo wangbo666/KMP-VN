@@ -14,6 +14,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.AboutUsScreen
+import com.kmp.vayone.ui.BatchRepayment
 import com.kmp.vayone.ui.ChangePasswordScreen
 import com.kmp.vayone.ui.ContactUsScreen
 import com.kmp.vayone.ui.FeedbackScreen
@@ -159,6 +160,10 @@ fun App() {
 
                     is Screen.Home -> {
                         HomeScreen(
+                            toast = { show, toast ->
+                                showToast = show
+                                toastMessage = toast
+                            },
                             selectedIndex = homeTabIndex,
                             onTabChange = { homeTabIndex = it })
                         { navigate(it) }
@@ -220,6 +225,10 @@ fun App() {
                     is Screen.SetPasswordSuccess -> SetPasswordSuccessScreen(
                         title = screen.title,
                     ) {
+                        navigate(it)
+                    }
+
+                    Screen.BatchRepayment -> BatchRepayment(onBack = { goBack() }) {
                         navigate(it)
                     }
                 }

@@ -24,9 +24,8 @@ import kotlin.String
 
 class NetworkManager(
     private val baseUrl: String = CacheManager.HTTP_HOST,
-    val isDebug: Boolean = CacheManager.isDebug
 ) {
-    val httpClient = HttpClientProvider(isDebug).client
+    val httpClient = HttpClientProvider().client
 
     // GET 请求
     suspend inline fun <reified T> get(

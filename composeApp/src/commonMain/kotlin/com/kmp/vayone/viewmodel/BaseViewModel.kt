@@ -4,7 +4,9 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kmp.vayone.data.Strings
 import com.kmp.vayone.data.remote.ApiResponse
+import com.kmp.vayone.ui.widget.UiState
 import com.kmp.vayone.util.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -16,7 +18,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 open class BaseViewModel : ViewModel() {
-
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
     fun showLoading() {

@@ -13,6 +13,8 @@ expect fun getPhoneBrand(): String
 
 expect suspend fun getLastKnownLocation(): Pair<Double, Double>?
 
+expect fun calculateAmount(list: List<String?>?): String
+
 /**
  * 跨平台设备唯一标识符
  * 特点：卸载应用后保持不变

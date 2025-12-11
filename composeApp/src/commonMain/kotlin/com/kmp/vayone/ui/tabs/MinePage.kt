@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,11 +39,14 @@ import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.widget.AutoSizeText
+import com.kmp.vayone.viewmodel.MainViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import theme.C_190E30
 import theme.C_2B2621
 import theme.C_524F4C
 import theme.C_FC7700
+import theme.C_FEB201
 import theme.C_FFBB48
 import theme.C_FFD64F
 import theme.C_FFF4E6
@@ -65,9 +69,29 @@ import vayone.composeapp.generated.resources.mine_set
 
 @Composable
 fun MinePage(
+    toast: (show: Boolean, message: String) -> Unit = { _, _ -> },
     navigate: (Screen) -> Unit,
 ) {
+    val viewModel = remember { MainViewModel() }
+
     var isShowLanguageDialog by remember { mutableStateOf(false) }
+    var isShowPaybackDialog by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        viewModel.homeAuthResult.collect {
+            if (it?.showMultipleRepaySign == 1) {
+                navigate(Screen.BatchRepayment)
+            } else {
+                isShowPaybackDialog = true
+            }
+        }
+    }
+    LaunchedEffect(Unit) {
+        viewModel.errorEvent.collect { event ->
+            toast(event.showToast, event.message)
+        }
+    }
+
     Column(
         modifier = Modifier.fillMaxWidth()
             .wrapContentHeight()
@@ -235,7 +259,7 @@ fun MinePage(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() },
                             onClick = {
-
+                                viewModel.getHomeAuthData(true)
                             }
                         ),
                     text = Strings["pay_back_now"],
@@ -403,6 +427,9 @@ fun MinePage(
         ChooseLanguageDialog(isShowLanguageDialog, navigate) {
             isShowLanguageDialog = false
         }
+        PaybackDialog(isShowPaybackDialog, navigate) {
+            isShowPaybackDialog = false
+        }
     }
 }
 
@@ -498,5 +525,54 @@ fun ChooseLanguageDialog(
 @Preview
 @Composable
 fun PreMine() {
-    ChooseLanguageDialog(true, {}) {}
+    PaybackDialog(true, {}) {}
+}
+
+@Composable
+fun PaybackDialog(
+    show: Boolean,
+    navigate: (Screen) -> Unit,
+    onDismiss: () -> Unit
+) {
+    if (!show) return
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier.fillMaxWidth().wrapContentHeight()
+                .background(white, RoundedCornerShape(16.dp))
+        ) {
+            Text(
+                textAlign = TextAlign.Center,
+                text = Strings["empty_repay"],
+                color = C_190E30,
+                fontWeight = FontWeight.Normal,
+                fontSize = 14.sp,
+                lineHeight = 20.sp,
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 48.dp)
+            )
+            Text(
+                text = Strings["borrow_now"],
+                modifier = Modifier
+                    .padding(start = 32.dp, end = 32.dp, top = 28.dp, bottom = 24.dp)
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .clip(RoundedCornerShape(30.dp))
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = listOf(
+                                C_FC7700,
+                                C_FEB201
+                            ),
+                        ), RoundedCornerShape(30.dp)
+                    ).clickable {
+                        onDismiss()
+                        navigate(Screen.Home())
+                    },
+                color = white,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                lineHeight = 48.sp,
+            )
+        }
+    }
 }

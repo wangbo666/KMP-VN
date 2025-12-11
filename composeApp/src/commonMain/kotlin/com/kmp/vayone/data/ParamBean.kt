@@ -85,7 +85,7 @@ data class ParamBean(
 
 @Serializable
 data class RelativesBean(
-    val relatives: Int?,
+    val relatives: Int? = null,
     val relativesName: String? = null,
     val relativesMobile: String? = null,
 )
@@ -104,16 +104,16 @@ data class HomeBean(
 )
 
 @Serializable
-data class SignBean(val verifySignSecret: String?)
+data class SignBean(val verifySignSecret: String? = "")
 
 @Serializable
 data class LoginBean(
-    val token: String,
-    val id: Long,
-    val phone: String,
+    val token: String = "",
+    val id: Long = 0L,
+    val phone: String = "",
     val appId: Long?,
     val channelId: Long?,
-    val passwdSign: Int,
+    val passwdSign: Int = 0,
 )
 
 @Serializable
@@ -148,14 +148,16 @@ data class UserAuthBean(
         return bankCardState == "30"
     }
 }
+
 @Serializable
 data class KycInfoBean(
-    val id: Long,
-    val userId: Long,
+    val id: Long = 0,
+    val userId: Long = 0,
     val frontImageUrl: String? = null,
     val backImageUrl: String? = null,
     val liveImageUrl: String? = null,
 )
+
 @Serializable
 data class PersonalInfoEnumBean(
     val gender: MutableList<EnumBean>? = null,
@@ -164,6 +166,7 @@ data class PersonalInfoEnumBean(
     val purpose: MutableList<EnumBean>? = null,
     val education: MutableList<EnumBean>? = null,
 )
+
 @Serializable
 data class WorkInfoEnumBean(
     val relatives: MutableList<EnumBean>? = null,
@@ -172,19 +175,21 @@ data class WorkInfoEnumBean(
     val jobnature: MutableList<EnumBean>? = null,
     val staffSize: MutableList<EnumBean>? = null,
 )
+
 @Serializable
 data class EnumBean(
     val id: Int = 0,
     val state: Int = 0,
-    val info: String,
+    val info: String = "",
 )
+
 @Serializable
 data class PersonalInfoBean(
-    val id: Long,
-    val userId: Long,
+    val id: Long = 0,
+    val userId: Long = 0,
     val firstName: String? = null,
     val marryState: Int?,
-    val sex: Int?,
+    val sex: Int? = 0,
     val birthDate: String?,
     val purpose: Int?,
     val education: Int?,
@@ -208,15 +213,17 @@ data class PersonalInfoBean(
     val email: String? = null,
     val zaloAccount: String? = null,
 )
+
 @Serializable
 data class AddressBean(
-    val id: Int,
-    val parentId: Long,
+    val id: Int = 0,
+    val parentId: Long = 0,
     val name: String? = null,
     val otherName: String? = null,
-    val type: Int,
-    val countryId: Int,
+    val type: Int = 0,
+    val countryId: Int = 0,
 )
+
 @Serializable
 data class CallLogBean(
     var name: String? = "",
@@ -225,10 +232,11 @@ data class CallLogBean(
     var lastCallTime: String? = "",
     var callTime: Int = 0,
 )
+
 @Serializable
 data class ContactsInfoBean(
-    val id: Long,
-    val userId: Long,
+    val id: Long = 0,
+    val userId: Long = 0,
     val companyName: String? = null,
     val salaryRange: Int? = null,
     val jobNature: Int? = null,
@@ -255,9 +263,10 @@ data class ContactsInfoBean(
     val industryStr: String? = null,
     val companyAddress: String? = null,
 )
+
 @Serializable
 data class PayChannelBean(
-    val id: Int,
+    val id: Int = 0,
     var status: Int = 0,
     var bankCode: String? = null,
     var bankName: String? = null,
@@ -266,6 +275,7 @@ data class PayChannelBean(
     var isSelect: Boolean = false,
     var countryId: Long? = null,
 )
+
 @Serializable
 data class BankCardBean(
     var id: Long? = 0,
@@ -293,6 +303,7 @@ data class BankCardBean(
     val branchName: String? = null,
     val bankAccount: String? = null,
 )
+
 @Serializable
 data class HomeLoanBean(
     val customerPhone: String? = null,
@@ -300,7 +311,7 @@ data class HomeLoanBean(
     val calmFlag: Boolean = false,
     val enableLoanStr: String? = null,
     val loanAmountRange: String? = null,
-    val bankErrorFlag: Boolean,
+    val bankErrorFlag: Boolean = false,
     val showMultipleRepaySign: Int = 0,
     val showProducts: List<ProductBean>? = null,
     val repayProducts: List<ProductBean>? = null,
@@ -320,9 +331,10 @@ data class HomeLoanBean(
     val usedAmount: String? = null,
     val userCreditStatus: Int? = null,
 )
+
 @Serializable
 data class ProductBean(
-    val productId: Long,
+    val productId: Long = 0,
     val productName: String? = null,
     val minLoanAmount: String? = null,
     val maxLoanAmount: String? = null,
@@ -344,7 +356,7 @@ data class ProductBean(
     val orderId: Long? = null,
     val orderNo: String? = null,
     val loanAmount: String? = null,
-    var pushStatus: Int,
+    var pushStatus: Int = 0,
     val pushMessage: String? = null,
     val repayTimeStr: String? = null,
     val orderStatus: Int? = null,
@@ -361,7 +373,7 @@ data class ProductBean(
     val productInstallmentPlanDTOList: List<ProductDetailBean>? = null,
     var isFillBank: Boolean = false,
     val loanTermConfigDTOList: List<ProductDetailBean>? = null,
-)  {
+) {
     fun isNormalProduct(): Boolean {
         return showConditionTypeSign == null || showConditionTypeSign == "0"
     }
@@ -400,7 +412,7 @@ data class ProductPlanBean(
     val needRepayAfterHandleAmount: String? = null,
     var isSelect: Boolean = false,
     var isExpend: Boolean = false,
-)  {
+) {
     fun isDueAndSettle(): Boolean {
         return when (planStatus) {
             34, 35, 40, 41, 42, 43 -> true
@@ -470,7 +482,7 @@ data class ProductDetailBean(
     val bankInfoId: Long? = null,
     val isSign: Int? = null,
     val isNew: Int? = null,
-    var canApply: Boolean,
+    var canApply: Boolean = false,
     val loanTermList: List<LoanTermBean>? = null,
     val currencySymbol: String? = null,
     val bankInfoPayOutFailSign: Boolean = false,
@@ -484,7 +496,7 @@ data class ProductDetailBean(
 
 @Serializable
 data class ProductFeeBean(
-    val productId: Long,
+    val productId: Long = 0,
     val name: String? = null,
     val nameConfig: String? = null,
     val amount: String? = null,
@@ -579,6 +591,7 @@ data class MessageBean(
     val unreadMark: Boolean = false,
     val unreadCount: Int = 0,
 )
+
 @Serializable
 data class HomeConfigBean(
     val enTitle: String? = null,
@@ -586,6 +599,7 @@ data class HomeConfigBean(
     val content: String? = null,
     val buttonType: Int? = null,
 )
+
 @Serializable
 data class AuthBean(
     var src: Int = 0,
@@ -594,6 +608,7 @@ data class AuthBean(
     var isCertified: Boolean = false,
     val authConfig: String? = "",
 )
+
 @Serializable
 data class BannerBean(
     val id: Long? = null,
@@ -602,6 +617,7 @@ data class BannerBean(
     val activityPicUrl: String? = null,
     val activityH5Url: String? = null,
 )
+
 @Serializable
 data class TogetherRepaymentBean(
     val payUrl: String? = null,
@@ -614,9 +630,9 @@ data class TogetherRepaymentBean(
 //    private int FACE;       //FACE      人脸      0-不需要上传 1-拍照（自拍） 2-活体
 @Serializable
 data class KycConfigBean(
-    val KYC_BACK: Int,
-    val FACE_COMPARE: Int,
-    val KYC_FRONT: Int,
-    val FACE: Int,
+    val KYC_BACK: Int = 0,
+    val FACE_COMPARE: Int = 0,
+    val KYC_FRONT: Int = 0,
+    val FACE: Int = 0,
 )
 

@@ -54,7 +54,22 @@ actual fun getPhoneBrand(): String = "Apple"
 actual suspend fun getDeviceId(): String {
     return withContext(Dispatchers.IO) {
         UIDevice.currentDevice.identifierForVendor?.UUIDString ?: ""
-    }.replace("-","")
+    }.replace("-", "")
+}
+
+actual fun calculateAmount(list: List<String?>?): String {
+    val total = list?.fold(0.0) { acc, it ->
+        acc + (it?.toDoubleOrNull() ?: 0.0)
+    } ?: 0.0
+
+    val formatter = NSNumberFormatter().apply {
+        numberStyle = NSNumberFormatterDecimalStyle
+        minimumFractionDigits = 0u
+        maximumFractionDigits = 2u
+        groupingSeparator = ","
+    }
+
+    return formatter.stringFromNumber(NSNumber(total)) ?: "0"
 }
 
 @OptIn(kotlinx.cinterop.ExperimentalForeignApi::class)
