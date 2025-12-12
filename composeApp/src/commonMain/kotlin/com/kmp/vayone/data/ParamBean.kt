@@ -4,6 +4,33 @@ import com.kmp.vayone.data.CacheManager.APPCODE
 import com.kmp.vayone.util.isCertPass
 import kotlinx.serialization.Serializable
 
+const val ORDER_STATUS_NOT = -1
+const val ORDER_STATUS_SUCCESS = 10
+const val ORDER_STATUS_REVIEW = 11//预审中
+const val ORDER_STATUS_AUTO = 12//自动审核中
+const val ORDER_STATUS_MANUAL = 13//人工复审中
+const val ORDER_STATUS_AUTO_FAIL = 14
+const val ORDER_STATUS_MANUAL_FAIL = 15
+const val ORDER_STATUS_AUTO_SUCCESS = 16
+const val ORDER_STATUS_MANUAL_SUCCESS = 17
+const val ORDER_STATUS_BANK_VERIFIED = 18
+const val ORDER_STATUS_SIGNED = 20
+const val ORDER_STATUS_CASH = 21
+const val ORDER_STATUS_INVALID = 22
+const val ORDER_STATUS_CLOSE = 23
+const val ORDER_STATUS_PAYMENT_ING = 24
+const val ORDER_STATUS_PAYMENT_FAIL = 25
+const val ORDER_STATUS_PAYMENT_PENDING = 30//待还款
+const val ORDER_STATUS_PAYMENT_PROCESS = 31//还款处理中
+const val ORDER_STATUS_IN_RENEWAL = 32
+const val ORDER_STATUS_IN_RENEWAL_PROCESS = 33
+const val ORDER_STATUS_OVERDUE = 34//逾期
+const val ORDER_STATUS_BAD_DEBTS = 35
+const val ORDER_STATUS_SETTLE = 40
+const val ORDER_STATUS_SETTLE_REDUCE = 41
+const val ORDER_STATUS_SETTLE_RENEWAL = 42
+const val ORDER_STATUS_SETTLE_REDUCE_OR_RENEWAL = 43
+
 
 @Serializable
 data class ParamBean(
@@ -381,6 +408,43 @@ data class ProductBean(
 
     fun isAddInfoProduct(): Boolean {
         return showConditionTypeSign == "1"
+    }
+
+    fun isPendingCash(): Boolean {
+        return when (orderStatus) {
+            ORDER_STATUS_SUCCESS,
+            ORDER_STATUS_REVIEW,
+            ORDER_STATUS_AUTO,
+            ORDER_STATUS_MANUAL,
+            ORDER_STATUS_CASH,
+            ORDER_STATUS_PAYMENT_ING,
+            ORDER_STATUS_PAYMENT_FAIL -> true
+
+            else -> false
+        }
+    }
+
+    fun isRepaymentProcessing(): Boolean {
+        return orderStatus == ORDER_STATUS_PAYMENT_PROCESS
+    }
+
+    fun isPendingRepayment(): Boolean {
+        return when (orderStatus) {
+            ORDER_STATUS_PAYMENT_PENDING,
+            ORDER_STATUS_IN_RENEWAL,
+            ORDER_STATUS_IN_RENEWAL_PROCESS -> true
+
+            else -> false
+        }
+    }
+
+    fun isDue(): Boolean {
+        return when (orderStatus) {
+            ORDER_STATUS_OVERDUE,
+            ORDER_STATUS_BAD_DEBTS -> true
+
+            else -> false
+        }
     }
 }
 

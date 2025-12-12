@@ -108,9 +108,11 @@ fun App() {
 
     MaterialTheme {
         Box {
-//            BackHandler(enabled = backStack.size > 1) {
-//                goBack()
-//            }
+            if (mobileType() != "2") {
+//                BackHandler(enabled = backStack.size > 1) {
+//                    goBack()
+//                }
+            }
             AnimatedContent(
                 targetState = currentScreen,
                 transitionSpec = {

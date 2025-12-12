@@ -104,8 +104,7 @@ import vayone.composeapp.generated.resources.product_icon
 fun HomePage(
     toast: (show: Boolean, message: String) -> Unit = { _, _ -> },
     navigate: (Screen) -> Unit,
-
-    ) {
+) {
     val mainViewModel = remember { MainViewModel() }
     val loadingState by mainViewModel.loadingState.collectAsState()
     val unAuthData by mainViewModel.homeUnAuthResult.collectAsState()
@@ -115,11 +114,6 @@ fun HomePage(
     var isShowPaymentFail by remember { mutableStateOf(false) }
     val homeProducts by mainViewModel.homeProducts.collectAsState()
 
-    LaunchedEffect(Unit) {
-        mainViewModel.errorEvent.collect { event ->
-            toast(event.showToast, event.message)
-        }
-    }
     LaunchedEffect(Unit) {
         mainViewModel.errorEvent.collect { event ->
             toast(event.showToast, event.message)
@@ -388,7 +382,7 @@ fun HomeUnAuthTop(item: HomeBean = HomeBean()) {
                 ).align(Alignment.BottomCenter)
         ) {
             Column(
-                modifier = Modifier.padding(start = 32.dp).fillMaxHeight()
+                modifier = Modifier.weight(3f).padding(start = 22.dp).fillMaxHeight()
             ) {
                 Text(
                     modifier = Modifier.padding(top = 13.dp),
@@ -407,10 +401,10 @@ fun HomeUnAuthTop(item: HomeBean = HomeBean()) {
                 )
             }
             Column(
-                modifier = Modifier.padding(start = 25.dp, end = 22.dp).fillMaxHeight().weight(1f)
+                modifier = Modifier.padding(start = 15.dp, end = 16.dp).fillMaxHeight().weight(2.5f)
             ) {
                 Row(
-                    modifier = Modifier.padding(top = 13.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 13.dp),
                 ) {
                     Text(
                         text = item.loanTerm ?: "",
@@ -422,7 +416,7 @@ fun HomeUnAuthTop(item: HomeBean = HomeBean()) {
                     Text(
                         text = Strings["days"],
                         color = C_2D3C52,
-                        fontSize = 16.sp,
+                        fontSize = 15.sp,
                         fontWeight = FontWeight.Normal,
                         lineHeight = 16.sp,
                     )
@@ -669,7 +663,7 @@ fun PreDenied(isShow: Boolean, date: String) {
 @Preview
 @Composable
 fun PreHomePage() {
-    ProductItem(ProductBean(), {}) {}
+    ProductItem(ProductBean(),{}){}
 }
 
 @Composable
@@ -950,15 +944,16 @@ fun ProductItem(
         if (item.showConditionTypeSign != "1") {
             Text(
                 text = Strings["apply"],
-                fontSize = 18.sp,
+                fontSize = 14.sp,
                 color = white,
-                lineHeight = 30.sp,
+                lineHeight = 32.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.align(Alignment.TopEnd)
                     .padding(end = 10.dp, top = 40.dp)
+                    .height(32.dp)
                     .clip(RoundedCornerShape(30.dp))
                     .background(C_FC7700, RoundedCornerShape(30.dp))
-                    .padding(horizontal = 28.dp)
+                    .padding(horizontal = 18.dp)
                     .clickable(enabled = item.canApply) {
                         onClick()
                     }

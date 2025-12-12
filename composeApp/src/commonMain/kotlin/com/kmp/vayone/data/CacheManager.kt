@@ -115,3 +115,5 @@ object CacheManager {
         if (isDebug) "http://vn-cash-api.cc006e2ab86b64d7e843cbb0d774deebb.cn-hangzhou.alicontainer.com/"
         else "https://log.vayone-fast.com/logstores/survey-prod/"
 }
+
+

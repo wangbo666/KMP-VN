@@ -133,8 +133,6 @@ fun Banner(
 
 @Composable
 fun BannerItem(item: BannerBean, modifier: Modifier = Modifier) {
-    // 用你自己的图片加载：Coil、GlideCompose 均可
-    "picUrl:${item.activityPicUrl}".log()
     AsyncImage(
         model = ImageRequest.Builder(LocalPlatformContext.current)
             .data(item.activityPicUrl)

@@ -145,7 +145,7 @@ fun HomeScreen(
             ) {
                 when (selectedIndex) {
                     0 -> HomePage(toast, navigate)
-                    1 -> OrderPage(toast)
+                    1 -> OrderPage(toast, navigate)
                     2 -> MinePage(toast, navigate)
                 }
             }
