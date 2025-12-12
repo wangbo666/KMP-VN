@@ -111,23 +111,21 @@ class MainViewModel : BaseViewModel() {
             _loadingState.value = UiState.Error()
             true
         }) {
-            _messageList.value = listOf(
-                MessageBean(
-                    0,
-                    theme = "Title",
-                    content = "Content",
-                    createTime = "sssss",
-                    readStatus = 0
-                ),
-                MessageBean(
-                    0,
-                    theme = "Title",
-                    content = "Content",
-                    createTime = "sssss",
-                    readStatus = 0
-                )
-            )
+            _messageList.value = it?.list ?: arrayListOf()
             _loadingState.value = UiState.Success
+        }
+    }
+
+    fun markMessagesRead(ids: List<Long>) {
+        launch({ UserRepository.markMessagesRead(ids) }) {
+            val newList = _messageList.value?.map { msg ->
+                if (ids.contains(msg.id)) {
+                    msg.copy(readStatus = 1)  // 更新
+                } else {
+                    msg                    // 不更新
+                }
+            }
+            _messageList.value = newList
         }
     }
 }

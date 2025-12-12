@@ -3,6 +3,7 @@ package com.kmp.vayone.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kmp.vayone.data.MessageBean
@@ -31,7 +34,6 @@ import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.widget.LoadingBox
 import com.kmp.vayone.ui.widget.TopBar
-import com.kmp.vayone.ui.widget.UiState
 import com.kmp.vayone.viewmodel.MainViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -40,6 +42,8 @@ import theme.C_B4B0AD
 import theme.C_ED190E
 import theme.white
 import vayone.composeapp.generated.resources.Res
+import vayone.composeapp.generated.resources.empty_message
+import vayone.composeapp.generated.resources.empty_product
 import vayone.composeapp.generated.resources.message_icon
 
 @Composable
@@ -67,16 +71,22 @@ fun MessageScreen(
         }
     }) { paddingValues ->
         LoadingBox(
-            UiState.Success, modifier = Modifier.background(white)
+            loadingState, modifier = Modifier.background(white)
                 .padding(paddingValues), onRetry = {
                 viewModel.getMessageList()
             }
         ) {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                item {
-                    messageList?.forEach {
-                        MessageItem(it) {
-                            it.readStatus = 1
+            if (messageList.isNullOrEmpty()) {
+                EmptyMessage()
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    item {
+
+                        messageList?.forEach {
+                            MessageItem(it) {
+                                navigate(Screen.MessageDetail(it))
+                                viewModel.markMessagesRead(listOf(it.id ?: 0))
+                            }
                         }
                     }
                 }
@@ -143,10 +153,31 @@ fun MessageItem(
     }
 }
 
+@Composable
+fun EmptyMessage() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center
+    ) {
+        Image(
+            painter = painterResource(Res.drawable.empty_message),
+            contentDescription = null,
+            modifier = Modifier.size(155.dp).align(Alignment.CenterHorizontally)
+        )
+        Text(
+            text = Strings["empty_message"],
+            fontSize = 14.sp,
+            color = C_B4B0AD,
+            fontWeight = FontWeight.Normal,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                .padding(top = 9.dp, bottom = 16.dp),
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
 @Preview
 @Composable
 fun PreMessage() {
-    MessageScreen({}) {
-
-    }
+    EmptyMessage()
 }

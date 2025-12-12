@@ -19,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +35,7 @@ import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.widget.ConfirmDialog
+import com.kmp.vayone.ui.widget.LoadingDialog
 import com.kmp.vayone.ui.widget.TopBar
 import com.kmp.vayone.viewmodel.LoginViewModel
 import org.jetbrains.compose.resources.painterResource
@@ -58,8 +60,9 @@ fun LogoutScreen(
     onBack: () -> Unit,
     onNavigate: (Screen) -> Unit,
 ) {
-
     val loginViewModel = remember { LoginViewModel() }
+    val isLoading by loginViewModel.isLoading.collectAsState()
+
     LaunchedEffect(Unit) {
         loginViewModel.logoutResult.collect {
             CacheManager.setToken("")
@@ -123,7 +126,7 @@ fun LogoutScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        text = Strings["close_app_name"],
+                        text = Strings["account_number"],
                         color = C_6A707D,
                         fontSize = 13.sp,
                         lineHeight = 20.sp,
@@ -131,7 +134,7 @@ fun LogoutScreen(
                             .align(Alignment.CenterVertically)
                     )
                     Text(
-                        text = Strings["app_name"],
+                        text = CacheManager.getLoginInfo()?.phone ?: "",
                         color = C_132247,
                         fontSize = 14.sp,
                         lineHeight = 20.sp,
@@ -215,6 +218,7 @@ fun LogoutScreen(
                 }
             }
         }
+        LoadingDialog(isLoading)
     }
 }
 

@@ -40,6 +40,7 @@ import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.widget.AutoSizeText
+import com.kmp.vayone.ui.widget.LoadingDialog
 import com.kmp.vayone.viewmodel.MainViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -76,6 +77,7 @@ fun MinePage(
 
     var isShowLanguageDialog by remember { mutableStateOf(false) }
     var isShowPaybackDialog by remember { mutableStateOf(false) }
+    val isLoading by viewModel.isLoading.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.paybackResult.collect {
@@ -430,6 +432,7 @@ fun MinePage(
         PaybackDialog(isShowPaybackDialog, navigate) {
             isShowPaybackDialog = false
         }
+        LoadingDialog(isLoading)
     }
 }
 

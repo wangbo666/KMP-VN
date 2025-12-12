@@ -81,6 +81,7 @@ data class ParamBean(
     val orderNo: String? = null,
     val planNumList: List<Int?>? = null,
     val imgType: String? = null,
+    val recordIdList: List<Long>? = null,
 )
 
 @Serializable

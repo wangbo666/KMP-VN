@@ -86,4 +86,11 @@ object UserRepository {
             "api/data/app/fcm/sendRecord/list", ParamBean(pageNum = 1, pageSize = 999)
         )
     }
+
+    suspend fun markMessagesRead(recordIdList: List<Long>): ApiResponse<String?> {
+        return networkManager.post(
+            "api/data/app/fcm/sendRecord/update",
+            ParamBean(recordIdList = recordIdList)
+        )
+    }
 }
