@@ -1,12 +1,14 @@
 package com.kmp.vayone.data.remote
 
 import com.kmp.vayone.data.AuthBean
+import com.kmp.vayone.data.BankCardBean
 import com.kmp.vayone.data.BannerBean
 import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.HomeBean
 import com.kmp.vayone.data.HomeLoanBean
 import com.kmp.vayone.data.LoginBean
 import com.kmp.vayone.data.MessagePageBean
+import com.kmp.vayone.data.OrderBean
 import com.kmp.vayone.data.ParamBean
 import com.kmp.vayone.data.ProductBean
 import com.kmp.vayone.data.SignBean
@@ -92,5 +94,21 @@ object UserRepository {
             "api/data/app/fcm/sendRecord/update",
             ParamBean(recordIdList = recordIdList)
         )
+    }
+
+    suspend fun getOrderList(): ApiResponse<List<OrderBean>?> {
+        return networkManager.post("api/loan/app/order/oldList")
+    }
+
+    suspend fun getBankcardList(): ApiResponse<List<BankCardBean>?> {
+        return networkManager.post("api/user/app/bank/myCard")
+    }
+
+    suspend fun setCardDefault(id: String?): ApiResponse<String?> {
+        return networkManager.post("api/user/app/bank/setDefault", ParamBean(bankInfoId = id))
+    }
+
+    suspend fun unbindCard(id: String?): ApiResponse<String?> {
+        return networkManager.post("api/user/app/bank/unbind", ParamBean(bankInfoId = id))
     }
 }

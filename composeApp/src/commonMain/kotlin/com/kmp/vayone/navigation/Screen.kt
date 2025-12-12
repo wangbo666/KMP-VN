@@ -17,9 +17,14 @@ sealed interface Screen {
     data object ContactUs : Screen
     data object SetPassword : Screen
     data class SetPasswordSuccess(val title: String) : Screen
-
     data object BatchRepayment : Screen
-
     data object Message : Screen
     data class MessageDetail(val data: MessageBean) : Screen
+    data object Cert : Screen
+    data class KycCert(val isCert: Boolean) : Screen
+    data class PersonalCert(val isCert: Boolean) : Screen
+    data class BankCert(val isCert: Boolean) : Screen
+    data class ServiceCert(val isCert: Boolean) : Screen
+    data object OrderCenter : Screen
+    data object AccountCenter : Screen
 }

@@ -637,7 +637,121 @@ data class OrderBean(
     val actualNeedRepayAmount: String? = null,
     val penaltyAmount: String? = null,
     val payGoUrl: String? = null,
-)
+) {
+    fun isComplete(): Boolean {
+        return when (status) {
+            ORDER_STATUS_SETTLE,
+            ORDER_STATUS_SETTLE_REDUCE,
+            ORDER_STATUS_SETTLE_RENEWAL,
+            ORDER_STATUS_SETTLE_REDUCE_OR_RENEWAL -> true
+
+            else -> false
+        }
+    }
+
+    fun isPendingCash(): Boolean {
+        return when (status) {
+            ORDER_STATUS_SUCCESS,
+            ORDER_STATUS_REVIEW,
+            ORDER_STATUS_AUTO,
+            ORDER_STATUS_MANUAL,
+            ORDER_STATUS_CASH,
+            ORDER_STATUS_PAYMENT_ING,
+            ORDER_STATUS_PAYMENT_FAIL -> true
+
+            else -> false
+        }
+    }
+
+    fun isReject(): Boolean {
+        return when (status) {
+            ORDER_STATUS_AUTO_FAIL,
+            ORDER_STATUS_MANUAL_FAIL -> true
+
+            else -> false
+        }
+    }
+
+    fun isClosed(): Boolean {
+        return when (status) {
+            ORDER_STATUS_CLOSE,
+            ORDER_STATUS_INVALID -> true
+
+            else -> false
+        }
+    }
+
+    fun isRepaymentProcessing(): Boolean {
+        return status == ORDER_STATUS_PAYMENT_PROCESS
+    }
+
+    fun isPendingRepayment(): Boolean {
+        return when (status) {
+            ORDER_STATUS_PAYMENT_PENDING,
+            ORDER_STATUS_IN_RENEWAL,
+            ORDER_STATUS_IN_RENEWAL_PROCESS -> true
+
+            else -> false
+        }
+    }
+
+    fun isDue(): Boolean {
+        return when (status) {
+            ORDER_STATUS_OVERDUE,
+            ORDER_STATUS_BAD_DEBTS -> true
+
+            else -> false
+        }
+    }
+
+    fun getStatusString(): String {
+        return when (status) {
+            ORDER_STATUS_SETTLE,
+            ORDER_STATUS_SETTLE_REDUCE,
+            ORDER_STATUS_SETTLE_RENEWAL,
+            ORDER_STATUS_SETTLE_REDUCE_OR_RENEWAL -> {
+                Strings["complete"]
+            }
+
+            ORDER_STATUS_SUCCESS,
+            ORDER_STATUS_REVIEW,
+            ORDER_STATUS_AUTO,
+            ORDER_STATUS_MANUAL,
+            ORDER_STATUS_CASH,
+            ORDER_STATUS_PAYMENT_ING,
+            ORDER_STATUS_PAYMENT_FAIL -> {
+                Strings["pending_cash"]
+            }
+
+            ORDER_STATUS_AUTO_FAIL,
+            ORDER_STATUS_MANUAL_FAIL -> {
+                Strings["reject"]
+            }
+
+            ORDER_STATUS_CLOSE,
+            ORDER_STATUS_INVALID -> {
+                Strings["closed"]
+            }
+
+            ORDER_STATUS_PAYMENT_PROCESS -> {
+                Strings["repayment_processing"]
+            }
+
+            ORDER_STATUS_PAYMENT_PENDING,
+            ORDER_STATUS_IN_RENEWAL,
+            ORDER_STATUS_IN_RENEWAL_PROCESS -> {
+                Strings["pending_repayment"]
+            }
+
+            ORDER_STATUS_OVERDUE,
+            ORDER_STATUS_BAD_DEBTS -> {
+                Strings["overdue"]
+            }
+
+            else -> ""
+        }
+    }
+}
 
 @Serializable
 data class MessagePageBean(

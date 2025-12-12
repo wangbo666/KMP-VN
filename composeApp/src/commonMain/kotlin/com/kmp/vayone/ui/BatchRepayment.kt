@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -41,7 +40,7 @@ import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.widget.LoadingBox
 import com.kmp.vayone.ui.widget.TopBar
 import com.kmp.vayone.util.toAmountString
-import com.kmp.vayone.viewmodel.RepaymentViewModel
+import com.kmp.vayone.viewmodel.OrderViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import theme.C_132247
@@ -65,7 +64,7 @@ fun BatchRepayment(
     onBack: () -> Unit,
     navigate: (Screen) -> Unit,
 ) {
-    val viewModel = remember { RepaymentViewModel() }
+    val viewModel = remember { OrderViewModel() }
     val loadingState by viewModel.loadingState.collectAsState()
     val togetherRepaymentList by viewModel.togetherRepaymentList.collectAsState()
     var totalAmount by remember {

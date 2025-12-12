@@ -81,7 +81,10 @@ fun MinePage(
 
     LaunchedEffect(Unit) {
         viewModel.paybackResult.collect {
-            if (it?.showMultipleRepaySign == 1) {
+            val size = it?.repayProducts?.filter { it1 ->
+                it1.isPendingRepayment() || it1.isDue()
+            }?.size ?: 0
+            if (it?.showMultipleRepaySign == 1 && size > 0) {
                 navigate(Screen.BatchRepayment)
             } else {
                 isShowPaybackDialog = true
@@ -157,7 +160,7 @@ fun MinePage(
                         .clip(RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp))
                         .background(Color.Transparent)
                         .clickable {
-
+                            navigate(Screen.AccountCenter)
                         },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
@@ -181,7 +184,7 @@ fun MinePage(
                         .weight(1f)
                         .fillMaxHeight()
                         .clickable {
-
+                            navigate(Screen.OrderCenter)
                         },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
@@ -209,7 +212,7 @@ fun MinePage(
                         .clip(RoundedCornerShape(topEnd = 24.dp, bottomEnd = 24.dp))
                         .background(Color.Transparent)
                         .clickable {
-
+                            navigate(Screen.Cert)
                         },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,

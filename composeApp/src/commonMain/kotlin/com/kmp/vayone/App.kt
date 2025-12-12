@@ -14,7 +14,13 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.AboutUsScreen
+import com.kmp.vayone.ui.AccountCenter
 import com.kmp.vayone.ui.BatchRepayment
+import com.kmp.vayone.ui.CertBankScreen
+import com.kmp.vayone.ui.CertKycScreen
+import com.kmp.vayone.ui.CertPersonalScreen
+import com.kmp.vayone.ui.CertScreen
+import com.kmp.vayone.ui.CertServiceScreen
 import com.kmp.vayone.ui.ChangePasswordScreen
 import com.kmp.vayone.ui.ContactUsScreen
 import com.kmp.vayone.ui.FeedbackScreen
@@ -24,6 +30,7 @@ import com.kmp.vayone.ui.LogoutScreen
 import com.kmp.vayone.ui.LogoutSuccessScreen
 import com.kmp.vayone.ui.MessageDetailScreen
 import com.kmp.vayone.ui.MessageScreen
+import com.kmp.vayone.ui.OrderCenterScreen
 import com.kmp.vayone.ui.PrivacyScreen
 import com.kmp.vayone.ui.SetPasswordScreen
 import com.kmp.vayone.ui.SetPasswordSuccessScreen
@@ -243,6 +250,51 @@ fun App() {
                     is Screen.MessageDetail -> MessageDetailScreen(message = screen.data) {
                         goBack()
                     }
+
+                    Screen.Cert -> CertScreen(toast = { show, toast ->
+                        showToast = show
+                        toastMessage = toast
+                    }, onBack = { goBack() }) { navigate(it) }
+
+                    is Screen.KycCert -> CertKycScreen(screen.isCert, toast = { show, toast ->
+                        showToast = show
+                        toastMessage = toast
+                    }, onBack = { goBack() }) { navigate(it) }
+
+                    is Screen.PersonalCert -> CertPersonalScreen(
+                        screen.isCert,
+                        toast = { show, toast ->
+                            showToast = show
+                            toastMessage = toast
+                        },
+                        onBack = { goBack() }) { navigate(it) }
+
+                    is Screen.BankCert -> CertBankScreen(screen.isCert, toast = { show, toast ->
+                        showToast = show
+                        toastMessage = toast
+                    }, onBack = { goBack() }) { navigate(it) }
+
+                    is Screen.ServiceCert -> CertServiceScreen(
+                        screen.isCert,
+                        toast = { show, toast ->
+                            showToast = show
+                            toastMessage = toast
+                        },
+                        onBack = { goBack() }) { navigate(it) }
+
+                    Screen.OrderCenter -> OrderCenterScreen(
+                        toast = { show, toast ->
+                            showToast = show
+                            toastMessage = toast
+                        },
+                        onBack = { goBack() }) { navigate(it) }
+
+                    Screen.AccountCenter -> AccountCenter(
+                        toast = { show, toast ->
+                            showToast = show
+                            toastMessage = toast
+                        },
+                        onBack = { goBack() }) { navigate(it) }
                 }
                 ToastHost(
                     message = toastMessage,

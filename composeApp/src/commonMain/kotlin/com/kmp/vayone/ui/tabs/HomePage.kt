@@ -46,6 +46,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil3.Image
+import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.HomeBean
 import com.kmp.vayone.data.HomeLoanBean
 import com.kmp.vayone.data.ProductBean
@@ -117,6 +118,17 @@ fun HomePage(
     LaunchedEffect(Unit) {
         mainViewModel.errorEvent.collect { event ->
             toast(event.showToast, event.message)
+            when (event.code) {
+                401, 402 -> {
+                    CacheManager.setLoginInfo(null)
+                    CacheManager.setToken("")
+                    navigate(Screen.Login)
+                }
+
+                300 -> {
+                    //VersionUpdate
+                }
+            }
         }
     }
     LaunchedEffect(Unit) {
@@ -663,7 +675,7 @@ fun PreDenied(isShow: Boolean, date: String) {
 @Preview
 @Composable
 fun PreHomePage() {
-    ProductItem(ProductBean(),{}){}
+    ProductItem(ProductBean(), {}) {}
 }
 
 @Composable

@@ -33,6 +33,27 @@ object CacheManager {
         settings.putString("language", lang)
     }
 
+    fun getAuthConfigList(): List<String> {
+        val info = settings.getString("configList", "")
+        return try {
+            json.decodeFromString<List<String>>(info)
+        } catch (e: Exception) {
+            arrayListOf()
+        }
+    }
+
+    fun saveAuthConfigList(l: List<String>?) {
+        if (l == null) {
+            settings.remove("configList")
+        } else {
+            try {
+                settings.putString("configList", json.encodeToString(l))
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     // --- AppsFlyer ---
     fun saveAfSource(value: String) {
         settings.putString("afSource", value)

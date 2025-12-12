@@ -91,8 +91,8 @@ fun ConfirmDialog(
                         .clip(RoundedCornerShape(30.dp))
                         .background(color = C_FFF4E6, shape = RoundedCornerShape(30.dp))
                         .clickable {
-                            onDismiss()
                             cancelAction()
+                            onDismiss()
                         },
                     text = cancel,
                     fontSize = 16.sp,
@@ -107,8 +107,8 @@ fun ConfirmDialog(
                         .clip(RoundedCornerShape(30.dp))
                         .background(color = C_FC7700)
                         .clickable {
-                            onDismiss()
                             confirmAction()
+                            onDismiss()
                         },
                     lineHeight = 44.sp,
                     text = confirm,
