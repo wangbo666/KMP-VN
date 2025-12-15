@@ -39,7 +39,7 @@ actual fun calculateAmount(list: List<String?>?): String {
         BigDecimal.ZERO
     ) { acc, it -> acc + BigDecimal(it) }
     val formatter = DecimalFormat("#,###.##")  // 最多保留两位小数，可调整
-    return formatter.format(fold?: BigDecimal.ZERO)
+    return formatter.format(fold ?: BigDecimal.ZERO)
 }
 
 actual fun openSystemPermissionSettings() {
@@ -99,4 +99,33 @@ actual suspend fun postAllPermissions(
     } catch (_: Exception) {
         refuseAction(false, emptyList())
     }
+}
+
+actual suspend fun postCameraPermissions(
+    refuseAction: (isNever: Boolean) -> Unit,
+    agreeAction: () -> Unit
+) {
+    val activity = MainActivity.instance
+    XXPermissions.with(activity)
+        .unchecked()
+        .permission(PermissionLists.getCameraPermission())
+        .request(object : OnPermissionCallback {
+            override fun onGranted(
+                permissions: MutableList<IPermission>,
+                allGranted: Boolean
+            ) {
+                if (allGranted) agreeAction.invoke()
+            }
+
+            override fun onDenied(
+                permissions: MutableList<IPermission>,
+                doNotAskAgain: Boolean,
+            ) {
+                refuseAction(doNotAskAgain)
+            }
+        })
+}
+
+actual suspend fun openCameraPermissionSettings() {
+    XXPermissions.startPermissionActivity(MainActivity.instance, PermissionLists.getCameraPermission())
 }

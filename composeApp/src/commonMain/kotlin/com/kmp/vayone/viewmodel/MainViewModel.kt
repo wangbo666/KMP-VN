@@ -1,6 +1,7 @@
 package com.kmp.vayone.viewmodel
 
 import com.kmp.vayone.data.BannerBean
+import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.HomeBean
 import com.kmp.vayone.data.HomeLoanBean
 import com.kmp.vayone.data.MessageBean
@@ -90,8 +91,10 @@ class MainViewModel : BaseViewModel() {
             _loadingState.value = UiState.Error()
             true
         }) {
-            action.invoke(it?.authConfig?.split(",")?.filterNot { it1 -> it1.isBlank() }
-                ?: listOf())
+            val authList = it?.authConfig?.split(",")?.filterNot { it1 -> it1.isBlank() }
+                ?: listOf()
+            CacheManager.saveAuthConfigList(authList)
+            action.invoke(authList)
         }
     }
 

@@ -2,6 +2,8 @@ package com.kmp.vayone.viewmodel
 
 import com.kmp.vayone.data.AuthBean
 import com.kmp.vayone.data.BankCardBean
+import com.kmp.vayone.data.CacheManager
+import com.kmp.vayone.data.KycConfigBean
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.data.UserAuthBean
 import com.kmp.vayone.data.remote.UserRepository
@@ -66,8 +68,10 @@ class CertViewModel : BaseViewModel() {
             onError()
             true
         }) {
-            action.invoke(it?.authConfig?.split(",")?.filterNot { it1 -> it1.isBlank() }
-                ?: listOf())
+            val authList = it?.authConfig?.split(",")?.filterNot { it1 -> it1.isBlank() }
+                ?: listOf()
+            CacheManager.saveAuthConfigList(authList)
+            action.invoke(authList)
         }
     }
 
@@ -126,6 +130,16 @@ class CertViewModel : BaseViewModel() {
                     else card.copy(isDefault = 0)
                 }
             }
+        }
+    }
+
+    private val _kycConfig = MutableStateFlow<KycConfigBean?>(null)
+    val kycConfig: StateFlow<KycConfigBean?> = _kycConfig
+    fun getKycConfig() {
+        launch({
+            UserRepository.getKycConfig()
+        }) {
+            _kycConfig.value = it
         }
     }
 }

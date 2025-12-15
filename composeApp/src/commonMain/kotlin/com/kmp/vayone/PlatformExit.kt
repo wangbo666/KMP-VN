@@ -35,3 +35,10 @@ expect suspend fun postAllPermissions(
     refuseAction: (isNever: Boolean, permissions: List<String>) -> Unit = { _, _ -> },
     action: (permissions: List<String>) -> Unit,
 )
+
+expect suspend fun postCameraPermissions(
+    refuseAction: (isNever: Boolean) -> Unit,
+    agreeAction: () -> Unit,
+)
+
+expect suspend fun openCameraPermissionSettings()

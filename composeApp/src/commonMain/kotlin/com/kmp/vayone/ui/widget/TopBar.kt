@@ -32,6 +32,7 @@ fun TopBar(
     title: String,
     tintColor: Color = C_2B2621,
     modifier: Modifier = Modifier.fillMaxWidth().height(44.dp).background(white),
+    rightText: String = "",
     onBackClick: () -> Unit,
 ) {
     Row(
@@ -58,6 +59,15 @@ fun TopBar(
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f).padding(end = 16.dp),
         )
+        if (rightText.isNotBlank()) {
+            Text(
+                text = rightText,
+                fontSize = 20.sp,
+                color = C_2B2621,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(end = 16.dp)
+            )
+        }
     }
 }
 

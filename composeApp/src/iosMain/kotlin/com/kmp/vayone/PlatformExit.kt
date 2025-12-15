@@ -128,3 +128,14 @@ actual suspend fun postAllPermissions(
 
     action(granted)
 }
+
+actual suspend fun postCameraPermissions(
+    refuseAction: (isNever: Boolean) -> Unit,
+    agreeAction: () -> Unit
+) {
+
+}
+
+actual suspend fun openCameraPermissionSettings() {
+
+}

@@ -6,6 +6,7 @@ import com.kmp.vayone.data.BannerBean
 import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.HomeBean
 import com.kmp.vayone.data.HomeLoanBean
+import com.kmp.vayone.data.KycConfigBean
 import com.kmp.vayone.data.LoginBean
 import com.kmp.vayone.data.MessagePageBean
 import com.kmp.vayone.data.OrderBean
@@ -110,5 +111,9 @@ object UserRepository {
 
     suspend fun unbindCard(id: String?): ApiResponse<String?> {
         return networkManager.post("api/user/app/bank/unbind", ParamBean(bankInfoId = id))
+    }
+
+    suspend fun getKycConfig(): ApiResponse<KycConfigBean?> {
+        return networkManager.post("api/user/app/kyc/config")
     }
 }
