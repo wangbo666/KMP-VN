@@ -4,6 +4,7 @@ import com.kmp.vayone.data.AuthBean
 import com.kmp.vayone.data.BankCardBean
 import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.KycConfigBean
+import com.kmp.vayone.data.KycInfoBean
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.data.UserAuthBean
 import com.kmp.vayone.data.remote.UserRepository
@@ -140,6 +141,19 @@ class CertViewModel : BaseViewModel() {
             UserRepository.getKycConfig()
         }) {
             _kycConfig.value = it
+        }
+    }
+
+    private val _kycResult = MutableStateFlow<KycInfoBean?>(null)
+    val kycResult: StateFlow<KycInfoBean?> = _kycResult
+    fun getKycInfo() {
+        _loadingState.value = UiState.Loading
+        launch({ UserRepository.getKycInfo() }, onError = {
+            _loadingState.value = UiState.Error()
+            true
+        }) {
+            _loadingState.value = UiState.Success
+            _kycResult.value = it
         }
     }
 }

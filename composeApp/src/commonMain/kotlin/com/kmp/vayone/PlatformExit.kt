@@ -42,3 +42,8 @@ expect suspend fun postCameraPermissions(
 )
 
 expect suspend fun openCameraPermissionSettings()
+
+expect suspend fun compressImage(
+    imageBytes: ByteArray,
+    maxSizeKb: Int = 250
+): ByteArray?

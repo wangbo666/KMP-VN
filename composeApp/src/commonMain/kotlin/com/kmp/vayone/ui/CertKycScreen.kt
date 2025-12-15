@@ -8,13 +8,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -37,6 +40,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import com.kmp.vayone.compressImage
+import com.kmp.vayone.data.CacheManager.getAuthConfigList
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.openCameraPermissionSettings
@@ -48,7 +57,11 @@ import com.kmp.vayone.ui.widget.LoadingDialog
 import com.kmp.vayone.ui.widget.TopBar
 import com.kmp.vayone.ui.widget.UiState
 import com.kmp.vayone.util.format
+import com.kmp.vayone.util.log
 import com.kmp.vayone.viewmodel.CertViewModel
+import com.preat.peekaboo.ui.camera.CameraMode
+import com.preat.peekaboo.ui.camera.PeekabooCamera
+import com.preat.peekaboo.ui.camera.rememberPeekabooCameraState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -74,7 +87,9 @@ import vayone.composeapp.generated.resources.example_self4
 import vayone.composeapp.generated.resources.kyc_camera_bg
 import vayone.composeapp.generated.resources.kyc_card
 import vayone.composeapp.generated.resources.kyc_self
+import vayone.composeapp.generated.resources.kyc_upload_failed
 import vayone.composeapp.generated.resources.kyc_upload_success
+import kotlin.math.max
 
 @Composable
 fun CertKycScreen(
@@ -89,9 +104,51 @@ fun CertKycScreen(
     var isExampleCardDialog by remember { mutableStateOf(true) }
     val isLoading by certViewModel.isLoading.collectAsState()
     val kycConfig by certViewModel.kycConfig.collectAsState()
+    val kycResult by certViewModel.kycResult.collectAsState()
     val scope = rememberCoroutineScope()
     var isShowCameraPermissionDialog by remember { mutableStateOf(false) }
 
+    var currentCaptureType by remember { mutableStateOf("") } // "front", "back", "selfie"
+    var showCamera by remember { mutableStateOf(false) }
+    var frontByte by remember { mutableStateOf<ByteArray?>(null) }
+    var backByte by remember { mutableStateOf<ByteArray?>(null) }
+    var selfByte by remember { mutableStateOf<ByteArray?>(null) }
+    var frontUploadState by remember { mutableStateOf(0) }//0无 1成功 -1失败
+    var backUploadState by remember { mutableStateOf(0) }
+    var selfUploadState by remember { mutableStateOf(0) }
+
+    // Peekaboo 相机状态
+    val cameraState = rememberPeekabooCameraState(
+        initialCameraMode = CameraMode.Back,
+        onCapture = { imageBytes ->
+            "ImageByte:${imageBytes?.size}".log()
+            if (imageBytes == null) return@rememberPeekabooCameraState
+            scope.launch {
+                try {
+                    // 压缩图片
+                    val compressed = compressImage(imageBytes, maxSizeKb = 250)
+                    "ImageByte:${compressed?.size}".log()
+                    if (currentCaptureType == "front") {
+                        frontByte = compressed
+                    }
+                    if (currentCaptureType == "back") {
+                        backByte = compressed
+                    }
+                    if (currentCaptureType == "selfie") {
+                        selfByte = compressed
+                    }
+                    if (compressed != null) {
+                        // 上传图片
+//                        certViewModel.uploadImage(compressed, currentCaptureType)
+//                        toast(true, "Upload successful")
+                    }
+                } catch (e: Exception) {
+//                    toast(true, "Error: ${e.message}")
+                }
+                showCamera = false
+            }
+        }
+    )
 
     LaunchedEffect(Unit) {
         certViewModel.errorEvent.collect { event ->
@@ -106,7 +163,7 @@ fun CertKycScreen(
     Scaffold(modifier = Modifier.fillMaxSize().background(white).statusBarsPadding(), topBar = {
         TopBar(
             "KYC",
-//            rightText = if (isCert) "" else "${getAuthConfigList().indexOf("KYC") + 1}/${getAuthConfigList().filterNot { it == "BANK" }.size}"
+            rightText = if (isCert) "" else "${getAuthConfigList().indexOf("KYC") + 1}/${getAuthConfigList().filterNot { it == "BANK" }.size}"
         ) {
             if (isCert) {
                 onBack()
@@ -119,6 +176,7 @@ fun CertKycScreen(
             Text(
                 text = Strings["next"],
                 modifier = Modifier
+                    .navigationBarsPadding()
                     .padding(start = 20.dp, end = 20.dp, bottom = 20.dp)
                     .fillMaxWidth()
                     .height(48.dp)
@@ -145,86 +203,325 @@ fun CertKycScreen(
             UiState.Success,
             Modifier.background(white).fillMaxSize().padding(paddingValues)
         ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                if (kycConfig?.KYC_FRONT != 0 || kycConfig?.KYC_BACK != 0) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
-                            .height(44.dp).background(C_FFF4E6)
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Image(
-                            painter = painterResource(Res.drawable.kyc_card),
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = Strings["nic_card"],
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            lineHeight = 18.sp,
-                            color = C_FC7700,
-                            modifier = Modifier.padding(start = 6.dp).weight(1f)
-                        )
-                        Text(
-                            text = Strings["example_str"],
-                            fontSize = 13.sp,
-                            lineHeight = 24.sp,
-                            color = C_FC7700,
-                            modifier = Modifier
-                                .background(white, RoundedCornerShape(30.dp))
-                                .border(
-                                    width = 1.dp, color = C_FC7700, RoundedCornerShape(30.dp)
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                item {
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        if (kycConfig?.KYC_FRONT != 0 || kycConfig?.KYC_BACK != 0) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth()
+                                    .height(44.dp).background(C_FFF4E6)
+                                    .padding(horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Image(
+                                    painter = painterResource(Res.drawable.kyc_card),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp)
                                 )
-                                .clip(RoundedCornerShape(30.dp))
-                                .padding(horizontal = 10.dp)
-                                .clickable {
-                                    isExampleCardDialog = true
-                                    isShowExampleDialog = true
-                                }
-                        )
-                    }
-                    if (kycConfig?.KYC_FRONT != 0) {
-                        Row(
-                            modifier = Modifier.padding(top = 20.dp, start = 16.dp, end = 16.dp)
-                                .fillMaxWidth()
-                        ) {
-                            Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
                                 Text(
-                                    text = Strings["nic_card_front"],
+                                    text = Strings["nic_card"],
                                     fontWeight = FontWeight.Bold,
-                                    color = C_524F4C,
-                                    fontSize = 16.sp,
+                                    fontSize = 18.sp,
+                                    lineHeight = 18.sp,
+                                    color = C_FC7700,
+                                    modifier = Modifier.padding(start = 6.dp).weight(1f)
                                 )
                                 Text(
-                                    text = Strings["please_upload_nic_card_front"],
-                                    fontWeight = FontWeight.Normal,
-                                    color = C_7E7B79,
-                                    fontSize = 11.sp,
-                                    modifier = Modifier.padding(top = 8.dp)
+                                    text = Strings["example_str"],
+                                    fontSize = 13.sp,
+                                    lineHeight = 24.sp,
+                                    color = C_FC7700,
+                                    modifier = Modifier
+                                        .background(white, RoundedCornerShape(30.dp))
+                                        .border(
+                                            width = 1.dp,
+                                            color = C_FC7700,
+                                            RoundedCornerShape(30.dp)
+                                        )
+                                        .clip(RoundedCornerShape(30.dp))
+                                        .padding(horizontal = 10.dp)
+                                        .clickable {
+                                            isExampleCardDialog = true
+                                            isShowExampleDialog = true
+                                        }
                                 )
                             }
+                            if (kycConfig?.KYC_FRONT != 0) {
+                                Row(
+                                    modifier = Modifier.padding(
+                                        top = 20.dp,
+                                        start = 16.dp,
+                                        end = 16.dp
+                                    )
+                                        .fillMaxWidth()
+                                ) {
+                                    Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
+                                        Text(
+                                            text = Strings["nic_card_front"],
+                                            fontWeight = FontWeight.Bold,
+                                            color = C_524F4C,
+                                            fontSize = 16.sp,
+                                        )
+                                        Text(
+                                            text = Strings["please_upload_nic_card_front"],
+                                            fontWeight = FontWeight.Normal,
+                                            color = C_7E7B79,
+                                            fontSize = 11.sp,
+                                            modifier = Modifier.padding(top = 8.dp)
+                                        )
+                                    }
+                                    Box(
+                                        modifier = Modifier.size(153.dp, 106.dp)
+                                            .clickable(enabled = !isCert) {
+                                                scope.launch {
+                                                    postCameraPermissions(refuseAction = {
+                                                        isShowCameraPermissionDialog = it
+                                                    }) {
+                                                        currentCaptureType = "front"
+                                                        if (cameraState.cameraMode == CameraMode.Front) {
+                                                            cameraState.toggleCamera()
+                                                        }
+                                                        showCamera = true
+                                                    }
+                                                }
+                                            }) {
+                                        Image(
+                                            painter = painterResource(Res.drawable.kyc_camera_bg),
+                                            contentDescription = null,
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.FillBounds,
+                                        )
+                                        AutoSizeText(
+                                            Strings["upload_nic_card_front"],
+                                            modifier = Modifier.fillMaxWidth()
+                                                .padding(start = 2.dp, end = 2.dp, bottom = 30.dp)
+                                                .align(
+                                                    Alignment.BottomCenter
+                                                ),
+                                            minFontSize = 8.sp,
+                                            maxFontSize = 12.sp,
+                                            color = C_B4B0AD,
+                                            fontWeight = FontWeight.Normal,
+                                            textAlign = TextAlign.Center,
+                                        )
+                                        if (!kycResult?.frontImageUrl.isNullOrEmpty()) {
+                                            AsyncImage(
+                                                model = ImageRequest.Builder(LocalPlatformContext.current)
+                                                    .data(kycResult?.frontImageUrl)
+                                                    .crossfade(true)
+                                                    .build(),
+                                                contentDescription = null,
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = ContentScale.Crop
+                                            )
+                                        }
+                                        if (frontByte != null) {
+                                            AsyncImage(
+                                                model = frontByte,
+                                                contentDescription = null,
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = ContentScale.Crop
+                                            )
+                                        }
+                                        if (frontUploadState != 0) {
+                                            Column(
+                                                modifier = Modifier.fillMaxSize()
+                                                    .background(color = Color.Black.copy(0.3f)),
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.Center,
+                                            ) {
+                                                Image(
+                                                    painter = painterResource(if (frontUploadState == 1) Res.drawable.kyc_upload_success else Res.drawable.kyc_upload_failed),
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                                Text(
+                                                    text = Strings["re_up"],
+                                                    fontSize = 12.sp,
+                                                    lineHeight = 12.sp,
+                                                    color = white
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (kycConfig?.KYC_BACK != 0) {
+                                Row(
+                                    modifier = Modifier.padding(
+                                        top = 16.dp,
+                                        start = 16.dp,
+                                        end = 16.dp
+                                    )
+                                        .fillMaxWidth().clickable(enabled = !isCert) {
+                                            scope.launch {
+                                                postCameraPermissions(refuseAction = {
+                                                    isShowCameraPermissionDialog = it
+                                                }) {
+                                                    currentCaptureType = "back"
+                                                    if (cameraState.cameraMode == CameraMode.Front) {
+                                                        cameraState.toggleCamera()
+                                                    }
+                                                    showCamera = true
+                                                }
+                                            }
+                                        }
+                                ) {
+                                    Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
+                                        Text(
+                                            text = Strings["nic_card_back"],
+                                            fontWeight = FontWeight.Bold,
+                                            color = C_524F4C,
+                                            fontSize = 16.sp,
+                                        )
+                                        Text(
+                                            text = Strings["please_upload_nic_card_back"],
+                                            fontWeight = FontWeight.Normal,
+                                            color = C_7E7B79,
+                                            fontSize = 11.sp,
+                                            modifier = Modifier.padding(top = 8.dp)
+                                        )
+                                    }
+                                    Box(modifier = Modifier.size(153.dp, 106.dp)) {
+                                        Image(
+                                            painter = painterResource(Res.drawable.kyc_camera_bg),
+                                            contentDescription = null,
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.FillBounds,
+                                        )
+                                        AutoSizeText(
+                                            Strings["upload_nic_card_back"],
+                                            modifier = Modifier.fillMaxWidth()
+                                                .padding(start = 2.dp, end = 2.dp, bottom = 30.dp)
+                                                .align(
+                                                    Alignment.BottomCenter
+                                                ),
+                                            minFontSize = 8.sp,
+                                            maxFontSize = 12.sp,
+                                            color = C_B4B0AD,
+                                            fontWeight = FontWeight.Normal,
+                                            textAlign = TextAlign.Center,
+                                        )
+                                        if (!kycResult?.backImageUrl.isNullOrEmpty()) {
+                                            AsyncImage(
+                                                model = ImageRequest.Builder(LocalPlatformContext.current)
+                                                    .data(kycResult?.backImageUrl)
+                                                    .crossfade(true)
+                                                    .build(),
+                                                contentDescription = null,
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = ContentScale.Crop
+                                            )
+                                        }
+                                        if (backByte != null) {
+                                            AsyncImage(
+                                                model = backByte,
+                                                contentDescription = null,
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentScale = ContentScale.Crop
+                                            )
+                                        }
+                                        if (backUploadState != 0) {
+                                            Column(
+                                                modifier = Modifier.fillMaxSize()
+                                                    .background(color = Color.Black.copy(0.3f)),
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                verticalArrangement = Arrangement.Center,
+                                            ) {
+                                                Image(
+                                                    painter = painterResource(if (backUploadState == 1) Res.drawable.kyc_upload_success else Res.drawable.kyc_upload_failed),
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(24.dp)
+                                                )
+                                                Text(
+                                                    text = Strings["re_up"],
+                                                    fontSize = 12.sp,
+                                                    lineHeight = 12.sp,
+                                                    color = white
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (kycConfig?.FACE != 0) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth()
+                                    .padding(top = 14.dp)
+                                    .height(44.dp).background(C_FFF4E6)
+                                    .padding(start = 16.dp, end = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Image(
+                                    painter = painterResource(Res.drawable.kyc_self),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Text(
+                                    text = Strings["self_photo"],
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 18.sp,
+                                    lineHeight = 18.sp,
+                                    color = C_FC7700,
+                                    modifier = Modifier.padding(start = 6.dp).weight(1f)
+                                )
+                                Text(
+                                    text = Strings["example_str"],
+                                    fontSize = 13.sp,
+                                    lineHeight = 24.sp,
+                                    color = C_FC7700,
+                                    modifier = Modifier
+                                        .background(white, RoundedCornerShape(30.dp))
+                                        .border(
+                                            width = 1.dp,
+                                            color = C_FC7700,
+                                            RoundedCornerShape(30.dp)
+                                        )
+                                        .clip(RoundedCornerShape(30.dp))
+                                        .padding(horizontal = 10.dp)
+                                        .clickable {
+                                            isExampleCardDialog = false
+                                            isShowExampleDialog = true
+                                        }
+                                )
+                            }
+                            Text(
+                                text = Strings["self_photo_tips"],
+                                fontWeight = FontWeight.Normal,
+                                fontSize = 11.sp,
+                                lineHeight = 15.sp,
+                                color = C_7E7B79,
+                                modifier = Modifier.padding(16.dp)
+                            )
                             Box(
-                                modifier = Modifier.size(153.dp, 106.dp)
+                                modifier = Modifier.size(214.dp, 148.dp)
+                                    .align(Alignment.CenterHorizontally)
                                     .clickable(enabled = !isCert) {
                                         scope.launch {
                                             postCameraPermissions(refuseAction = {
-                                                isShowCameraPermissionDialog = true
+                                                isShowCameraPermissionDialog = it
                                             }) {
-
+                                                val isKyc = kycConfig?.FACE_COMPARE == 2
+                                                currentCaptureType = "selfie"
+                                                if (cameraState.cameraMode == CameraMode.Back) {
+                                                    cameraState.toggleCamera()
+                                                }
+                                                showCamera = true
                                             }
                                         }
-                                    }) {
+                                    }
+                            ) {
                                 Image(
                                     painter = painterResource(Res.drawable.kyc_camera_bg),
                                     contentDescription = null,
-                                    modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.FillBounds,
+                                    modifier = Modifier.fillMaxSize()
                                 )
                                 AutoSizeText(
-                                    Strings["upload_nic_card_front"],
+                                    Strings["upload_self_photo"],
                                     modifier = Modifier.fillMaxWidth()
-                                        .padding(start = 2.dp, end = 2.dp, bottom = 30.dp).align(
+                                        .padding(start = 2.dp, end = 2.dp, bottom = 54.dp).align(
                                             Alignment.BottomCenter
                                         ),
                                     minFontSize = 8.sp,
@@ -233,215 +530,69 @@ fun CertKycScreen(
                                     fontWeight = FontWeight.Normal,
                                     textAlign = TextAlign.Center,
                                 )
-                                Column(
-                                    modifier = Modifier.fillMaxSize()
-                                        .background(color = Color.Black.copy(0.3f)),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center,
-                                ) {
-                                    Image(
-                                        painter = painterResource(Res.drawable.kyc_upload_success),
+                                if (!kycResult?.liveImageUrl.isNullOrEmpty()) {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(LocalPlatformContext.current)
+                                            .data(kycResult?.liveImageUrl)
+                                            .crossfade(true)
+                                            .build(),
                                         contentDescription = null,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Text(
-                                        text = Strings["re_up"],
-                                        fontSize = 12.sp,
-                                        lineHeight = 12.sp,
-                                        color = white
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop
                                     )
                                 }
-                            }
-                        }
-                    }
-                    if (kycConfig?.KYC_BACK != 0) {
-                        Row(
-                            modifier = Modifier.padding(top = 16.dp, start = 16.dp, end = 16.dp)
-                                .fillMaxWidth().clickable(enabled = !isCert) {
-                                    scope.launch {
-                                        postCameraPermissions(refuseAction = {
-                                            isShowCameraPermissionDialog = true
-                                        }) {
-
-                                        }
-                                    }
-                                }
-                        ) {
-                            Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
-                                Text(
-                                    text = Strings["nic_card_back"],
-                                    fontWeight = FontWeight.Bold,
-                                    color = C_524F4C,
-                                    fontSize = 16.sp,
-                                )
-                                Text(
-                                    text = Strings["please_upload_nic_card_back"],
-                                    fontWeight = FontWeight.Normal,
-                                    color = C_7E7B79,
-                                    fontSize = 11.sp,
-                                    modifier = Modifier.padding(top = 8.dp)
-                                )
-                            }
-                            Box(modifier = Modifier.size(153.dp, 106.dp)) {
-                                Image(
-                                    painter = painterResource(Res.drawable.kyc_camera_bg),
-                                    contentDescription = null,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.FillBounds,
-                                )
-                                AutoSizeText(
-                                    Strings["upload_nic_card_back"],
-                                    modifier = Modifier.fillMaxWidth()
-                                        .padding(start = 2.dp, end = 2.dp, bottom = 30.dp).align(
-                                            Alignment.BottomCenter
-                                        ),
-                                    minFontSize = 8.sp,
-                                    maxFontSize = 12.sp,
-                                    color = C_B4B0AD,
-                                    fontWeight = FontWeight.Normal,
-                                    textAlign = TextAlign.Center,
-                                )
-                                Column(
-                                    modifier = Modifier.fillMaxSize()
-                                        .background(color = Color.Black.copy(0.3f)),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center,
-                                ) {
-                                    Image(
-                                        painter = painterResource(Res.drawable.kyc_upload_success),
+                                if (selfByte != null) {
+                                    AsyncImage(
+                                        model = selfByte,
                                         contentDescription = null,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Text(
-                                        text = Strings["re_up"],
-                                        fontSize = 12.sp,
-                                        lineHeight = 12.sp,
-                                        color = white
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop
                                     )
                                 }
-                            }
-                        }
-                    }
-                }
-                if (kycConfig?.FACE != 0) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
-                            .padding(top = 14.dp)
-                            .height(44.dp).background(C_FFF4E6)
-                            .padding(start = 16.dp, end = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Image(
-                            painter = painterResource(Res.drawable.kyc_self),
-                            contentDescription = null,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = Strings["self_photo"],
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            lineHeight = 18.sp,
-                            color = C_FC7700,
-                            modifier = Modifier.padding(start = 6.dp).weight(1f)
-                        )
-                        Text(
-                            text = Strings["example_str"],
-                            fontSize = 13.sp,
-                            lineHeight = 24.sp,
-                            color = C_FC7700,
-                            modifier = Modifier
-                                .background(white, RoundedCornerShape(30.dp))
-                                .border(
-                                    width = 1.dp, color = C_FC7700, RoundedCornerShape(30.dp)
-                                )
-                                .clip(RoundedCornerShape(30.dp))
-                                .padding(horizontal = 10.dp)
-                                .clickable {
-                                    isExampleCardDialog = false
-                                    isShowExampleDialog = true
-                                }
-                        )
-                    }
-                    Text(
-                        text = Strings["self_photo_tips"],
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 11.sp,
-                        lineHeight = 15.sp,
-                        color = C_7E7B79,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                    Box(
-                        modifier = Modifier.size(214.dp, 148.dp)
-                            .align(Alignment.CenterHorizontally)
-                            .clickable(enabled = !isCert) {
-                                scope.launch {
-                                    postCameraPermissions(refuseAction = {
-                                        isShowCameraPermissionDialog = true
-                                    }) {
-
+                                if (selfUploadState != 0) {
+                                    Column(
+                                        modifier = Modifier.fillMaxSize()
+                                            .background(color = Color.Black.copy(0.3f)),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center,
+                                    ) {
+                                        Image(
+                                            painter = painterResource(if (selfUploadState == 1) Res.drawable.kyc_upload_success else Res.drawable.kyc_upload_failed),
+                                            contentDescription = null,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                        Text(
+                                            text = Strings["re_up"],
+                                            fontSize = 12.sp,
+                                            lineHeight = 12.sp,
+                                            color = white
+                                        )
                                     }
                                 }
                             }
-                    ) {
-                        Image(
-                            painter = painterResource(Res.drawable.kyc_camera_bg),
-                            contentDescription = null,
-                            contentScale = ContentScale.FillBounds,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                        AutoSizeText(
-                            Strings["upload_self_photo"],
-                            modifier = Modifier.fillMaxWidth()
-                                .padding(start = 2.dp, end = 2.dp, bottom = 54.dp).align(
-                                    Alignment.BottomCenter
-                                ),
-                            minFontSize = 8.sp,
-                            maxFontSize = 12.sp,
-                            color = C_B4B0AD,
-                            fontWeight = FontWeight.Normal,
-                            textAlign = TextAlign.Center,
-                        )
-                        Column(
-                            modifier = Modifier.fillMaxSize()
-                                .background(color = Color.Black.copy(0.3f)),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
-                        ) {
-                            Image(
-                                painter = painterResource(Res.drawable.kyc_upload_success),
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Text(
-                                text = Strings["re_up"],
-                                fontSize = 12.sp,
-                                lineHeight = 12.sp,
-                                color = white
-                            )
                         }
                     }
                 }
             }
-
-//            if (isShowConfirmExitDialog && !isCert) {
-//                val list = getAuthConfigList().filterNot { it1 -> it1.isBlank() || it1 == "BANK" }
-//                val step = list.size - max(0, list.indexOf("KYC"))
-//                ConfirmDialog(
-//                    true,
-//                    title = "",
-//                    content = Strings["auth_exit_confirm"].format(step.toString()),
-//                    cancel = Strings["give_up"],
-//                    confirm = Strings["continue_str"],
-//                    highLight = step.toString(),
-//                    cancelAction = {
-//                        onBack()
-//                    },
-//                    confirmAction = {
-//                    }
-//                ) {
-//                    isShowConfirmExitDialog = false
-//                }
-//            }
+            if (isShowConfirmExitDialog && !isCert) {
+                val list = getAuthConfigList().filterNot { it1 -> it1.isBlank() || it1 == "BANK" }
+                val step = list.size - max(0, list.indexOf("KYC"))
+                ConfirmDialog(
+                    true,
+                    title = "",
+                    content = Strings["auth_exit_confirm"].format(step.toString()),
+                    cancel = Strings["give_up"],
+                    confirm = Strings["continue_str"],
+                    highLight = step.toString(),
+                    cancelAction = {
+                        onBack()
+                    },
+                    confirmAction = {
+                    }
+                ) {
+                    isShowConfirmExitDialog = false
+                }
+            }
             ShowExampleDialog(isShowExampleDialog, isExampleCardDialog) {
                 isShowExampleDialog = false
             }
@@ -449,6 +600,23 @@ fun CertKycScreen(
             ShowCameraPermissionRefuse(isShowCameraPermissionDialog, scope) {
                 isShowCameraPermissionDialog = false
             }
+        }
+    }
+    if (showCamera) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            PeekabooCamera(
+                state = cameraState,
+                modifier = Modifier.fillMaxSize(),
+            )
+            Spacer(
+                modifier = Modifier.padding(bottom = 100.dp)
+                    .clip(RoundedCornerShape((50.dp)))
+                    .size(80.dp).background(white, RoundedCornerShape(50.dp))
+                    .align(Alignment.BottomCenter)
+                    .clickable {
+                        cameraState.capture()
+                    }
+            )
         }
     }
 }

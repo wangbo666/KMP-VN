@@ -1,11 +1,15 @@
+@file:OptIn(ExperimentalForeignApi::class)
+
 package com.kmp.vayone
 
 import platform.UIKit.UIApplication
-import platform.Foundation.NSLog
-import kotlinx.cinterop.*
+import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.usePinned
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.CoreGraphics.CGFloat
 import platform.Foundation.*
 import platform.UIKit.*
@@ -21,6 +25,21 @@ import platform.darwin.NSObject
 import platform.darwin.dispatch_semaphore_create
 import platform.darwin.dispatch_semaphore_signal
 import platform.darwin.dispatch_semaphore_wait
+import platform.AVFoundation.AVAuthorizationStatusAuthorized
+import platform.AVFoundation.AVAuthorizationStatusDenied
+import platform.AVFoundation.AVAuthorizationStatusNotDetermined
+import platform.AVFoundation.AVAuthorizationStatusRestricted
+import platform.AVFoundation.AVCaptureDevice
+import platform.AVFoundation.AVMediaTypeVideo
+import platform.AVFoundation.authorizationStatusForMediaType
+import platform.AVFoundation.requestAccessForMediaType
+import platform.darwin.dispatch_async
+import platform.darwin.dispatch_get_main_queue
+import kotlin.coroutines.resume
+import kotlinx.cinterop.*
+import platform.CoreGraphics.*
+import platform.UIKit.*
+import kotlin.math.sqrt
 
 // 实际实现
 @OptIn(ExperimentalForeignApi::class)
@@ -133,9 +152,111 @@ actual suspend fun postCameraPermissions(
     refuseAction: (isNever: Boolean) -> Unit,
     agreeAction: () -> Unit
 ) {
+    // 确保在主线程检查和请求权限
+    withContext(Dispatchers.Main) {
+        val status = AVCaptureDevice.authorizationStatusForMediaType(AVMediaTypeVideo)
 
+        when (status) {
+            AVAuthorizationStatusAuthorized -> {
+                agreeAction()
+            }
+
+            AVAuthorizationStatusNotDetermined -> {
+                val granted = suspendCancellableCoroutine<Boolean> { cont ->
+                    AVCaptureDevice.requestAccessForMediaType(AVMediaTypeVideo) { granted ->
+                        // 直接恢复协程，不需要再 dispatch
+                        if (cont.isActive) {
+                            cont.resume(granted) {}
+                        }
+                    }
+                }
+
+                if (granted) {
+                    agreeAction()
+                } else {
+                    refuseAction(false)
+                }
+            }
+
+            AVAuthorizationStatusDenied, AVAuthorizationStatusRestricted -> {
+                refuseAction(true)
+            }
+
+            else -> {
+                refuseAction(false)
+            }
+        }
+    }
 }
 
 actual suspend fun openCameraPermissionSettings() {
+    withContext(Dispatchers.Main) {
+        val url = NSURL(string = UIApplicationOpenSettingsURLString)
+        if (UIApplication.sharedApplication.canOpenURL(url)) {
+            UIApplication.sharedApplication.openURL(url)
+        }
+    }
+}
 
+actual suspend fun compressImage(
+    imageBytes: ByteArray,
+    maxSizeKb: Int
+): ByteArray? {
+    try {
+        // ByteArray 转 NSData
+        val nsData = imageBytes.usePinned { pinned ->
+            NSData.create(bytes = pinned.addressOf(0), length = imageBytes.size.toULong())
+        }
+
+        // NSData 转 UIImage
+        var image = UIImage.imageWithData(nsData) ?: return null
+
+        var quality = 0.9
+        var compressedData: NSData?
+
+        do {
+            compressedData = UIImageJPEGRepresentation(image, quality)
+
+            if (compressedData == null) return null
+
+            val dataSize = compressedData.length.toLong()
+            val targetSize = (maxSizeKb * 1024).toLong()
+
+            if (dataSize <= targetSize) {
+                break
+            }
+
+            if (quality > 0.1) {
+                quality -= 0.1
+            } else {
+                // 缩小尺寸
+                val scaleFactor = sqrt(targetSize.toDouble() / dataSize.toDouble())
+                val newSize = CGSizeMake(
+                    image.size.useContents { width * scaleFactor },
+                    image.size.useContents { height * scaleFactor }
+                )
+
+                UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
+                image.drawInRect(
+                    CGRectMake(
+                    0.0,
+                    0.0,
+                    newSize.useContents { width },
+                    newSize.useContents { height }
+                ))
+                image = UIGraphicsGetImageFromCurrentImageContext() ?: return null
+                UIGraphicsEndImageContext()
+
+                quality = 0.9
+            }
+
+        } while (dataSize > targetSize)
+
+        // NSData 转 ByteArray
+        return compressedData.bytes?.readBytes(compressedData.length.toInt())
+
+    } catch (e: Exception) {
+        e.printStackTrace()
+        return null
+    }
 }

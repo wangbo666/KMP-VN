@@ -62,10 +62,10 @@ kotlin {
             implementation(libs.coil3.coil.network.ktor)
             implementation(libs.accompanist.swiperefresh)
 
-            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
+            implementation(libs.kotlinx.datetime)
 
-
-
+            implementation(libs.peekaboo.ui)
+//            implementation(libs.peekaboo.image.picker)
         }
         iosMain {
             dependencies {

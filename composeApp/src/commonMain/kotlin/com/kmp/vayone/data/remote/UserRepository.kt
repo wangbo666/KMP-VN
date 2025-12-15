@@ -7,6 +7,7 @@ import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.HomeBean
 import com.kmp.vayone.data.HomeLoanBean
 import com.kmp.vayone.data.KycConfigBean
+import com.kmp.vayone.data.KycInfoBean
 import com.kmp.vayone.data.LoginBean
 import com.kmp.vayone.data.MessagePageBean
 import com.kmp.vayone.data.OrderBean
@@ -115,5 +116,9 @@ object UserRepository {
 
     suspend fun getKycConfig(): ApiResponse<KycConfigBean?> {
         return networkManager.post("api/user/app/kyc/config")
+    }
+
+    suspend fun getKycInfo(): ApiResponse<KycInfoBean?> {
+        return networkManager.post("api/user/app/kyc/info")
     }
 }
