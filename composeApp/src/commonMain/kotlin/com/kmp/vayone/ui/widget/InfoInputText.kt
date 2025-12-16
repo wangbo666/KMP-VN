@@ -67,7 +67,7 @@ fun InfoInputText(
     Column(modifier = modifier) {
         Text(
             text = title,
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             lineHeight = 14.sp,
@@ -84,7 +84,7 @@ fun InfoInputText(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             BasicTextField(
-                modifier= Modifier.onFocusChanged { focusState ->
+                modifier = Modifier.onFocusChanged { focusState ->
                     if (focusState.isFocused) {
                         scope.launch {
                             bringIntoViewRequester?.bringIntoView()
@@ -154,7 +154,7 @@ fun InfoText(
     Column(modifier = modifier) {
         Text(
             text = title,
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             lineHeight = 14.sp,
@@ -183,11 +183,13 @@ fun InfoText(
                 color = if (content.isBlank()) C_B4B0AD else C_524F4C,
                 fontWeight = FontWeight.Normal,
             )
-            Image(
-                painter = painterResource(Res.drawable.personal_bottom),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp)
-            )
+            if (isEnable) {
+                Image(
+                    painter = painterResource(Res.drawable.personal_bottom),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
         }
         if (isError) {
             Text(

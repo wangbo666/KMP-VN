@@ -13,16 +13,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -46,13 +42,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import coil3.Image
 import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.HomeBean
 import com.kmp.vayone.data.HomeLoanBean
 import com.kmp.vayone.data.ProductBean
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
+import com.kmp.vayone.ui.CertBankScreen
 import com.kmp.vayone.ui.widget.AutoSizeText
 import com.kmp.vayone.ui.widget.Banner
 import com.kmp.vayone.ui.widget.ColoredTextPart
@@ -62,6 +58,8 @@ import com.kmp.vayone.ui.widget.MultiColoredText
 import com.kmp.vayone.ui.widget.UiState
 import com.kmp.vayone.util.format
 import com.kmp.vayone.util.isLoggedIn
+import com.kmp.vayone.util.jumpCert
+import com.kmp.vayone.util.log
 import com.kmp.vayone.util.toAmountString
 import com.kmp.vayone.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
@@ -83,10 +81,8 @@ import theme.C_F8F4F0
 import theme.C_FC7700
 import theme.C_FEB201
 import theme.C_FF652E
-import theme.C_FFBB48
 import theme.C_FFD8AE
 import theme.C_FFE070
-import theme.C_FFEADB
 import theme.C_FFF4E6
 import theme.white
 import vayone.composeapp.generated.resources.Res
@@ -100,7 +96,6 @@ import vayone.composeapp.generated.resources.home_question2
 import vayone.composeapp.generated.resources.home_question3
 import vayone.composeapp.generated.resources.home_question4
 import vayone.composeapp.generated.resources.home_tag
-import vayone.composeapp.generated.resources.logout_icon
 import vayone.composeapp.generated.resources.product_icon
 
 @Composable
@@ -199,8 +194,7 @@ fun HomePage(
                                         start = 40.dp,
                                         end = 40.dp,
                                         top = 6.dp
-                                    )
-                                        .fillMaxWidth().height(48.dp)
+                                    ).fillMaxWidth().height(48.dp)
                                         .clip(RoundedCornerShape(30.dp))
                                         .background(
                                             Brush.horizontalGradient(
@@ -208,8 +202,23 @@ fun HomePage(
                                                     C_FC7700, C_FEB201
                                                 ),
                                             ), RoundedCornerShape(30.dp)
-                                        ).clickable {
-
+                                        )
+                                        .clickable {
+                                            if (!isLoggedIn()) {
+                                                navigate(Screen.Login)
+                                                return@clickable
+                                            }
+                                            if (!isCert) {
+                                                mainViewModel.authState.value?.jumpCert(
+                                                    navigate,
+                                                    false
+                                                )
+                                                return@clickable
+                                            }
+                                            if (mainViewModel.authState.value?.isFillBank() != true) {
+                                                navigate(Screen.BankCert(false))
+                                                return@clickable
+                                            }
                                         },
                                     color = white,
                                     fontSize = 18.sp,
@@ -961,12 +970,12 @@ fun ProductItem(
                 modifier = Modifier.align(Alignment.TopEnd)
                     .padding(end = 10.dp, top = 40.dp)
                     .height(32.dp)
-                    .clip(RoundedCornerShape(30.dp))
                     .background(C_FC7700, RoundedCornerShape(30.dp))
                     .padding(horizontal = 18.dp)
                     .clickable(enabled = item.canApply) {
                         onClick()
                     }
+                    .clip(RoundedCornerShape(30.dp))
             )
         }
         if (!item.canApply) {

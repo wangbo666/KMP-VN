@@ -1,6 +1,7 @@
 package com.kmp.vayone.data.remote
 
 import com.kmp.vayone.currentTimeMillis
+import com.kmp.vayone.data.AddressBean
 import com.kmp.vayone.data.AuthBean
 import com.kmp.vayone.data.BankCardBean
 import com.kmp.vayone.data.BannerBean
@@ -217,5 +218,9 @@ object UserRepository {
 
     suspend fun submitPersonalInfo(paramBean: ParamBean): ApiResponse<String?> {
         return networkManager.post("api/user/app/userBaseExt/save/v2", paramBean)
+    }
+
+    suspend fun getAddressList(id: String?): ApiResponse<List<AddressBean>?> {
+        return networkManager.post("api/user/app/address/list", ParamBean(parentId = id))
     }
 }

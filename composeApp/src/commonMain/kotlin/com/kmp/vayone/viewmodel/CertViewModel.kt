@@ -1,5 +1,6 @@
 package com.kmp.vayone.viewmodel
 
+import com.kmp.vayone.data.AddressBean
 import com.kmp.vayone.data.AuthBean
 import com.kmp.vayone.data.BankCardBean
 import com.kmp.vayone.data.CacheManager
@@ -233,6 +234,19 @@ class CertViewModel : BaseViewModel() {
             getUserAuthState {
                 _kycSubmitResult.tryEmit(it)
             }
+        }
+    }
+
+    private val _addressList = MutableStateFlow<List<AddressBean>?>(null)
+    val addressList: StateFlow<List<AddressBean>?> = _addressList
+    fun getAddressList(id: String?) {
+        _loadingState.value = UiState.Loading
+        launch({ UserRepository.getAddressList(id) }, false, onError = {
+            _loadingState.value = UiState.Error()
+            true
+        }) {
+            _loadingState.value = UiState.Success
+            _addressList.value = it
         }
     }
 }

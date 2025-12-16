@@ -6,6 +6,7 @@ import com.kmp.vayone.data.HomeBean
 import com.kmp.vayone.data.HomeLoanBean
 import com.kmp.vayone.data.MessageBean
 import com.kmp.vayone.data.ProductBean
+import com.kmp.vayone.data.UserAuthBean
 import com.kmp.vayone.data.remote.UserRepository
 import com.kmp.vayone.ui.widget.UiState
 import com.kmp.vayone.util.isLoggedIn
@@ -65,6 +66,8 @@ class MainViewModel : BaseViewModel() {
     private val _isCert = MutableStateFlow<Boolean>(false)
     val isCert: StateFlow<Boolean> = _isCert
 
+    private val _authState = MutableStateFlow<UserAuthBean?>(null)
+    val authState: StateFlow<UserAuthBean?> = _authState
     fun getAuthStatus() {
         if (!isLoggedIn()) {
             _isCert.value = false
@@ -75,6 +78,7 @@ class MainViewModel : BaseViewModel() {
             _loadingState.value = UiState.Error()
             true
         }) {
+            _authState.value = it
             getAuthConfig { configList ->
                 _isCert.value = (it?.isAuthPass(configList) == true) && isLoggedIn()
                 if (_isCert.value) {

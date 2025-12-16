@@ -70,8 +70,9 @@ fun WheelPickerForDate(
 ) {
     val centerIndex = visibleCount / 2
 
+    // 直接将目标项作为首个可见项，避免默认偏移导致初始选中错位
     val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = max(0, initialIndex - centerIndex)
+        initialFirstVisibleItemIndex = initialIndex
     )
 
     val snapLayoutInfoProvider = remember(listState) {
@@ -120,12 +121,12 @@ fun WheelPickerForDate(
             }
         }
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(itemHeight)
-                .border(1.dp, C_B4B0AD)
-        )
+//        Box(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .height(itemHeight)
+//                .border(1.dp, C_B4B0AD)
+//        )
     }
 
     // 初始化时立即回调
@@ -286,8 +287,9 @@ fun DatePickerBottomSheet(
                     )
                     .clickable {
                         val selectedDate = LocalDate(selectedYear, selectedMonth, selectedDay)
-                        if (selectedDate >= minDate && selectedDate <= maxDate) {
+                        if (selectedDate in minDate..maxDate) {
                             onConfirm(DateSelection(selectedYear, selectedMonth, selectedDay))
+                            onDismiss()
                         }
                     },
                 color = white,

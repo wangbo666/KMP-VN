@@ -206,8 +206,8 @@ data class WorkInfoEnumBean(
 
 @Serializable
 data class EnumBean(
-    val state: Int = 0,
-    val info: String = "",
+    var state: Int = 0,
+    var info: String = "",
 )
 
 @Serializable
@@ -222,9 +222,9 @@ data class PersonalInfoBean(
     val education: Int?,
     val currentAddress: String? = null,
     val cardNo: String? = null,
-    val province: Long?,
-    val city: Long?,
-    val region: Long?,
+    val province: Int?,
+    val city: Int?,
+    val region: Int?,
     val marryStateStr: String? = null,
     val address: String? = null,
     val purposeStr: String? = null,

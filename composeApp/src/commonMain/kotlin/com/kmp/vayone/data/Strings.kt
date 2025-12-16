@@ -304,7 +304,7 @@ object Strings {
         "please_choose_current_info" to "Please choose the correct information",
         "gender" to "Gender",
         "please_choose_gender" to "Please choose gender",
-        "please_choose" to "please choose",
+        "please_choose" to "Please choose",
         "please_enter_name" to "Please enter the name",
         "please_enter_id_card" to "Please enter the ID card number",
         "monthly_salary" to "Monthly salary",

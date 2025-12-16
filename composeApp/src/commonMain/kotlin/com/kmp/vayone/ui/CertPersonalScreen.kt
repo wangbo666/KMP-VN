@@ -49,6 +49,8 @@ import com.kmp.vayone.mobileType
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.openSystemPermissionSettings
 import com.kmp.vayone.postAllPermissions
+import com.kmp.vayone.ui.widget.AddressPicker
+import com.kmp.vayone.ui.widget.AddressSheet
 import com.kmp.vayone.ui.widget.ConfirmDialog
 import com.kmp.vayone.ui.widget.DatePickerBottomSheet
 import com.kmp.vayone.ui.widget.InfoInputText
@@ -127,13 +129,14 @@ fun CertPersonalScreen(
     var genderStatus by remember { mutableStateOf<Int?>(null) }
     var educationStatus by remember { mutableStateOf<Int?>(null) }
     var marryStatus by remember { mutableStateOf<Int?>(null) }
-    var provinceId by remember { mutableStateOf<Long?>(null) }
-    var cityId by remember { mutableStateOf<Long?>(null) }
-    var regionId by remember { mutableStateOf<Long?>(null) }
+    var provinceId by remember { mutableStateOf<Int?>(null) }
+    var cityId by remember { mutableStateOf<Int?>(null) }
+    var regionId by remember { mutableStateOf<Int?>(null) }
 
     var showPermissionGuideDialog by remember { mutableStateOf(false) }
     var permissionText by mutableStateOf("")
     var showBirthSheet by remember { mutableStateOf(false) }
+    var showAddressSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         certViewModel.errorEvent.collect { event ->
@@ -225,9 +228,12 @@ fun CertPersonalScreen(
                                 }
                                 return@clickable
                             }
-                            if (idNumText.isBlank() || idNumText.isValidIDCard()) {
+                            if (idNumText.isBlank() || !idNumText.isValidIDCard()) {
                                 isIDError = true
-                                toast(true, Strings["id_number_error"])
+                                toast(
+                                    true,
+                                    if (idNumText.isBlank()) Strings["please_enter_id_card"] else Strings["id_number_error"]
+                                )
                                 scope.launch {
                                     listState.animateScrollToItem(4)
                                 }
@@ -395,13 +401,15 @@ fun CertPersonalScreen(
                         title = Strings["id_card_number"],
                         content = idNumText,
                         hintText = Strings["please_enter_id_card"],
-                        errorText = Strings["please_enter_id_card"],
+                        errorText = if (idNumText.isBlank()) Strings["please_enter_id_card"] else Strings["id_number_error"],
                         bringIntoViewRequester = idRequester,
                         isError = isIDError,
                         keyboardType = KeyboardType.Number,
                     ) {
-                        idNumText = it
-                        isEducationError = false
+                        isIDError = false
+                        if (it.length <= 12) {
+                            idNumText = it
+                        }
                     }
                 }
                 item {
@@ -477,6 +485,8 @@ fun CertPersonalScreen(
                         isError = isProvinceError,
                         isEnable = !isCert,
                     ) {
+                        isAddressError = false
+                        showAddressSheet = true
                         scope.launch {
                             listState.animateScrollToItem(9)
                         }
@@ -575,8 +585,18 @@ fun CertPersonalScreen(
                     onDismiss = { showBirthSheet = false },
                     onConfirm = { date ->
                         birthText = date.toString()
+                        isBirthError = false
                     }
                 )
+            }
+            if (showAddressSheet) {
+                AddressSheet(onDismiss = { showAddressSheet = false }) { address, pId, cId, rId ->
+                    provinceText = address
+                    isProvinceError = false
+                    provinceId = pId
+                    cityId = cId
+                    regionId = rId
+                }
             }
         }
     }
