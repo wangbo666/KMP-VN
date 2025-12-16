@@ -188,11 +188,11 @@ data class KycInfoBean(
 
 @Serializable
 data class PersonalInfoEnumBean(
-    val gender: MutableList<EnumBean>? = null,
-    val language: MutableList<EnumBean>? = null,
-    val maritalStatus: MutableList<EnumBean>? = null,
-    val purpose: MutableList<EnumBean>? = null,
-    val education: MutableList<EnumBean>? = null,
+    val gender: List<EnumBean>? = null,
+    val language: List<EnumBean>? = null,
+    val maritalStatus: List<EnumBean>? = null,
+    val purpose: List<EnumBean>? = null,
+    val education: List<EnumBean>? = null,
 )
 
 @Serializable
@@ -206,7 +206,6 @@ data class WorkInfoEnumBean(
 
 @Serializable
 data class EnumBean(
-    val id: Int = 0,
     val state: Int = 0,
     val info: String = "",
 )

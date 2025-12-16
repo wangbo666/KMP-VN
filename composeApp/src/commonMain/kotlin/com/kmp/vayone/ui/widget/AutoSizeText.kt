@@ -71,6 +71,7 @@ fun AutoSizeText(
             fontFamily = fontFamily ?: style.fontFamily,
             textAlign = textAlign ?: style.textAlign
         ),
+        lineHeight = fontSize,
         maxLines = maxLines,
         overflow = TextOverflow.Visible,
         onTextLayout = { textLayoutResult ->

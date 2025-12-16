@@ -5,6 +5,9 @@ import com.kmp.vayone.data.BankCardBean
 import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.KycConfigBean
 import com.kmp.vayone.data.KycInfoBean
+import com.kmp.vayone.data.ParamBean
+import com.kmp.vayone.data.PersonalInfoBean
+import com.kmp.vayone.data.PersonalInfoEnumBean
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.data.UserAuthBean
 import com.kmp.vayone.data.remote.UserRepository
@@ -194,6 +197,42 @@ class CertViewModel : BaseViewModel() {
     private fun getUserAuthState(action: (UserAuthBean?) -> Unit) {
         launch({ UserRepository.getAuthStatus() }, true) {
             action.invoke(it)
+        }
+    }
+
+    private val _personalEnumResult = MutableStateFlow<PersonalInfoEnumBean?>(null)
+    val personalEnumResult: StateFlow<PersonalInfoEnumBean?> = _personalEnumResult
+    fun getEnums() {
+        if (_personalEnumResult.value != null) {
+            return
+        }
+        launch({
+            UserRepository.getPersonalInfoEnum()
+        }, true) {
+            _personalEnumResult.value = it
+        }
+    }
+
+    private val _personalInfoResult = MutableSharedFlow<PersonalInfoBean?>(replay = 1)
+    val personalInfoResult: SharedFlow<PersonalInfoBean?> = _personalInfoResult
+    fun getPersonalInfo() {
+        _loadingState.value = UiState.Loading
+        launch({ UserRepository.getPersonalInfo() }, onError = {
+            _loadingState.value = UiState.Error()
+            true
+        }) {
+            _loadingState.value = UiState.Success
+            _personalInfoResult.tryEmit(it)
+        }
+    }
+
+    private val _personalSubmitResult = MutableSharedFlow<UserAuthBean?>(replay = 1)
+    val personalSubmitResult: SharedFlow<UserAuthBean?> = _personalSubmitResult
+    fun submitPersonal(paramBean: ParamBean) {
+        launch({ UserRepository.submitPersonalInfo(paramBean) }, true) {
+            getUserAuthState {
+                _kycSubmitResult.tryEmit(it)
+            }
         }
     }
 }

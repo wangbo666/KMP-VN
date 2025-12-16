@@ -13,6 +13,8 @@ import com.kmp.vayone.data.LoginBean
 import com.kmp.vayone.data.MessagePageBean
 import com.kmp.vayone.data.OrderBean
 import com.kmp.vayone.data.ParamBean
+import com.kmp.vayone.data.PersonalInfoBean
+import com.kmp.vayone.data.PersonalInfoEnumBean
 import com.kmp.vayone.data.ProductBean
 import com.kmp.vayone.data.SignBean
 import com.kmp.vayone.data.TogetherRepaymentBean
@@ -203,5 +205,17 @@ object UserRepository {
 
     suspend fun faceCompare(): ApiResponse<String?> {
         return networkManager.post("api/user/app/kyc/face/compare")
+    }
+
+    suspend fun getPersonalInfoEnum(): ApiResponse<PersonalInfoEnumBean?> {
+        return networkManager.post("api/user/app/userBaseExt/getEnum")
+    }
+
+    suspend fun getPersonalInfo(): ApiResponse<PersonalInfoBean?> {
+        return networkManager.post("api/user/app/userBaseExt/info")
+    }
+
+    suspend fun submitPersonalInfo(paramBean: ParamBean): ApiResponse<String?> {
+        return networkManager.post("api/user/app/userBaseExt/save/v2", paramBean)
     }
 }

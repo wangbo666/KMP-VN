@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -161,15 +162,16 @@ fun CertItem(item: AuthBean, index: Int, onClick: (AuthBean) -> Unit) {
     Box(
         modifier = Modifier.fillMaxWidth().height(92.dp)
             .padding(horizontal = 16.dp)
-            .clickable {
-                onClick(item)
-            }
     ) {
         Row(
             modifier = Modifier.fillMaxWidth()
                 .padding(top = 18.dp, start = 36.dp)
                 .height(56.dp)
-                .background(C_FFF4E6, RoundedCornerShape(12.dp)),
+                .clip(RoundedCornerShape(12.dp))
+                .background(C_FFF4E6, RoundedCornerShape(12.dp))
+                .clickable {
+                    onClick(item)
+                },
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(

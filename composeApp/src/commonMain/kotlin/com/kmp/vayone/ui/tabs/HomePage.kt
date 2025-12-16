@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -52,6 +53,7 @@ import com.kmp.vayone.data.HomeLoanBean
 import com.kmp.vayone.data.ProductBean
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
+import com.kmp.vayone.ui.widget.AutoSizeText
 import com.kmp.vayone.ui.widget.Banner
 import com.kmp.vayone.ui.widget.ColoredTextPart
 import com.kmp.vayone.ui.widget.LoadingBox
@@ -280,14 +282,15 @@ fun HomeQuestion(isShow: Boolean = true) {
                     modifier = Modifier.padding(top = 8.dp).size(32.dp)
                         .align(Alignment.CenterHorizontally)
                 )
-                Text(
+                AutoSizeText(
                     text = Strings["home_question1"],
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     color = C_190E30,
-                    lineHeight = 17.sp,
+                    minFontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp,
+                    maxFontSize = 12.sp,
+                    maxLines = 2
                 )
             }
             Column(
@@ -300,14 +303,15 @@ fun HomeQuestion(isShow: Boolean = true) {
                     modifier = Modifier.padding(top = 8.dp).size(32.dp)
                         .align(Alignment.CenterHorizontally)
                 )
-                Text(
+                AutoSizeText(
                     text = Strings["home_question2"],
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     color = C_190E30,
-                    lineHeight = 17.sp,
+                    minFontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp,
+                    maxFontSize = 12.sp,
+                    maxLines = 2,
                 )
             }
         }
@@ -322,14 +326,15 @@ fun HomeQuestion(isShow: Boolean = true) {
                     modifier = Modifier.padding(top = 8.dp).size(32.dp)
                         .align(Alignment.CenterHorizontally)
                 )
-                Text(
+                AutoSizeText(
                     text = Strings["home_question3"],
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Center,
                     color = C_190E30,
-                    lineHeight = 17.sp,
+                    minFontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp,
+                    maxFontSize = 12.sp,
+                    maxLines = 2,
                 )
             }
             Column(
@@ -342,14 +347,15 @@ fun HomeQuestion(isShow: Boolean = true) {
                     modifier = Modifier.padding(top = 8.dp).size(32.dp)
                         .align(Alignment.CenterHorizontally)
                 )
-                Text(
+                AutoSizeText(
                     text = Strings["home_question4"],
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
                     textAlign = TextAlign.Center,
                     color = C_190E30,
-                    lineHeight = 17.sp,
+                    minFontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
-                    fontSize = 12.sp,
+                    maxFontSize = 12.sp,
+                    maxLines = 2,
                 )
             }
         }
@@ -372,12 +378,13 @@ fun HomeUnAuthTop(item: HomeBean = HomeBean()) {
             contentDescription = null,
             modifier = Modifier.padding(end = 15.dp).size(135.dp, 112.dp).align(Alignment.TopEnd)
         )
-        Text(
+        AutoSizeText(
             text = Strings["current_available_credit_str"],
             color = white,
-            fontSize = 16.sp,
-            lineHeight = 19.sp,
+            maxFontSize = 16.sp,
+            minFontSize = 13.sp,
             modifier = Modifier.padding(start = 20.dp, top = 33.dp)
+                .widthIn(max = 200.dp)
         )
         Text(
             text = item.maxAmount.toAmountString(item.currencySymbol),
@@ -396,50 +403,41 @@ fun HomeUnAuthTop(item: HomeBean = HomeBean()) {
             Column(
                 modifier = Modifier.weight(3f).padding(start = 22.dp).fillMaxHeight()
             ) {
-                Text(
+                AutoSizeText(
                     modifier = Modifier.padding(top = 13.dp),
                     text = item.annualizedInterestRate ?: "",
                     color = C_2D3C52,
-                    fontSize = 16.sp,
+                    maxFontSize = 16.sp,
+                    minFontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
-                    lineHeight = 16.sp,
                 )
-                Text(
+                AutoSizeText(
                     modifier = Modifier.padding(top = 4.dp),
                     text = Strings["annual_rate"],
                     color = C_2D3C52,
-                    fontSize = 14.sp,
-                    lineHeight = 14.sp,
+                    maxFontSize = 14.sp,
+                    minFontSize = 11.sp,
+                    fontWeight = FontWeight.Normal,
                 )
             }
             Column(
                 modifier = Modifier.padding(start = 15.dp, end = 16.dp).fillMaxHeight().weight(2.5f)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 13.dp),
-                ) {
-                    Text(
-                        text = item.loanTerm ?: "",
-                        color = C_2D3C52,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        lineHeight = 16.sp,
-                    )
-                    Text(
-                        text = Strings["days"],
-                        color = C_2D3C52,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Normal,
-                        lineHeight = 16.sp,
-                    )
-
-                }
-                Text(
+                AutoSizeText(
+                    modifier = Modifier.padding(top = 13.dp),
+                    text = "${item.loanTerm}${Strings["days"]}",
+                    color = C_2D3C52,
+                    maxFontSize = 16.sp,
+                    minFontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                AutoSizeText(
                     modifier = Modifier.padding(top = 4.dp),
                     text = Strings["loan_period"],
                     color = C_2D3C52,
-                    fontSize = 14.sp,
-                    lineHeight = 14.sp,
+                    maxFontSize = 14.sp,
+                    minFontSize = 11.sp,
+                    fontWeight = FontWeight.Normal,
                 )
             }
         }

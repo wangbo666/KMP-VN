@@ -91,7 +91,7 @@ actual suspend fun postAllPermissions(
                     permissions: MutableList<IPermission>,
                     allGranted: Boolean
                 ) {
-                    if (allGranted) action(permissions.map { it.toString() })
+                    if (allGranted) action(permissions.map { it.permissionName })
                 }
 
                 override fun onDenied(
