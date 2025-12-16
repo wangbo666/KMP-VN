@@ -21,3 +21,7 @@ fun String.format(vararg args: String): String {
     }
     return result
 }
+
+fun String?.toAmountString(symbol: String?): String {
+    return "${this ?: ""}${symbol ?: ""}".replace(".00", "")
+}

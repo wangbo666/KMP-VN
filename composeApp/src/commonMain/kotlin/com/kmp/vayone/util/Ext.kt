@@ -1,6 +1,9 @@
 package com.kmp.vayone.util
 
 import com.kmp.vayone.data.CacheManager
+import com.kmp.vayone.data.UserAuthBean
+import com.kmp.vayone.navigation.Screen
+import kotlinx.coroutines.launch
 
 fun isCertPass(configs: Map<String, Pair<Boolean, String?>>): Boolean {
     configs.forEach { (_, pair) ->
@@ -12,6 +15,45 @@ fun isCertPass(configs: Map<String, Pair<Boolean, String?>>): Boolean {
 
 fun isLoggedIn(): Boolean = CacheManager.getToken().isNotBlank()
 
-fun String?.toAmountString(symbol: String?): String {
-    return "${this ?: ""}${symbol ?: ""}".replace(".00", "")
+fun UserAuthBean.jumpCert(navigate: (Screen) -> Unit, isFromAuthPage: Boolean = true) {
+    val configList = CacheManager.getAuthConfigList().filterNot { it.isBlank() }
+    if (userAuthState == "30") {
+//        AuthSuccessActivity.launch(context)
+        return
+    }
+    if (isFromAuthPage
+        && isCertPass(
+            mapOf(
+                "KYC" to (configList.contains("KYC") to kycState),
+                "ID" to (configList.contains("ID") to idState),
+                "TELECOM" to (configList.contains("TELECOM") to telecomPermissionState)
+            )
+        )
+    ) {
+//        AuthSuccessActivity.launch(context)
+        return
+    }
+    configList.forEach {
+        when {
+            it.uppercase() == "KYC" && kycState != "30" -> {
+                navigate(Screen.KycCert(false))
+                return
+            }
+
+            it.uppercase() == "ID" && idState != "30" -> {
+                navigate(Screen.PersonalCert(false))
+                return
+            }
+
+            it.uppercase() == "BANK" && bankCardState != "30" -> {
+                navigate(Screen.BankCert(false))
+                return
+            }
+
+            it.uppercase() == "TELECOM" && telecomPermissionState != "30" -> {
+                navigate(Screen.ServiceCert(false))
+                return
+            }
+        }
+    }
 }

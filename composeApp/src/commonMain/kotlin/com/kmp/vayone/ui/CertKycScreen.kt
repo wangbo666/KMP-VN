@@ -55,15 +55,18 @@ import com.kmp.vayone.ui.widget.ConfirmDialog
 import com.kmp.vayone.ui.widget.LoadingBox
 import com.kmp.vayone.ui.widget.LoadingDialog
 import com.kmp.vayone.ui.widget.TopBar
-import com.kmp.vayone.ui.widget.UiState
 import com.kmp.vayone.util.format
+import com.kmp.vayone.util.jumpCert
 import com.kmp.vayone.util.log
 import com.kmp.vayone.viewmodel.CertViewModel
 import com.preat.peekaboo.ui.camera.CameraMode
 import com.preat.peekaboo.ui.camera.PeekabooCamera
 import com.preat.peekaboo.ui.camera.rememberPeekabooCameraState
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import theme.C_2B2621
@@ -107,6 +110,7 @@ fun CertKycScreen(
     val kycResult by certViewModel.kycResult.collectAsState()
     val scope = rememberCoroutineScope()
     var isShowCameraPermissionDialog by remember { mutableStateOf(false) }
+    val loadingState by certViewModel.loadingState.collectAsState()
 
     var currentCaptureType by remember { mutableStateOf("") } // "front", "back", "selfie"
     var showCamera by remember { mutableStateOf(false) }
@@ -126,24 +130,26 @@ fun CertKycScreen(
             scope.launch {
                 try {
                     // 压缩图片
-                    val compressed = compressImage(imageBytes, maxSizeKb = 250)
-                    "ImageByte:${compressed?.size}".log()
-                    if (currentCaptureType == "front") {
-                        frontByte = compressed
+                    val compressed = withContext(Dispatchers.IO) {
+                        compressImage(imageBytes, maxSizeKb = 250)
+                    }?.let {
+                        "ImageByte:${it.size}".log()
+                        if (currentCaptureType == "front") {
+                            frontByte = it
+                            certViewModel.submitKycCard("IDCARD_CARD_FRONT", it)
+                        }
+                        if (currentCaptureType == "back") {
+                            backByte = it
+                            certViewModel.submitKycCard("IDCARD_CARD_BACK", it)
+                        }
+                        if (currentCaptureType == "selfie") {
+                            selfByte = it
+                            certViewModel.submitKycSelf(it, null)
+                        }
                     }
-                    if (currentCaptureType == "back") {
-                        backByte = compressed
-                    }
-                    if (currentCaptureType == "selfie") {
-                        selfByte = compressed
-                    }
-                    if (compressed != null) {
-                        // 上传图片
-//                        certViewModel.uploadImage(compressed, currentCaptureType)
-//                        toast(true, "Upload successful")
-                    }
+
                 } catch (e: Exception) {
-//                    toast(true, "Error: ${e.message}")
+                    "SubmitError: ${e.message}".log()
                 }
                 showCamera = false
             }
@@ -151,14 +157,33 @@ fun CertKycScreen(
     )
 
     LaunchedEffect(Unit) {
+        certViewModel.getKycConfig()
+        certViewModel.getKycInfo()
+    }
+    LaunchedEffect(Unit) {
         certViewModel.errorEvent.collect { event ->
             toast(event.showToast, event.message)
         }
     }
     LaunchedEffect(Unit) {
-        certViewModel.getKycConfig()
+        certViewModel.kycSubmitCardResult.collect {
+            if (currentCaptureType == "front") {
+                frontUploadState = if (it) 1 else -1
+            } else {
+                backUploadState = if (it) 1 else -1
+            }
+        }
     }
-
+    LaunchedEffect(Unit) {
+        certViewModel.kycSubmitSelfResult.collect {
+            selfUploadState = if (it) 1 else -1
+        }
+    }
+    LaunchedEffect(Unit) {
+        certViewModel.kycSubmitResult.collect {
+            it?.jumpCert(navigate)
+        }
+    }
 
     Scaffold(modifier = Modifier.fillMaxSize().background(white).statusBarsPadding(), topBar = {
         TopBar(
@@ -189,7 +214,19 @@ fun CertKycScreen(
                             ),
                         ), RoundedCornerShape(30.dp)
                     ).clickable {
-
+                        if (kycConfig?.KYC_FRONT != 0 && kycResult?.frontImageUrl.isNullOrBlank() && frontUploadState != 1) {
+                            toast(true, Strings["please_upload_nic_card_front"])
+                            return@clickable
+                        }
+                        if (kycConfig?.KYC_BACK != 0 && kycResult?.backImageUrl.isNullOrBlank() && backUploadState != 1) {
+                            toast(true, Strings["please_upload_nic_card_back"])
+                            return@clickable
+                        }
+                        if (kycConfig?.FACE != 0 && kycResult?.liveImageUrl.isNullOrBlank() && selfUploadState != 1) {
+                            toast(true, Strings["please_upload_self_photo"])
+                            return@clickable
+                        }
+                        certViewModel.faceCompare()
                     },
                 color = white,
                 fontSize = 18.sp,
@@ -200,8 +237,11 @@ fun CertKycScreen(
         }
     }) { paddingValues ->
         LoadingBox(
-            UiState.Success,
-            Modifier.background(white).fillMaxSize().padding(paddingValues)
+            loadingState,
+            Modifier.background(white).fillMaxSize().padding(paddingValues),
+            onRetry = {
+                certViewModel.getKycInfo()
+            }
         ) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 item {
@@ -503,11 +543,13 @@ fun CertKycScreen(
                                                 isShowCameraPermissionDialog = it
                                             }) {
                                                 val isKyc = kycConfig?.FACE_COMPARE == 2
-                                                currentCaptureType = "selfie"
-                                                if (cameraState.cameraMode == CameraMode.Back) {
-                                                    cameraState.toggleCamera()
+                                                if (!isKyc) {
+                                                    currentCaptureType = "selfie"
+                                                    if (cameraState.cameraMode == CameraMode.Back) {
+                                                        cameraState.toggleCamera()
+                                                    }
+                                                    showCamera = true
                                                 }
-                                                showCamera = true
                                             }
                                         }
                                     }

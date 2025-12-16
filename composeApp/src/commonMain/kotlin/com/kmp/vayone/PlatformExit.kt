@@ -47,3 +47,5 @@ expect suspend fun compressImage(
     imageBytes: ByteArray,
     maxSizeKb: Int = 250
 ): ByteArray?
+
+expect fun randomUUID(): String

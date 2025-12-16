@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
+//import androidx.compose.ui.backhandler.BackHandler
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.AboutUsScreen
@@ -115,11 +116,11 @@ fun App() {
 
     MaterialTheme {
         Box {
-            if (mobileType() != "2") {
-//                BackHandler(enabled = backStack.size > 1) {
-//                    goBack()
-//                }
-            }
+//            if (mobileType() != "2") {
+//            BackHandler(enabled = backStack.size > 1) {
+//                goBack()
+//            }
+//            }
             AnimatedContent(
                 targetState = currentScreen,
                 transitionSpec = {

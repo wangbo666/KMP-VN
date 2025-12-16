@@ -58,11 +58,11 @@ open class BaseViewModel : ViewModel() {
                 }
             } catch (e: Exception) {
                 ("HttpException: ${e.message}").log()
-                val errorResponse = ApiResponse<T>(
+                val errorResponse = ApiResponse(
                     code = -1,
                     message = e.message ?: "Unknown error",
                     showToast = isShowErrorToast,
-                    data = null
+                    data = false
                 )
                 if (isShowErrorToast) {
                     _errorEvent.emit(errorResponse)

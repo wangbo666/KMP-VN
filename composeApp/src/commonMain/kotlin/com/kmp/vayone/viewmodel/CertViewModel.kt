@@ -9,7 +9,9 @@ import com.kmp.vayone.data.Strings
 import com.kmp.vayone.data.UserAuthBean
 import com.kmp.vayone.data.remote.UserRepository
 import com.kmp.vayone.ui.widget.UiState
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
@@ -154,6 +156,44 @@ class CertViewModel : BaseViewModel() {
         }) {
             _loadingState.value = UiState.Success
             _kycResult.value = it
+        }
+    }
+
+    private val _kycSubmitCardResult = MutableSharedFlow<Boolean>(replay = 1)
+    val kycSubmitCardResult: SharedFlow<Boolean> = _kycSubmitCardResult
+    fun submitKycCard(imageType: String, imageBytes: ByteArray) {
+        launch({ UserRepository.submitKycCard(imageType, imageBytes) }, true, onError = {
+            _kycSubmitCardResult.tryEmit(false)
+            true
+        }) {
+            _kycSubmitCardResult.tryEmit(true)
+        }
+    }
+
+    private val _kycSubmitSelfResult = MutableSharedFlow<Boolean>(replay = 1)
+    val kycSubmitSelfResult: SharedFlow<Boolean> = _kycSubmitSelfResult
+    fun submitKycSelf(imageBytes: ByteArray, liveBytes: ByteArray? = null) {
+        launch({ UserRepository.submitKycSelf(imageBytes, liveBytes) }, true, onError = {
+            _kycSubmitSelfResult.tryEmit(false)
+            true
+        }) {
+            _kycSubmitSelfResult.tryEmit(true)
+        }
+    }
+
+    private val _kycSubmitResult = MutableSharedFlow<UserAuthBean?>(replay = 1)
+    val kycSubmitResult: SharedFlow<UserAuthBean?> = _kycSubmitResult
+    fun faceCompare() {
+        launch({ UserRepository.faceCompare() }, true) {
+            getUserAuthState {
+                _kycSubmitResult.tryEmit(it)
+            }
+        }
+    }
+
+    private fun getUserAuthState(action: (UserAuthBean?) -> Unit) {
+        launch({ UserRepository.getAuthStatus() }, true) {
+            action.invoke(it)
         }
     }
 }

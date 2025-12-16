@@ -260,3 +260,7 @@ actual suspend fun compressImage(
         return null
     }
 }
+
+actual fun randomUUID(): String {
+    return NSUUID().UUIDString()
+}

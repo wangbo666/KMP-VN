@@ -1,5 +1,6 @@
 package com.kmp.vayone.data.remote
 
+import com.kmp.vayone.currentTimeMillis
 import com.kmp.vayone.data.AuthBean
 import com.kmp.vayone.data.BankCardBean
 import com.kmp.vayone.data.BannerBean
@@ -16,6 +17,18 @@ import com.kmp.vayone.data.ProductBean
 import com.kmp.vayone.data.SignBean
 import com.kmp.vayone.data.TogetherRepaymentBean
 import com.kmp.vayone.data.UserAuthBean
+import com.kmp.vayone.data.version_Name
+import com.kmp.vayone.mobileType
+import com.kmp.vayone.randomUUID
+import io.ktor.client.request.forms.formData
+import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
+import io.ktor.http.content.PartData
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonObject
 
 // 使用示例
 object UserRepository {
@@ -120,5 +133,75 @@ object UserRepository {
 
     suspend fun getKycInfo(): ApiResponse<KycInfoBean?> {
         return networkManager.post("api/user/app/kyc/info")
+    }
+
+    suspend fun submitKycCard(imgType: String, imageBytes: ByteArray): ApiResponse<String?> {
+        val list = withContext(Dispatchers.IO) {
+            formData {
+                // 添加图片文件
+                append(
+                    key = "image",
+                    value = imageBytes,
+                    headers = Headers.build {
+                        append(HttpHeaders.ContentType, "image/jpeg")
+                        append(
+                            HttpHeaders.ContentDisposition,
+                            "filename=\"${currentTimeMillis()}\""
+                        )
+                    }
+                )
+                // 添加其他参数
+                append("mobileType", mobileType())
+                append("appCode", CacheManager.APPCODE)
+                append("version", version_Name)
+                append("imgType", imgType)
+            }
+        }
+        return networkManager.postMultipart<String?>("api/user/app/kyc/save/v2", list)
+    }
+
+    suspend fun submitKycSelf(
+        faceFile: ByteArray,
+        livenessDataFile: ByteArray?
+    ): ApiResponse<String?> {
+        val list = withContext(Dispatchers.IO) {
+            formData {
+                // 添加图片文件
+                append(
+                    key = "faceFile",
+                    value = faceFile,
+                    headers = Headers.build {
+                        append(HttpHeaders.ContentType, "image/jpeg")
+                        append(
+                            HttpHeaders.ContentDisposition,
+                            "filename=\"${currentTimeMillis()}\""
+                        )
+                    }
+                )
+                livenessDataFile?.let {
+                    append(
+                        key = "livenessDataFile",
+                        value = livenessDataFile,
+                        headers = Headers.build {
+                            append(HttpHeaders.ContentType, "image/*")
+                            append(
+                                HttpHeaders.ContentDisposition,
+                                "filename=\"${currentTimeMillis()}\""
+                            )
+                        }
+                    )
+                }
+                // 添加其他参数
+                append("mobileType", mobileType())
+                append("appCode", CacheManager.APPCODE)
+                append("version", version_Name)
+                append("imageId", randomUUID())
+            }
+        }
+        return networkManager.postMultipart("api/user/app/kyc/liveness/anti/hack", list)
+    }
+
+    suspend fun faceCompare(): ApiResponse<String?> {
+        return networkManager.post("api/user/app/kyc/face/compare")
     }
 }

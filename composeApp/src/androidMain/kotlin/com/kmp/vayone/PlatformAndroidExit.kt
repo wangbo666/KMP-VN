@@ -13,6 +13,7 @@ import java.io.ByteArrayOutputStream
 import java.math.BigDecimal
 import java.security.MessageDigest
 import java.text.DecimalFormat
+import java.util.UUID
 import kotlin.collections.arrayListOf
 import kotlin.math.sqrt
 import kotlin.system.exitProcess
@@ -207,4 +208,8 @@ private fun fixImageOrientation(bitmap: Bitmap, imageBytes: ByteArray): Bitmap {
     } catch (e: Exception) {
         return bitmap
     }
+}
+
+actual fun randomUUID(): String {
+    return UUID.randomUUID().toString()
 }
