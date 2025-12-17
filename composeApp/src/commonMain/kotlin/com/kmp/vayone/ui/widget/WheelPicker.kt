@@ -164,7 +164,7 @@ fun WheelBottomSheet(
         ) {
             WheelPicker(
                 items = items,
-                initialIndex = max(initialIndex, 0),
+                initialIndex = 0,//max(initialIndex, 0),
                 onSelected = {
                     selectedItem = it
                 }

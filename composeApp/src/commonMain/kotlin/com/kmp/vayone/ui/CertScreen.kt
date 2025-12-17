@@ -143,7 +143,7 @@ fun CertScreen(
                             }
 
                             Strings["supple_info"] -> {
-//                                SuppleInfoActivity.launch(context, item.isCertified)
+                                navigate(Screen.SuppleInfo(item.isCertified, ""))
                             }
 
                             else -> {

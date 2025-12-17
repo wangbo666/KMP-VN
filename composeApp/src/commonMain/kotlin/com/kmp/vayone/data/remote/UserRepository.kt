@@ -246,4 +246,8 @@ object UserRepository {
     suspend fun addAccount(paramBean: ParamBean): ApiResponse<String?> {
         return networkManager.post("api/user/app/bank/addBank", paramBean)
     }
+
+    suspend fun submitSuppleInfo(paramBean: ParamBean): ApiResponse<String?> {
+        return networkManager.post("api/user/app/userBaseExt/save/work/v2", paramBean)
+    }
 }

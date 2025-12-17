@@ -39,6 +39,7 @@ import com.kmp.vayone.ui.SetPasswordScreen
 import com.kmp.vayone.ui.SetPasswordSuccessScreen
 import com.kmp.vayone.ui.SettingsScreen
 import com.kmp.vayone.ui.SplashScreen
+import com.kmp.vayone.ui.SuppleScreen
 import com.kmp.vayone.ui.WebViewScreen
 import com.kmp.vayone.ui.widget.ToastHost
 import kotlinx.coroutines.delay
@@ -174,6 +175,7 @@ fun App() {
 
                     is Screen.Home -> {
                         HomeScreen(
+                            isFromCertSuccess = screen.isFromCertSuccess,
                             toast = { show, toast ->
                                 showToast = show
                                 toastMessage = toast
@@ -301,6 +303,14 @@ fun App() {
 
                     Screen.CertSuccess -> CertSuccessScreen { navigate(it) }
                     Screen.AddAccount -> AddAccountScreen(
+                        toast = { show, toast ->
+                            showToast = show
+                            toastMessage = toast
+                        },
+                        onBack = { goBack() }) { navigate(it) }
+
+                    is Screen.SuppleInfo -> SuppleScreen(
+                        screen.isCert, screen.amount.replace(".00", ""),
                         toast = { show, toast ->
                             showToast = show
                             toastMessage = toast

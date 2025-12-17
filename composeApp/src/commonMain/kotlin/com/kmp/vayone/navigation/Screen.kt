@@ -5,7 +5,7 @@ import com.kmp.vayone.data.MessageBean
 sealed interface Screen {
     data object Splash : Screen
     data object Privacy : Screen
-    data class Home(val selectedIndex: Int = 0) : Screen
+    data class Home(val selectedIndex: Int = 0, val isFromCertSuccess: Boolean = false) : Screen
     data object Login : Screen
     data class WebView(val title: String, val url: String) : Screen
     data object AboutUs : Screen
@@ -31,4 +31,5 @@ sealed interface Screen {
     data object AccountCenter : Screen
 
     data object AddAccount : Screen
+    data class SuppleInfo(val isCert: Boolean, val amount: String) : Screen
 }

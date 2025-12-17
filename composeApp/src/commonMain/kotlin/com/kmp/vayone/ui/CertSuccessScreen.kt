@@ -118,7 +118,7 @@ fun CertSuccessScreen(
                 .background(C_FC7700, RoundedCornerShape((30.dp)))
                 .clip(RoundedCornerShape((30.dp)))
                 .clickable {
-                    navigate(Screen.Home())
+                    navigate(Screen.Home(isFromCertSuccess = true))
                 }
 
         )

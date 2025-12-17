@@ -307,4 +307,12 @@ class CertViewModel : BaseViewModel() {
             _addAccountResult.tryEmit(it)
         }
     }
+
+    private val _submitSuppleResult = MutableSharedFlow<String?>(replay = 1)
+    val submitSuppleResult: SharedFlow<String?> = _submitSuppleResult
+    fun submitSupple(paramBean: ParamBean) {
+        launch({ UserRepository.submitSuppleInfo(paramBean) }, true) {
+            _submitSuppleResult.tryEmit(it)
+        }
+    }
 }

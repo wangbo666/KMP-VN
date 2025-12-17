@@ -91,6 +91,10 @@ fun String.isValidIDCard(): Boolean {
     return pattern.matches(this)
 }
 
+fun String?.isPositive(): Boolean {
+    return this != null && this != "0"
+}
+
 fun String?.permissionToString(): String {
     return when (this) {
         "android.permission.READ_PHONE_STATE" -> Strings["dialog_permission_phone"]
@@ -102,4 +106,13 @@ fun String?.permissionToString(): String {
         "android.permission.CAMERA" -> Strings["camera_str"]
         else -> ""
     }
+}
+
+fun String.isValidEmail(): Boolean {
+    if (isBlank()) return false
+
+    val emailRegex = Regex(
+        "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
+    )
+    return emailRegex.matches(this)
 }

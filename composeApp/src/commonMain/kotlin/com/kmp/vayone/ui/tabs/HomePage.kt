@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -35,10 +36,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -48,7 +51,6 @@ import com.kmp.vayone.data.HomeLoanBean
 import com.kmp.vayone.data.ProductBean
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
-import com.kmp.vayone.ui.CertBankScreen
 import com.kmp.vayone.ui.widget.AutoSizeText
 import com.kmp.vayone.ui.widget.Banner
 import com.kmp.vayone.ui.widget.ColoredTextPart
@@ -58,8 +60,8 @@ import com.kmp.vayone.ui.widget.MultiColoredText
 import com.kmp.vayone.ui.widget.UiState
 import com.kmp.vayone.util.format
 import com.kmp.vayone.util.isLoggedIn
+import com.kmp.vayone.util.isPositive
 import com.kmp.vayone.util.jumpCert
-import com.kmp.vayone.util.log
 import com.kmp.vayone.util.toAmountString
 import com.kmp.vayone.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
@@ -70,11 +72,13 @@ import theme.C_190E30
 import theme.C_2B2621
 import theme.C_2D3C52
 import theme.C_3E4845
+import theme.C_45FD12
 import theme.C_524F4C
 import theme.C_72C4FF
 import theme.C_75707E
 import theme.C_7E7B79
 import theme.C_B4B0AD
+import theme.C_C4C4C4
 import theme.C_EAF393
 import theme.C_ED190E
 import theme.C_F8F4F0
@@ -82,6 +86,7 @@ import theme.C_FC7700
 import theme.C_FEB201
 import theme.C_FF652E
 import theme.C_FFD8AE
+import theme.C_FFD96E
 import theme.C_FFE070
 import theme.C_FFF4E6
 import theme.white
@@ -90,16 +95,22 @@ import vayone.composeapp.generated.resources.dialog_close
 import vayone.composeapp.generated.resources.empty_product
 import vayone.composeapp.generated.resources.home_arrow
 import vayone.composeapp.generated.resources.home_calm
+import vayone.composeapp.generated.resources.home_fill_bg_dialog
+import vayone.composeapp.generated.resources.home_gift_dialog
 import vayone.composeapp.generated.resources.home_icon
+import vayone.composeapp.generated.resources.home_pre_dialog
 import vayone.composeapp.generated.resources.home_question1
 import vayone.composeapp.generated.resources.home_question2
 import vayone.composeapp.generated.resources.home_question3
 import vayone.composeapp.generated.resources.home_question4
+import vayone.composeapp.generated.resources.home_refuse_dialog
+import vayone.composeapp.generated.resources.home_star_dialog
 import vayone.composeapp.generated.resources.home_tag
 import vayone.composeapp.generated.resources.product_icon
 
 @Composable
 fun HomePage(
+    isFromCertSuccess: Boolean = false,
     toast: (show: Boolean, message: String) -> Unit = { _, _ -> },
     navigate: (Screen) -> Unit,
 ) {
@@ -111,6 +122,10 @@ fun HomePage(
     val bannerList by mainViewModel.bannerList.collectAsState()
     var isShowPaymentFail by remember { mutableStateOf(false) }
     val homeProducts by mainViewModel.homeProducts.collectAsState()
+    var showPreDialog by remember { mutableStateOf(false) }
+    var enableLoanStr by remember { mutableStateOf("") }
+    var showRefuseDialog by remember { mutableStateOf(false) }
+    var showFillBankDialog by remember { mutableStateOf(isFromCertSuccess) }
 
     LaunchedEffect(Unit) {
         mainViewModel.errorEvent.collect { event ->
@@ -188,6 +203,8 @@ fun HomePage(
                                 ) {
                                     MarqueeText()
                                 }
+                                val isEnable =
+                                    !isCert || (authData?.togetherLoanSign == 1 && authData?.userCreditAmount.isPositive())
                                 Text(
                                     text = if (isCert) Strings["withdrawal"] else Strings["borrow_now"],
                                     modifier = Modifier.padding(
@@ -198,12 +215,12 @@ fun HomePage(
                                         .clip(RoundedCornerShape(30.dp))
                                         .background(
                                             Brush.horizontalGradient(
-                                                colors = listOf(
+                                                colors = if (isEnable) listOf(
                                                     C_FC7700, C_FEB201
-                                                ),
+                                                ) else listOf(C_C4C4C4, C_C4C4C4),
                                             ), RoundedCornerShape(30.dp)
                                         )
-                                        .clickable {
+                                        .clickable(isEnable) {
                                             if (!isLoggedIn()) {
                                                 navigate(Screen.Login)
                                                 return@clickable
@@ -246,11 +263,58 @@ fun HomePage(
                                 isShowPaymentFail = false
                             }
                             HomeQuestion(!isCert)
-                            HomeProductList(homeProducts, navigate)
+                            HomeProductList(homeProducts, navigate) { item ->
+                                if (mainViewModel.authState.value?.isFillBank() != true) {
+                                    navigate(Screen.BankCert(false))
+                                    return@HomeProductList
+                                }
+                                if (item.creditStatus == 2) {
+                                    showPreDialog = true
+                                    enableLoanStr = item.enableLoanStr ?: ""
+                                    return@HomeProductList
+                                }
+                                if (item.creditStatus == 0) {
+                                    showRefuseDialog = true
+                                    return@HomeProductList
+                                }
+                                if (item.showConditionTypeSign == "1") {
+                                    navigate(Screen.SuppleInfo(false, item.maxLoanAmount ?: ""))
+                                    return@HomeProductList
+                                }
+                                when (item.jumpType) {
+                                    1 -> {
+//                                        goExternalBrowser(item.downloadUrl ?: "")
+                                    }
+
+                                    2 -> {
+//                                        goGooglePlay(item.downloadUrl ?: "")
+                                    }
+
+                                    else -> {
+//                                        mainViewModel.getProductDetail(
+//                                            item.productId.toString(),
+//                                            item.maxLoanAmount.toString()
+//                                        )
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
+        }
+        ShowPreHomeDialog(showPreDialog, enableLoanStr) {
+            showPreDialog = false
+        }
+        ShowRefuseDialog(showRefuseDialog) {
+            showRefuseDialog = false
+        }
+        ShowFillBankDialog(
+            showFillBankDialog && isFromCertSuccess,
+            authData?.loanAmountRange ?: "0",
+            navigate
+        ) {
+            showFillBankDialog = false
         }
     }
 }
@@ -659,7 +723,7 @@ fun PreDenied(isShow: Boolean, date: String) {
             .background(color = white, RoundedCornerShape(16.dp))
     ) {
         Text(
-            text = Strings["home_pre"],
+            text = Strings["home_pre_dialog"],
             fontSize = 16.sp,
             color = C_ED190E,
             fontWeight = FontWeight.Bold,
@@ -682,7 +746,7 @@ fun PreDenied(isShow: Boolean, date: String) {
 @Preview
 @Composable
 fun PreHomePage() {
-    ProductItem(ProductBean(), {}) {}
+    ShowFillBankDialog(true, navigate = {}) {}
 }
 
 @Composable
@@ -783,6 +847,7 @@ fun HomeCalm(date: String = "") {
 fun HomeProductList(
     list: List<ProductBean> = arrayListOf(),
     navigate: (Screen) -> Unit,
+    onClick: (ProductBean) -> Unit,
 ) {
     if (list.isEmpty()) return
     Column(
@@ -802,9 +867,7 @@ fun HomeProductList(
             fontSize = 18.sp,
         )
         list.forEach { product ->
-            ProductItem(product, navigate) {
-                // 点击回调
-            }
+            ProductItem(product, navigate, onClick)
         }
     }
 }
@@ -813,7 +876,7 @@ fun HomeProductList(
 fun ProductItem(
     item: ProductBean,
     navigate: (Screen) -> Unit,
-    onClick: () -> Unit,
+    onClick: (ProductBean) -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -918,6 +981,9 @@ fun ProductItem(
                         .fillMaxWidth()
                         .height(40.dp)
                         .background(C_FFF4E6, RoundedCornerShape(30.dp))
+                        .clickable(enabled = item.canApply) {
+                            navigate(Screen.SuppleInfo(false, item.maxLoanAmount ?: ""))
+                        }
                 ) {
                     Text(
                         text = Strings["go_add_info_str"],
@@ -970,12 +1036,12 @@ fun ProductItem(
                 modifier = Modifier.align(Alignment.TopEnd)
                     .padding(end = 10.dp, top = 40.dp)
                     .height(32.dp)
+                    .clip(RoundedCornerShape(30.dp))
                     .background(C_FC7700, RoundedCornerShape(30.dp))
                     .padding(horizontal = 18.dp)
                     .clickable(enabled = item.canApply) {
-                        onClick()
+                        onClick(item)
                     }
-                    .clip(RoundedCornerShape(30.dp))
             )
         }
         if (!item.canApply) {
@@ -992,6 +1058,205 @@ fun ProductItem(
                     fontWeight = FontWeight.Bold,
                 )
             }
+        }
+    }
+}
+
+@Composable
+fun ShowPreHomeDialog(isShow: Boolean = true, date: String, onDismiss: () -> Unit) {
+    if (!isShow) return
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier.fillMaxWidth()
+                .background(white, RoundedCornerShape(16.dp))
+        ) {
+            Image(
+                painter = painterResource(Res.drawable.dialog_close),
+                contentDescription = null,
+                modifier = Modifier.padding(top = 10.dp, end = 10.dp).size(24.dp)
+                    .align(Alignment.End)
+                    .clickable {
+                        onDismiss()
+                    },
+            )
+            Image(
+                painter = painterResource(Res.drawable.home_pre_dialog),
+                contentDescription = null,
+                modifier = Modifier.padding(top = 20.dp).size(60.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+            Text(
+                modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 18.dp),
+                text = Strings["pre_credit_has_expired"],
+                fontSize = 16.sp,
+                lineHeight = 16.sp,
+                color = C_2B2621,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+            MultiColoredText(
+                Strings["pre_credit_has_expired_tips"].format(
+                    date
+                ),
+                listOf(
+                    ColoredTextPart(date, C_524F4C, 14.sp) {
+
+                    }
+                ),
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 20.dp, end = 20.dp, bottom = 20.dp, top = 12.dp),
+                defaultColor = C_7E7B79,
+                defaultFontSize = 12.sp,
+                defaultFontWeight = FontWeight.Normal,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+fun ShowRefuseDialog(isShow: Boolean = true, onDismiss: () -> Unit) {
+    if (!isShow) return
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier.fillMaxWidth()
+                .background(white, RoundedCornerShape(16.dp))
+        ) {
+            Image(
+                painter = painterResource(Res.drawable.dialog_close),
+                contentDescription = null,
+                modifier = Modifier.padding(top = 10.dp, end = 10.dp).size(24.dp)
+                    .align(Alignment.End)
+                    .clickable {
+                        onDismiss()
+                    },
+            )
+            Image(
+                painter = painterResource(Res.drawable.home_refuse_dialog),
+                contentDescription = null,
+                modifier = Modifier.padding(top = 20.dp).size(70.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+            Text(
+                modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 18.dp),
+                text = Strings["pre_credit_has_expired"],
+                fontSize = 16.sp,
+                lineHeight = 16.sp,
+                color = C_2B2621,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 20.dp, end = 20.dp, bottom = 20.dp, top = 12.dp),
+                color = C_7E7B79,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Normal,
+                textAlign = TextAlign.Center,
+                text = Strings["dialog_home_refuse"]
+            )
+        }
+    }
+}
+
+@Composable
+fun ShowFillBankDialog(
+    isShow: Boolean = true,
+    amount: String = "1000",
+    navigate: (Screen) -> Unit,
+    onDismiss: () -> Unit
+) {
+    if (!isShow) return
+    Dialog(onDismissRequest = onDismiss) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Image(
+                painter = painterResource(Res.drawable.home_fill_bg_dialog),
+                contentDescription = null,
+                modifier = Modifier.matchParentSize(),
+                contentScale = ContentScale.FillBounds
+            )
+            Image(
+                painter = painterResource(Res.drawable.home_star_dialog),
+                contentDescription = null,
+                modifier = Modifier.padding(start = 18.dp, top = 22.dp).size(32.dp),
+            )
+            Text(
+                text = Strings["dialog_auth_title"],
+                modifier = Modifier.padding(start = 18.dp, top = 51.dp).width(158.dp),
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                lineHeight = 20.sp,
+                color = C_45FD12,
+            )
+            Image(
+                painter = painterResource(Res.drawable.home_gift_dialog),
+                contentDescription = null,
+                modifier = Modifier.padding(end = 22.dp, top = 16.dp).size(147.dp)
+                    .align(Alignment.TopEnd),
+            )
+            Image(
+                painter = painterResource(Res.drawable.dialog_close),
+                contentDescription = null,
+                modifier = Modifier.padding(end = 10.dp, top = 10.dp).size(24.dp)
+                    .align(Alignment.TopEnd)
+                    .clickable {
+                        onDismiss()
+                    })
+            Column(
+                modifier = Modifier.padding(
+                    top = 160.dp,
+                    start = 20.dp,
+                    end = 20.dp,
+                    bottom = 89.dp
+                ).fillMaxWidth()
+                    .background(white, RoundedCornerShape(12.dp))
+            ) {
+                Text(
+                    text = Strings["amount_range"],
+                    fontSize = 18.sp,
+                    lineHeight = 18.sp,
+                    color = C_190E30,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.fillMaxWidth().padding(top = 18.dp),
+                    textAlign = TextAlign.Center,
+                )
+                Text(
+                    text = amount,
+                    fontSize = 20.sp,
+                    lineHeight = 20.sp,
+                    color = C_FC7700,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = 4.dp, start = 8.dp, end = 8.dp),
+                    textAlign = TextAlign.Center,
+                )
+                Text(
+                    text = Strings["dialog_auth_desc"],
+                    fontSize = 13.sp,
+                    lineHeight = 13.sp,
+                    color = C_75707E,
+                    fontWeight = FontWeight.Normal,
+                    modifier = Modifier.fillMaxWidth()
+                        .padding(top = 15.dp, start = 8.dp, end = 8.dp, bottom = 17.dp),
+                    textAlign = TextAlign.Center,
+                )
+            }
+            Text(
+                text = Strings["immediate_loan"],
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                color = C_2B2621,
+                textAlign = TextAlign.Center,
+                lineHeight = 48.sp,
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 20.dp, end = 20.dp, bottom = 20.dp)
+                    .clip(RoundedCornerShape((30.dp)))
+                    .height(48.dp).background(C_FFD96E, RoundedCornerShape(30.dp))
+                    .align(Alignment.BottomCenter)
+                    .clickable {
+                        navigate(Screen.BankCert(false))
+                    }
+            )
         }
     }
 }
