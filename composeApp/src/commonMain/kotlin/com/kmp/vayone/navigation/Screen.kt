@@ -25,6 +25,10 @@ sealed interface Screen {
     data class PersonalCert(val isCert: Boolean) : Screen
     data class BankCert(val isCert: Boolean) : Screen
     data class ServiceCert(val isCert: Boolean) : Screen
+
+    data object CertSuccess : Screen
     data object OrderCenter : Screen
     data object AccountCenter : Screen
+
+    data object AddAccount : Screen
 }

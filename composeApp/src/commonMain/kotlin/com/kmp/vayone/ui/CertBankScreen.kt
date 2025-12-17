@@ -40,9 +40,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kmp.vayone.data.CacheManager.getAuthConfigList
+import com.kmp.vayone.data.ParamBean
+import com.kmp.vayone.data.PayChannelBean
+import com.kmp.vayone.data.RelativesBean
 import com.kmp.vayone.data.Strings
+import com.kmp.vayone.data.WorkInfoEnumBean
 import com.kmp.vayone.navigation.Screen
+import com.kmp.vayone.openSystemPermissionSettings
 import com.kmp.vayone.postAllPermissions
+import com.kmp.vayone.ui.widget.BankSelection
 import com.kmp.vayone.ui.widget.ConfirmDialog
 import com.kmp.vayone.ui.widget.InfoInputText
 import com.kmp.vayone.ui.widget.InfoText
@@ -50,6 +56,7 @@ import com.kmp.vayone.ui.widget.LoadingBox
 import com.kmp.vayone.ui.widget.LoadingDialog
 import com.kmp.vayone.ui.widget.TopBar
 import com.kmp.vayone.ui.widget.UiState
+import com.kmp.vayone.ui.widget.WheelBottomSheet
 import com.kmp.vayone.util.format
 import com.kmp.vayone.util.permissionToString
 import com.kmp.vayone.viewmodel.CertViewModel
@@ -81,6 +88,7 @@ fun CertBankScreen(
     val loadingState by certViewModel.loadingState.collectAsState()
     var isShowConfirmExitDialog by remember { mutableStateOf(false) }
     var permissionText by mutableStateOf("")
+    var showPermissionGuideDialog by remember { mutableStateOf(false) }
     var bankText by remember { mutableStateOf("") }
     var isBankError by remember { mutableStateOf(false) }
     var holderNameText by remember { mutableStateOf("") }
@@ -102,16 +110,55 @@ fun CertBankScreen(
     var contactPhone2Text by remember { mutableStateOf("") }
     var isContactPhone2Error by remember { mutableStateOf(false) }
 
+    var showBankSheet by remember { mutableStateOf(false) }
+    var showContact1Sheet by remember { mutableStateOf(false) }
+    var showContact2Sheet by remember { mutableStateOf(false) }
+    var bankInfo by remember { mutableStateOf<PayChannelBean?>(null) }
+    val workEnum by certViewModel.workEnumResult.collectAsState()
+    var relativesStatus by remember { mutableStateOf<Int?>(null) }
+    var friendStatus by remember { mutableStateOf<Int?>(null) }
+
     LaunchedEffect(Unit) {
         certViewModel.errorEvent.collect { event ->
             toast(event.showToast, event.message)
+        }
+    }
+    LaunchedEffect(Unit) {
+        if (!isCert) {
+            certViewModel.getPersonalInfo()
+        }
+    }
+    LaunchedEffect(Unit) {
+        certViewModel.getContactInfo()
+    }
+    LaunchedEffect(Unit) {
+        certViewModel.personalInfoResult.collect {
+            holderNameText = it?.firstName ?: ""
+        }
+    }
+    LaunchedEffect(Unit) {
+        certViewModel.submitBankResult.collect {
+            toast(true, Strings["submit_success"])
+            onBack()
+        }
+    }
+    LaunchedEffect(Unit) {
+        certViewModel.contactInfo.collect {
+            it?.let {
+                contact1Text = it.relativesStr ?: ""
+                contactPhone1Text = it.relativesMobile ?: ""
+                contactName1Text = it.relativesName ?: ""
+                contact2Text = it.otherRelativesStr ?: ""
+                contactPhone2Text = it.otherMobile ?: ""
+                contactName2Text = it.otherName ?: ""
+            }
         }
     }
     Scaffold(
         modifier = Modifier.fillMaxSize().background(white).statusBarsPadding().imePadding(),
         topBar = {
             TopBar(
-                Strings["bank_and_contact"]
+                if (isCert) Strings["contact_info"] else Strings["bank_and_contact"]
             ) {
                 if (isCert) {
                     onBack()
@@ -138,14 +185,106 @@ fun CertBankScreen(
                                 ),
                             ), RoundedCornerShape(30.dp)
                         ).clickable {
+                            if (bankText.isBlank()) {
+                                scope.launch {
+                                    listState.animateScrollToItem(1)
+                                }
+                                isBankError = true
+                                return@clickable
+                            }
+                            if (holderNameText.isBlank()) {
+                                scope.launch {
+                                    listState.animateScrollToItem(2)
+                                }
+                                isHolderNameError = true
+                                return@clickable
+                            }
+                            if (bankAccountText.isBlank()) {
+                                scope.launch {
+                                    listState.animateScrollToItem(3)
+                                }
+                                isBankAccountError = true
+                                return@clickable
+                            }
+                            if (confirmBankAccountText.isBlank() || confirmBankAccountText != bankAccountText) {
+                                scope.launch {
+                                    listState.animateScrollToItem(4)
+                                }
+                                isConfirmBankAccountError = true
+                                return@clickable
+                            }
+                            if (contact1Text.isBlank()) {
+                                scope.launch {
+                                    listState.animateScrollToItem(6)
+                                }
+                                isContact1Error = true
+                                return@clickable
+                            }
+                            if (contactName1Text.isBlank()) {
+                                scope.launch {
+                                    listState.animateScrollToItem(7)
+                                }
+                                isContactName1Error = true
+                                return@clickable
+                            }
+                            if (contactPhone1Text.isBlank()) {
+                                scope.launch {
+                                    listState.animateScrollToItem(8)
+                                }
+                                isContactPhone1Error = true
+                                return@clickable
+                            }
+                            if (contact2Text.isBlank()) {
+                                scope.launch {
+                                    listState.animateScrollToItem(9)
+                                }
+                                isContact2Error = true
+                                return@clickable
+                            }
+                            if (contactName2Text.isBlank()) {
+                                scope.launch {
+                                    listState.animateScrollToItem(10)
+                                }
+                                isContactName2Error = true
+                                return@clickable
+                            }
+                            if (contactPhone2Text.isBlank()) {
+                                scope.launch {
+                                    listState.animateScrollToItem(11)
+                                }
+                                isContactPhone2Error = true
+                                return@clickable
+                            }
                             scope.launch {
                                 postAllPermissions(refuseAction = { isNever, permissions ->
                                     if (isNever) {
                                         permissionText =
                                             permissions.joinToString { it.permissionToString() }
-                                        isShowConfirmExitDialog = true
+                                        showPermissionGuideDialog = true
                                     }
                                 }) {
+                                    certViewModel.submitContactBank(
+                                        ParamBean(
+                                            bankInfoId = bankInfo?.countryId.toString(),
+                                            bankId = bankInfo?.id.toString(),
+                                            accountUser = holderNameText,
+                                            bankNo = bankAccountText,
+                                            bankCode = bankInfo?.bankCode,
+                                            bankName = bankInfo?.bankName,
+                                            relativesInfoVOList = arrayListOf(
+                                                RelativesBean(
+                                                    relativesStatus,
+                                                    contactName1Text,
+                                                    contactPhone1Text
+                                                ),
+                                                RelativesBean(
+                                                    friendStatus,
+                                                    contactName2Text,
+                                                    contactPhone2Text
+                                                )
+                                            )
+                                        )
+                                    )
                                 }
                             }
                         },
@@ -158,7 +297,7 @@ fun CertBankScreen(
             }
         }) { paddingValues ->
         LoadingBox(
-            UiState.Success,
+            loadingState,
             Modifier.background(white).fillMaxSize().padding(paddingValues)
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
@@ -166,103 +305,103 @@ fun CertBankScreen(
                     })
                 },
             onRetry = {
-                certViewModel.getPersonalInfo()
+                certViewModel.getContactInfo()
             }
         ) {
             LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
-                item {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth()
-                                .height(44.dp).background(C_FFF4E6)
-                                .padding(horizontal = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                if (!isCert) {
+                    item {
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth()
+                                    .height(44.dp).background(C_FFF4E6)
+                                    .padding(horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Image(
+                                    painter = painterResource(Res.drawable.bank_cert),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Text(
+                                    text = Strings["bank_account"],
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 18.sp,
+                                    lineHeight = 18.sp,
+                                    color = C_FC7700,
+                                    modifier = Modifier.padding(start = 6.dp).weight(1f)
+                                )
+                            }
+                            if (!isCert) {
+                                Text(
+                                    text = Strings["bank_tips"],
+                                    fontSize = 12.sp,
+                                    lineHeight = 17.sp,
+                                    modifier = Modifier.padding(
+                                        start = 16.dp,
+                                        end = 16.dp,
+                                        top = 8.dp
+                                    ),
+                                    color = C_7E7B79,
+                                    textAlign = TextAlign.Start
+                                )
+                            }
+                        }
+                    }
+                    item {
+                        InfoText(
+                            title = Strings["bank"],
+                            content = bankText,
+                            hintText = Strings["please_choose_bank"],
+                            errorText = Strings["please_choose_current_info"],
+                            isError = isBankError,
+                            isEnable = !isCert,
                         ) {
-                            Image(
-                                painter = painterResource(Res.drawable.bank_cert),
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Text(
-                                text = Strings["bank_account"],
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp,
-                                lineHeight = 18.sp,
-                                color = C_FC7700,
-                                modifier = Modifier.padding(start = 6.dp).weight(1f)
-                            )
-                        }
-                        if (!isCert) {
-                            Text(
-                                text = Strings["bank_tips"],
-                                fontSize = 12.sp,
-                                lineHeight = 17.sp,
-                                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
-                                color = C_7E7B79,
-                                textAlign = TextAlign.Start
-                            )
+                            showBankSheet = true
                         }
                     }
-                }
-                item {
-                    InfoText(
-                        title = Strings["bank"],
-                        content = bankText,
-                        hintText = Strings["please_choose_bank"],
-                        errorText = Strings["please_choose_current_info"],
-                        isError = isBankError,
-                        isEnable = !isCert,
-                    ) {
-                        isBankError = false
-                        scope.launch {
-                            listState.animateScrollToItem(2)
+                    item {
+                        InfoInputText(
+                            title = Strings["cardholder_name"],
+                            content = holderNameText,
+                            hintText = Strings["please_enter_holder_name"],
+                            errorText = Strings["please_enter_holder_name"],
+                            isError = isHolderNameError,
+                        ) {
+                            isHolderNameError = false
+                            holderNameText = it
                         }
                     }
-                }
-                item {
-                    InfoInputText(
-                        title = Strings["cardholder_name"],
-                        content = holderNameText,
-                        hintText = Strings["please_enter_holder_name"],
-                        errorText = Strings["please_enter_holder_name"],
-                        isError = isHolderNameError,
-                    ) {
-                        isHolderNameError = false
-                        holderNameText = it
-                        scope.launch {
-                            listState.animateScrollToItem(3)
+                    item {
+                        InfoInputText(
+                            title = Strings["bank_account"],
+                            content = bankAccountText,
+                            hintText = Strings["please_enter_bank_account"],
+                            errorText = Strings["please_enter_bank_account"],
+                            isError = isBankAccountError,
+                            keyboardType = KeyboardType.Number,
+                        ) {
+                            isBankAccountError = false
+                            bankAccountText = it
+                            if (bankAccountText == confirmBankAccountText) {
+                                isConfirmBankAccountError = false
+                            }
                         }
                     }
-                }
-                item {
-                    InfoInputText(
-                        title = Strings["bank_account"],
-                        content = bankAccountText,
-                        hintText = Strings["please_enter_bank_account"],
-                        errorText = Strings["please_enter_bank_account"],
-                        isError = isBankAccountError,
-                        keyboardType = KeyboardType.Number,
-                    ) {
-                        isBankAccountError = false
-                        bankAccountText = it
-                        scope.launch {
-                            listState.animateScrollToItem(4)
-                        }
-                    }
-                }
-                item {
-                    InfoInputText(
-                        title = Strings["bank_account"],
-                        content = confirmBankAccountText,
-                        hintText = Strings["please_enter_bank_account"],
-                        errorText = Strings["bank_account_not_match"],
-                        isError = isConfirmBankAccountError,
-                        keyboardType = KeyboardType.Number,
-                    ) {
-                        isConfirmBankAccountError = false
-                        confirmBankAccountText = it
-                        scope.launch {
-                            listState.animateScrollToItem(5)
+                    item {
+                        InfoInputText(
+                            title = Strings["bank_account"],
+                            content = confirmBankAccountText,
+                            hintText = Strings["please_enter_bank_account"],
+                            errorText = Strings["bank_account_not_match"],
+                            isError = isConfirmBankAccountError,
+                            keyboardType = KeyboardType.Number,
+                        ) {
+                            isConfirmBankAccountError = false
+                            if (bankAccountText == confirmBankAccountText) {
+                                isBankAccountError = false
+                            }
+                            confirmBankAccountText = it
                         }
                     }
                 }
@@ -310,10 +449,8 @@ fun CertBankScreen(
                         isError = isContact1Error,
                         isEnable = !isCert,
                     ) {
-                        isContact1Error = false
-                        scope.launch {
-                            listState.animateScrollToItem(7)
-                        }
+                        certViewModel.getWorkEnums()
+                        showContact1Sheet = true
                     }
                 }
                 item {
@@ -326,9 +463,6 @@ fun CertBankScreen(
                     ) {
                         isContactName1Error = false
                         contactName1Text = it
-                        scope.launch {
-                            listState.animateScrollToItem(8)
-                        }
                     }
                 }
                 item {
@@ -342,9 +476,6 @@ fun CertBankScreen(
                     ) {
                         isContactPhone1Error = false
                         contactPhone1Text = it
-                        scope.launch {
-                            listState.animateScrollToItem(9)
-                        }
                     }
                 }
                 item {
@@ -356,10 +487,8 @@ fun CertBankScreen(
                         isError = isContact2Error,
                         isEnable = !isCert,
                     ) {
-                        isContact2Error = true
-                        scope.launch {
-                            listState.animateScrollToItem(10)
-                        }
+                        certViewModel.getWorkEnums()
+                        showContact2Sheet = true
                     }
                 }
                 item {
@@ -372,9 +501,6 @@ fun CertBankScreen(
                     ) {
                         isContactName2Error = false
                         contactName2Text = it
-                        scope.launch {
-                            listState.animateScrollToItem(11)
-                        }
                     }
                 }
                 item {
@@ -388,9 +514,6 @@ fun CertBankScreen(
                     ) {
                         isContactPhone2Error = false
                         contactPhone2Text = it
-                        scope.launch {
-                            listState.animateScrollToItem(12)
-                        }
                     }
                 }
                 item {
@@ -417,6 +540,49 @@ fun CertBankScreen(
                 }
             }
             LoadingDialog(isLoading)
+            if (showBankSheet) {
+                BankSelection({ showBankSheet = false }) {
+                    isBankError = false
+                    bankText = it.bankName ?: ""
+                    bankInfo = it
+                }
+            }
+            if (showContact1Sheet && workEnum?.relatives != null) {
+                WheelBottomSheet(
+                    items = workEnum?.relatives ?: listOf(),
+                    initialIndex = workEnum?.relatives?.indexOfFirst { it1 -> it1.state == relativesStatus }
+                        ?: 0,
+                    onDismiss = { showContact1Sheet = false }
+                ) { it1 ->
+                    contact1Text = it1.info
+                    isContact1Error = false
+                    relativesStatus = it1.state
+                }
+            }
+            if (showContact2Sheet && workEnum?.otherRelatives != null) {
+                WheelBottomSheet(
+                    items = workEnum?.otherRelatives ?: listOf(),
+                    initialIndex = workEnum?.otherRelatives?.indexOfFirst { it1 -> it1.state == friendStatus }
+                        ?: 0,
+                    onDismiss = { showContact2Sheet = false }
+                ) { it1 ->
+                    contact2Text = it1.info
+                    isContact2Error = false
+                    friendStatus = it1.state
+                }
+            }
+            ConfirmDialog(
+                showPermissionGuideDialog,
+                title = Strings["dialog_permission_title"].format(permissionText),
+                content = "",
+                cancel = Strings["closed"],
+                confirm = Strings["sure"],
+                confirmAction = {
+                    openSystemPermissionSettings()
+                }
+            ) {
+                showPermissionGuideDialog = false
+            }
         }
     }
 }

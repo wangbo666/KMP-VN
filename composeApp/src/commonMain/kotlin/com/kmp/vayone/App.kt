@@ -16,12 +16,14 @@ import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.AboutUsScreen
 import com.kmp.vayone.ui.AccountCenter
+import com.kmp.vayone.ui.AddAccountScreen
 import com.kmp.vayone.ui.BatchRepayment
 import com.kmp.vayone.ui.CertBankScreen
 import com.kmp.vayone.ui.CertKycScreen
 import com.kmp.vayone.ui.CertPersonalScreen
 import com.kmp.vayone.ui.CertScreen
 import com.kmp.vayone.ui.CertServiceScreen
+import com.kmp.vayone.ui.CertSuccessScreen
 import com.kmp.vayone.ui.ChangePasswordScreen
 import com.kmp.vayone.ui.ContactUsScreen
 import com.kmp.vayone.ui.FeedbackScreen
@@ -291,6 +293,14 @@ fun App() {
                         onBack = { goBack() }) { navigate(it) }
 
                     Screen.AccountCenter -> AccountCenter(
+                        toast = { show, toast ->
+                            showToast = show
+                            toastMessage = toast
+                        },
+                        onBack = { goBack() }) { navigate(it) }
+
+                    Screen.CertSuccess -> CertSuccessScreen { navigate(it) }
+                    Screen.AddAccount -> AddAccountScreen(
                         toast = { show, toast ->
                             showToast = show
                             toastMessage = toast

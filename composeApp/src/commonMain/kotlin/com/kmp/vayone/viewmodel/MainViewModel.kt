@@ -40,7 +40,7 @@ class MainViewModel : BaseViewModel() {
                 productList.addAll(
                     (it?.showProducts ?: arrayListOf()).onEach { it1 -> it1.canApply = true })
                 productList.addAll(
-                    (it?.repayProducts ?: arrayListOf()).onEach { it1 -> it1.canApply = false })
+                    (it?.canNotApplyProducts ?: arrayListOf()).onEach { it1 -> it1.canApply = false })
                 _homeProducts.value = productList
             }
         }

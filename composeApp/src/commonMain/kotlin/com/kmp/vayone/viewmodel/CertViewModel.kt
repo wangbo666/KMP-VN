@@ -4,13 +4,16 @@ import com.kmp.vayone.data.AddressBean
 import com.kmp.vayone.data.AuthBean
 import com.kmp.vayone.data.BankCardBean
 import com.kmp.vayone.data.CacheManager
+import com.kmp.vayone.data.ContactsInfoBean
 import com.kmp.vayone.data.KycConfigBean
 import com.kmp.vayone.data.KycInfoBean
 import com.kmp.vayone.data.ParamBean
+import com.kmp.vayone.data.PayChannelBean
 import com.kmp.vayone.data.PersonalInfoBean
 import com.kmp.vayone.data.PersonalInfoEnumBean
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.data.UserAuthBean
+import com.kmp.vayone.data.WorkInfoEnumBean
 import com.kmp.vayone.data.remote.UserRepository
 import com.kmp.vayone.ui.widget.UiState
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -247,6 +250,61 @@ class CertViewModel : BaseViewModel() {
         }) {
             _loadingState.value = UiState.Success
             _addressList.value = it
+        }
+    }
+
+    private val _payChannelList = MutableStateFlow<List<PayChannelBean>?>(null)
+    val payChannelList: StateFlow<List<PayChannelBean>?> = _payChannelList
+    fun getPayChannelList() {
+        _loadingState.value = UiState.Loading
+        launch({ UserRepository.getPayChannel() }, onError = {
+            _loadingState.value = UiState.Error()
+            true
+        }) {
+            _loadingState.value = UiState.Success
+            _payChannelList.value = it
+        }
+    }
+
+    private val _contactInfo = MutableSharedFlow<ContactsInfoBean?>(replay = 1)
+    val contactInfo: SharedFlow<ContactsInfoBean?> = _contactInfo
+    fun getContactInfo() {
+        _loadingState.value = UiState.Loading
+        launch({ UserRepository.getContactInfo() }, onError = {
+            _loadingState.value = UiState.Error()
+            true
+        }) {
+            _loadingState.value = UiState.Success
+            _contactInfo.tryEmit(it)
+        }
+    }
+
+    private val _workEnumResult = MutableStateFlow<WorkInfoEnumBean?>(null)
+    val workEnumResult: StateFlow<WorkInfoEnumBean?> = _workEnumResult
+    fun getWorkEnums() {
+        if (_workEnumResult.value != null) {
+            return
+        }
+        launch({
+            UserRepository.getWorkInfoEnum()
+        }, true) {
+            _workEnumResult.value = it
+        }
+    }
+
+    private val _submitBankResult = MutableSharedFlow<String?>(replay = 1)
+    val submitBankResult: SharedFlow<String?> = _submitBankResult
+    fun submitContactBank(paramBean: ParamBean) {
+        launch({ UserRepository.submitBankAndContactInfo(paramBean) }, true) {
+            _submitBankResult.tryEmit(it)
+        }
+    }
+
+    private val _addAccountResult = MutableSharedFlow<String?>(replay = 1)
+    val addAccountResult: SharedFlow<String?> = _addAccountResult
+    fun addAccount(paramBean: ParamBean) {
+        launch({ UserRepository.addAccount(paramBean) }, true) {
+            _addAccountResult.tryEmit(it)
         }
     }
 }

@@ -18,7 +18,7 @@ fun isLoggedIn(): Boolean = CacheManager.getToken().isNotBlank()
 fun UserAuthBean.jumpCert(navigate: (Screen) -> Unit, isFromAuthPage: Boolean = true) {
     val configList = CacheManager.getAuthConfigList().filterNot { it.isBlank() }
     if (userAuthState == "30") {
-//        AuthSuccessActivity.launch(context)
+        navigate(Screen.CertSuccess)
         return
     }
     if (isFromAuthPage
@@ -30,7 +30,7 @@ fun UserAuthBean.jumpCert(navigate: (Screen) -> Unit, isFromAuthPage: Boolean = 
             )
         )
     ) {
-//        AuthSuccessActivity.launch(context)
+        navigate(Screen.CertSuccess)
         return
     }
     configList.forEach {

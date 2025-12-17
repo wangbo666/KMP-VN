@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -153,6 +154,10 @@ fun AccountCenter(
                                     width = 1.dp,
                                     color = C_FC7700, RoundedCornerShape(16.dp)
                                 )
+                                .clip(RoundedCornerShape(16.dp))
+                                .clickable {
+                                    navigate(Screen.AddAccount)
+                                }
                         ) {
                             Image(
                                 painter = painterResource(Res.drawable.accounts_add),

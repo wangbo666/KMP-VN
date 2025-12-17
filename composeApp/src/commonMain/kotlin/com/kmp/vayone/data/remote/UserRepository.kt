@@ -6,6 +6,7 @@ import com.kmp.vayone.data.AuthBean
 import com.kmp.vayone.data.BankCardBean
 import com.kmp.vayone.data.BannerBean
 import com.kmp.vayone.data.CacheManager
+import com.kmp.vayone.data.ContactsInfoBean
 import com.kmp.vayone.data.HomeBean
 import com.kmp.vayone.data.HomeLoanBean
 import com.kmp.vayone.data.KycConfigBean
@@ -14,12 +15,14 @@ import com.kmp.vayone.data.LoginBean
 import com.kmp.vayone.data.MessagePageBean
 import com.kmp.vayone.data.OrderBean
 import com.kmp.vayone.data.ParamBean
+import com.kmp.vayone.data.PayChannelBean
 import com.kmp.vayone.data.PersonalInfoBean
 import com.kmp.vayone.data.PersonalInfoEnumBean
 import com.kmp.vayone.data.ProductBean
 import com.kmp.vayone.data.SignBean
 import com.kmp.vayone.data.TogetherRepaymentBean
 import com.kmp.vayone.data.UserAuthBean
+import com.kmp.vayone.data.WorkInfoEnumBean
 import com.kmp.vayone.data.version_Name
 import com.kmp.vayone.mobileType
 import com.kmp.vayone.randomUUID
@@ -222,5 +225,25 @@ object UserRepository {
 
     suspend fun getAddressList(id: String?): ApiResponse<List<AddressBean>?> {
         return networkManager.post("api/user/app/address/list", ParamBean(parentId = id))
+    }
+
+    suspend fun getPayChannel(): ApiResponse<List<PayChannelBean>?> {
+        return networkManager.post("api/user/app/bank/list")
+    }
+
+    suspend fun getContactInfo(): ApiResponse<ContactsInfoBean?> {
+        return networkManager.post("api/user/app/userWork/info")
+    }
+
+    suspend fun getWorkInfoEnum(): ApiResponse<WorkInfoEnumBean?> {
+        return networkManager.post("api/user/app/userWork/enum")
+    }
+
+    suspend fun submitBankAndContactInfo(paramBean: ParamBean): ApiResponse<String?> {
+        return networkManager.post("api/user/app/bank/bind/v2", paramBean)
+    }
+
+    suspend fun addAccount(paramBean: ParamBean): ApiResponse<String?> {
+        return networkManager.post("api/user/app/bank/addBank", paramBean)
     }
 }

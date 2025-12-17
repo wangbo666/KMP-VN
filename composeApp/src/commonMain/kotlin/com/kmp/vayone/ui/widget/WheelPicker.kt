@@ -183,6 +183,7 @@ fun WheelBottomSheet(
                     )
                     .clickable {
                         onConfirm(selectedItem)
+                        onDismiss()
                     },
                 color = white,
                 fontSize = 18.sp,

@@ -537,7 +537,6 @@ fun CertPersonalScreen(
                     onDismiss = { showGenderSheet = false }
                 ) { it1 ->
                     genderText = it1.info
-                    showGenderSheet = false
                     isGenderError = false
                     genderStatus = it1.state
                 }
@@ -550,7 +549,6 @@ fun CertPersonalScreen(
                     onDismiss = { showEducationSheet = false }
                 ) { it1 ->
                     educationText = it1.info
-                    showEducationSheet = false
                     isEducationError = false
                     educationStatus = it1.state
                 }
@@ -563,7 +561,6 @@ fun CertPersonalScreen(
                     onDismiss = { showMarrySheet = false }
                 ) { it1 ->
                     marryText = it1.info
-                    showMarrySheet = false
                     isMarryError = false
                     marryStatus = it1.state
                 }
