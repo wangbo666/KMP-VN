@@ -5,7 +5,9 @@ import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.HomeBean
 import com.kmp.vayone.data.HomeLoanBean
 import com.kmp.vayone.data.MessageBean
+import com.kmp.vayone.data.ParamBean
 import com.kmp.vayone.data.ProductBean
+import com.kmp.vayone.data.ProductDetailBean
 import com.kmp.vayone.data.UserAuthBean
 import com.kmp.vayone.data.remote.UserRepository
 import com.kmp.vayone.ui.widget.UiState
@@ -40,7 +42,9 @@ class MainViewModel : BaseViewModel() {
                 productList.addAll(
                     (it?.showProducts ?: arrayListOf()).onEach { it1 -> it1.canApply = true })
                 productList.addAll(
-                    (it?.canNotApplyProducts ?: arrayListOf()).onEach { it1 -> it1.canApply = false })
+                    (it?.canNotApplyProducts ?: arrayListOf()).onEach { it1 ->
+                        it1.canApply = false
+                    })
                 _homeProducts.value = productList
             }
         }
@@ -133,6 +137,23 @@ class MainViewModel : BaseViewModel() {
                 }
             }
             _messageList.value = newList
+        }
+    }
+
+    private val _productDetailResult = MutableSharedFlow<ProductDetailBean?>(replay = 1)
+    val productDetailResult: SharedFlow<ProductDetailBean?> = _productDetailResult
+    fun getProductDetail(
+        id: String?,
+        amount: String?
+    ) {
+        launch({
+            UserRepository.getProductDetail(
+                ParamBean(
+                    productId = id, amount = amount
+                )
+            )
+        }, true) {
+            _productDetailResult.tryEmit(it)
         }
     }
 }

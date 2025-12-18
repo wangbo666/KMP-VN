@@ -2,6 +2,7 @@ package com.kmp.vayone.data
 
 import com.kmp.vayone.data.remote.json
 import com.russhwolf.settings.Settings
+import com.russhwolf.settings.get
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.builtins.PairSerializer
@@ -52,6 +53,14 @@ object CacheManager {
                 e.printStackTrace()
             }
         }
+    }
+
+    fun isSignBackHome(): Boolean {
+        return settings.getBoolean("isBackHome", false)
+    }
+
+    fun setSignBackHome(b: Boolean) {
+        settings.putBoolean("isBackHome", b)
     }
 
     // --- AppsFlyer ---

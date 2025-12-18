@@ -19,6 +19,7 @@ import com.kmp.vayone.data.PayChannelBean
 import com.kmp.vayone.data.PersonalInfoBean
 import com.kmp.vayone.data.PersonalInfoEnumBean
 import com.kmp.vayone.data.ProductBean
+import com.kmp.vayone.data.ProductDetailBean
 import com.kmp.vayone.data.SignBean
 import com.kmp.vayone.data.TogetherRepaymentBean
 import com.kmp.vayone.data.UserAuthBean
@@ -249,5 +250,9 @@ object UserRepository {
 
     suspend fun submitSuppleInfo(paramBean: ParamBean): ApiResponse<String?> {
         return networkManager.post("api/user/app/userBaseExt/save/work/v2", paramBean)
+    }
+
+    suspend fun getProductDetail(paramBean: ParamBean): ApiResponse<ProductDetailBean?> {
+        return networkManager.post("api/loan/app/productInfo/detail", paramBean)
     }
 }

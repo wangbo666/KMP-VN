@@ -529,7 +529,6 @@ data class ProductDetailBean(
     val overdueValue: Double? = null,
     val maxPenaltyType: Int? = null,
     val loanAmountRange: String? = null,
-    val maxPenaltyValue: Int? = null,
     val jumpType: Int? = null,
     val downloadUrl: String? = null,
     val tags: String? = null,

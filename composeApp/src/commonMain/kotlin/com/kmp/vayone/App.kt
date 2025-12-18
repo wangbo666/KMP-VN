@@ -28,6 +28,7 @@ import com.kmp.vayone.ui.ChangePasswordScreen
 import com.kmp.vayone.ui.ContactUsScreen
 import com.kmp.vayone.ui.FeedbackScreen
 import com.kmp.vayone.ui.HomeScreen
+import com.kmp.vayone.ui.LoanResultScreen
 import com.kmp.vayone.ui.LoginScreen
 import com.kmp.vayone.ui.LogoutScreen
 import com.kmp.vayone.ui.LogoutSuccessScreen
@@ -38,6 +39,7 @@ import com.kmp.vayone.ui.PrivacyScreen
 import com.kmp.vayone.ui.SetPasswordScreen
 import com.kmp.vayone.ui.SetPasswordSuccessScreen
 import com.kmp.vayone.ui.SettingsScreen
+import com.kmp.vayone.ui.SignScreen
 import com.kmp.vayone.ui.SplashScreen
 import com.kmp.vayone.ui.SuppleScreen
 import com.kmp.vayone.ui.WebViewScreen
@@ -312,6 +314,20 @@ fun App() {
                     is Screen.SuppleInfo -> SuppleScreen(
                         screen.isCert, screen.amount.replace(".00", ""),
                         toast = { show, toast ->
+                            showToast = show
+                            toastMessage = toast
+                        },
+                        onBack = { goBack() }) { navigate(it) }
+
+                    is Screen.Sign -> SignScreen(screen.signPageParams, toast = { show, toast ->
+                        showToast = show
+                        toastMessage = toast
+                    }, onBack = { goBack() }) {
+                        navigate(it)
+                    }
+
+                    is Screen.LoanResult -> LoanResultScreen(
+                        screen.signPageParams, toast = { show, toast ->
                             showToast = show
                             toastMessage = toast
                         },

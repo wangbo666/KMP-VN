@@ -55,6 +55,7 @@ import com.kmp.vayone.ui.widget.ConfirmDialog
 import com.kmp.vayone.ui.widget.LoadingBox
 import com.kmp.vayone.ui.widget.LoadingDialog
 import com.kmp.vayone.ui.widget.TopBar
+import com.kmp.vayone.ui.widget.UiState
 import com.kmp.vayone.util.format
 import com.kmp.vayone.util.jumpCert
 import com.kmp.vayone.util.log
@@ -65,6 +66,7 @@ import com.preat.peekaboo.ui.camera.rememberPeekabooCameraState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.painterResource
@@ -609,9 +611,7 @@ fun CertKycScreen(
     }
     if (showCamera) {
         TakPhoto(currentCaptureType) {
-            scope.launch {
-                showCamera = false
-            }
+            showCamera = false
             it?.let {
                 if (currentCaptureType == "front") {
                     frontByte = it
@@ -633,15 +633,19 @@ fun CertKycScreen(
 @Composable
 fun TakPhoto(currentCaptureType: String, takeAction: (ByteArray?) -> Unit) {
     val scope = rememberCoroutineScope()
-    // Peekaboo 相机状态
+
     val cameraState = rememberPeekabooCameraState(
-        initialCameraMode = CameraMode.Back,
+        // 根据类型初始化正确的相机模式
+        initialCameraMode = if (currentCaptureType == "selfie") {
+            CameraMode.Front
+        } else {
+            CameraMode.Back
+        },
         onCapture = { imageBytes ->
             "ImageByte:${imageBytes?.size}".log()
             if (imageBytes == null) return@rememberPeekabooCameraState
             scope.launch {
                 try {
-                    // 压缩图片
                     val compressed = withContext(Dispatchers.IO) {
                         compressImage(imageBytes, maxSizeKb = 250)
                     }
@@ -653,33 +657,46 @@ fun TakPhoto(currentCaptureType: String, takeAction: (ByteArray?) -> Unit) {
             }
         }
     )
-//    if (cameraState.isCameraReady) {
-    if (currentCaptureType == "front" || currentCaptureType == "back") {
-        if (cameraState.cameraMode == CameraMode.Front) {
-            cameraState.toggleCamera()
+    var isCameraReady by remember { mutableStateOf(true) }
+
+    // ✅ 等待相机就绪后再切换（如果需要）
+    LaunchedEffect(cameraState.isCameraReady) {
+        if (cameraState.isCameraReady) {
+            // 如果初始模式不对，再切换
+            val needFront = currentCaptureType == "selfie"
+            val isFront = cameraState.cameraMode == CameraMode.Front
+
+            if (needFront != isFront) {
+                delay(300) // 给相机一点时间稳定
+                cameraState.toggleCamera()
+            }
+            delay(200) // 等待相机完全准备好
+            isCameraReady = true
         }
     }
-    if (currentCaptureType == "selfie") {
-        if (cameraState.cameraMode == CameraMode.Back) {
-            cameraState.toggleCamera()
+
+    LoadingBox(
+        if (isCameraReady) UiState.Success else UiState.Loading,
+        modifier = Modifier.fillMaxSize().background(Color.Black)
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            PeekabooCamera(
+                state = cameraState,
+                modifier = Modifier.fillMaxSize(),
+            )
+            Spacer(
+                modifier = Modifier.padding(bottom = 100.dp)
+                    .clip(RoundedCornerShape((50.dp)))
+                    .size(80.dp).background(white, RoundedCornerShape(50.dp))
+                    .align(Alignment.BottomCenter)
+                    .clickable {
+                        if (cameraState.isCameraReady) { // ✅ 确保就绪
+                            cameraState.capture()
+                        }
+                    }
+            )
         }
     }
-    Box(modifier = Modifier.fillMaxSize()) {
-        PeekabooCamera(
-            state = cameraState,
-            modifier = Modifier.fillMaxSize(),
-        )
-        Spacer(
-            modifier = Modifier.padding(bottom = 100.dp)
-                .clip(RoundedCornerShape((50.dp)))
-                .size(80.dp).background(white, RoundedCornerShape(50.dp))
-                .align(Alignment.BottomCenter)
-                .clickable {
-                    cameraState.capture()
-                }
-        )
-    }
-//    }
 }
 
 @Preview

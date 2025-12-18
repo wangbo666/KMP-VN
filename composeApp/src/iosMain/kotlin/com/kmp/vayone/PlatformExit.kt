@@ -2,6 +2,7 @@
 
 package com.kmp.vayone
 
+import androidx.compose.ui.graphics.ImageBitmap
 import platform.UIKit.UIApplication
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.usePinned
@@ -152,7 +153,6 @@ actual suspend fun postCameraPermissions(
     refuseAction: (isNever: Boolean) -> Unit,
     agreeAction: () -> Unit
 ) {
-    // 确保在主线程检查和请求权限
     withContext(Dispatchers.Main) {
         val status = AVCaptureDevice.authorizationStatusForMediaType(AVMediaTypeVideo)
 
@@ -164,7 +164,6 @@ actual suspend fun postCameraPermissions(
             AVAuthorizationStatusNotDetermined -> {
                 val granted = suspendCancellableCoroutine<Boolean> { cont ->
                     AVCaptureDevice.requestAccessForMediaType(AVMediaTypeVideo) { granted ->
-                        // 直接恢复协程，不需要再 dispatch
                         if (cont.isActive) {
                             cont.resume(granted) {}
                         }

@@ -50,13 +50,16 @@ import com.kmp.vayone.data.HomeBean
 import com.kmp.vayone.data.HomeLoanBean
 import com.kmp.vayone.data.ProductBean
 import com.kmp.vayone.data.Strings
+import com.kmp.vayone.data.remote.json
 import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.widget.AutoSizeText
 import com.kmp.vayone.ui.widget.Banner
 import com.kmp.vayone.ui.widget.ColoredTextPart
 import com.kmp.vayone.ui.widget.LoadingBox
+import com.kmp.vayone.ui.widget.LoadingDialog
 import com.kmp.vayone.ui.widget.MarqueeText
 import com.kmp.vayone.ui.widget.MultiColoredText
+import com.kmp.vayone.ui.widget.SignPageParams
 import com.kmp.vayone.ui.widget.UiState
 import com.kmp.vayone.util.format
 import com.kmp.vayone.util.isLoggedIn
@@ -108,6 +111,7 @@ import vayone.composeapp.generated.resources.home_refuse_dialog
 import vayone.composeapp.generated.resources.home_star_dialog
 import vayone.composeapp.generated.resources.home_tag
 import vayone.composeapp.generated.resources.product_icon
+import kotlin.toString
 
 @Composable
 fun HomePage(
@@ -127,6 +131,7 @@ fun HomePage(
     var enableLoanStr by remember { mutableStateOf("") }
     var showRefuseDialog by remember { mutableStateOf(false) }
     var showFillBankDialog by remember { mutableStateOf(isFromCertSuccess) }
+    val isLoading by mainViewModel.isLoading.collectAsState()
 
     LaunchedEffect(Unit) {
         launch {
@@ -147,6 +152,46 @@ fun HomePage(
         }
         launch {
             mainViewModel.getBannerList()
+        }
+        launch {
+            mainViewModel.productDetailResult.collect {
+                it?.let {
+                    if (CacheManager.isSignBackHome()) {
+                        val map: MutableMap<Long?, Int?> = HashMap()
+                        if (!it.productInstallmentPlanDTOList.isNullOrEmpty()) {
+                            val index =
+                                it.productInstallmentPlanDTOList.indexOfFirst { it1 -> it1.isDefault == 1 }
+                                    .coerceIn(0, Int.MAX_VALUE)
+                            map[it.productInstallmentPlanDTOList[index].productId] =
+                                it.productInstallmentPlanDTOList[index].planNums
+                        }
+                        val termMap: MutableMap<Long?, Long?> = HashMap()
+                        if (!it.loanTermConfigDTOList.isNullOrEmpty()) {
+                            val index =
+                                it.loanTermConfigDTOList.indexOfFirst { it1 -> it1.defaultSign == 1 }
+                                    .coerceIn(0, Int.MAX_VALUE)
+                            termMap[it.id] = it.loanTermConfigDTOList[index].id
+                        }
+                        navigate(
+                            Screen.Sign(
+                                SignPageParams(
+                                    it.bankInfoId,
+                                    null,
+                                    it.id.toString(),
+                                    it.bankInfoId,
+                                    it.maxLoanAmount,
+                                    if (map.isEmpty()) null else json.encodeToString(map),
+                                    json.encodeToString(termMap),
+                                    true,
+                                    null
+                                )
+                            )
+                        )
+                    } else {
+
+                    }
+                }
+            }
         }
     }
     // 监听生命周期
@@ -294,10 +339,10 @@ fun HomePage(
                                     }
 
                                     else -> {
-//                                        mainViewModel.getProductDetail(
-//                                            item.productId.toString(),
-//                                            item.maxLoanAmount.toString()
-//                                        )
+                                        mainViewModel.getProductDetail(
+                                            item.productId.toString(),
+                                            item.maxLoanAmount.toString()
+                                        )
                                     }
                                 }
                             }
@@ -319,6 +364,7 @@ fun HomePage(
         ) {
             showFillBankDialog = false
         }
+        LoadingDialog(isLoading)
     }
 }
 

@@ -1,5 +1,9 @@
 package com.kmp.vayone
 
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.ImageBitmap
+import com.kmp.vayone.ui.widget.Stroke
+
 expect fun exitApp()
 
 expect fun currentTimeMillis(): Long
@@ -49,3 +53,14 @@ expect suspend fun compressImage(
 ): ByteArray?
 
 expect fun randomUUID(): String
+
+
+// 3. 定义跨平台保存接口 (Expect)
+interface SignatureFileManager {
+    // 返回保存后的文件绝对路径
+    suspend fun saveSignatureImage(strokes: List<Stroke>, cropRect: Rect, originalSize: Size): String?
+
+    data class Size(val width: Int, val height: Int)
+}
+
+expect fun getSignatureFileManager(): SignatureFileManager
