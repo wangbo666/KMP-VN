@@ -36,6 +36,7 @@ import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.widget.LoadingBox
 import com.kmp.vayone.ui.widget.TopBar
 import com.kmp.vayone.viewmodel.LoginViewModel
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import theme.C_132247
@@ -61,14 +62,15 @@ fun ContactUsScreen(
     val loadingState by loginViewModel.loadingState.collectAsState()
 
     LaunchedEffect(Unit) {
-        loginViewModel.getCustomer()
-    }
-    LaunchedEffect(Unit) {
-        loginViewModel.errorEvent.collect { event ->
-            toast(event.showToast, event.message)
+        launch {
+            loginViewModel.getCustomer()
+        }
+        launch {
+            loginViewModel.errorEvent.collect { event ->
+                toast(event.showToast, event.message)
+            }
         }
     }
-
     Scaffold(modifier = Modifier.fillMaxSize().statusBarsPadding(), topBar = {
         TopBar(Strings["contact_us"]) {
             onBack()

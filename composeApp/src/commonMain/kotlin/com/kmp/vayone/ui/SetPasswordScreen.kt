@@ -49,6 +49,7 @@ import com.kmp.vayone.ui.widget.ConfirmDialog
 import com.kmp.vayone.ui.widget.LoadingDialog
 import com.kmp.vayone.ui.widget.TopBar
 import com.kmp.vayone.viewmodel.LoginViewModel
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import theme.C_2B2621
@@ -77,21 +78,22 @@ fun SetPasswordScreen(
     var isShowSkipDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        loginViewModel.setPasswordResult.collect {
-            CacheManager.setToken(it?.token ?: "")
-            onNavigate(
-                Screen.SetPasswordSuccess(
-                    Strings["password_set_successful"]
+        launch {
+            loginViewModel.setPasswordResult.collect {
+                CacheManager.setToken(it?.token ?: "")
+                onNavigate(
+                    Screen.SetPasswordSuccess(
+                        Strings["password_set_successful"]
+                    )
                 )
-            )
+            }
+        }
+        launch {
+            loginViewModel.errorEvent.collect { event ->
+                toast(event.showToast, event.message)
+            }
         }
     }
-    LaunchedEffect(Unit) {
-        loginViewModel.errorEvent.collect { event ->
-            toast(event.showToast, event.message)
-        }
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.fillMaxSize()

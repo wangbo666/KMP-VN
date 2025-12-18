@@ -5,35 +5,30 @@
         <key>CADisableMinimumFrameDurationOnPhone</key>
         <true/>
 
-        <!-- 相机权限说明 -->
-        <key>NSCameraUsageDescription</key>
-        <string>We need camera access to capture your ID card and selfie for KYC verification.</string>
-        <!-- 新添加的相机隐私说明 -->
-        <key>Privacy - Camera Usage Description</key>
-        <string>This app uses camera for capturing photos.</string>
-
-        <!-- 照片库权限说明（如果需要从相册选择照片） -->
+        <!-- 照片库权限 -->
         <key>NSPhotoLibraryUsageDescription</key>
         <string>We need access to your photo library to select images for KYC verification.</string>
 
-        <key>NSLocationWhenInUseUsageDescription</key>
-        <string>Allow approximate location to improve KYC and service experience.</string>
+        <!-- 相机权限 -->
+        <key>NSCameraUsageDescription</key>
+        <string>We need camera access to capture your ID card and selfie for KYC verification.</string>
 
+        <!-- 位置权限 -->
+        <key>NSLocationWhenInUseUsageDescription</key>
+        <string>We need your location to improve KYC and service experience.</string>
+
+        <!-- 网络安全配置 -->
         <key>NSAppTransportSecurity</key>
         <dict>
-            <!-- 全局允许 HTTP 请求，保证 iOS 可以加载所有网络图片 -->
-            <key>NSAllowsArbitraryLoads</key>
-            <true/>
-
-            <!-- 可选：特定域名配置 -->
             <key>NSExceptionDomains</key>
             <dict>
+                <!-- 只允许特定域名使用 HTTP -->
                 <key>vn-cash-api.cc006e2ab86b64d7e843cbb0d774deebb.cn-hangzhou.alicontainer.com</key>
                 <dict>
                     <key>NSExceptionAllowsInsecureHTTPLoads</key>
                     <true/>
-                    <key>NSExceptionRequiresForwardSecrecy</key>
-                    <false/>
+                    <key>NSIncludesSubdomains</key>
+                    <true/>
                 </dict>
             </dict>
         </dict>

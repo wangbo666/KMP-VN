@@ -119,38 +119,40 @@ fun CertBankScreen(
     var friendStatus by remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(Unit) {
-        certViewModel.errorEvent.collect { event ->
-            toast(event.showToast, event.message)
+        launch {
+            certViewModel.errorEvent.collect { event ->
+                toast(event.showToast, event.message)
+            }
         }
-    }
-    LaunchedEffect(Unit) {
-        if (!isCert) {
-            certViewModel.getPersonalInfo()
+        launch {
+            if (!isCert) {
+                certViewModel.getPersonalInfo()
+            }
         }
-    }
-    LaunchedEffect(Unit) {
-        certViewModel.getContactInfo()
-    }
-    LaunchedEffect(Unit) {
-        certViewModel.personalInfoResult.collect {
-            holderNameText = it?.firstName ?: ""
+        launch {
+            certViewModel.getContactInfo()
         }
-    }
-    LaunchedEffect(Unit) {
-        certViewModel.submitBankResult.collect {
-            toast(true, Strings["submit_success"])
-            onBack()
+        launch {
+            certViewModel.personalInfoResult.collect {
+                holderNameText = it?.firstName ?: ""
+            }
         }
-    }
-    LaunchedEffect(Unit) {
-        certViewModel.contactInfo.collect {
-            it?.let {
-                contact1Text = it.relativesStr ?: ""
-                contactPhone1Text = it.relativesMobile ?: ""
-                contactName1Text = it.relativesName ?: ""
-                contact2Text = it.otherRelativesStr ?: ""
-                contactPhone2Text = it.otherMobile ?: ""
-                contactName2Text = it.otherName ?: ""
+        launch {
+            certViewModel.submitBankResult.collect {
+                toast(true, Strings["submit_success"])
+                onBack()
+            }
+        }
+        launch {
+            certViewModel.contactInfo.collect {
+                it?.let {
+                    contact1Text = it.relativesStr ?: ""
+                    contactPhone1Text = it.relativesMobile ?: ""
+                    contactName1Text = it.relativesName ?: ""
+                    contact2Text = it.otherRelativesStr ?: ""
+                    contactPhone2Text = it.otherMobile ?: ""
+                    contactName2Text = it.otherName ?: ""
+                }
             }
         }
     }

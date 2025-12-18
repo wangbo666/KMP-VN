@@ -35,6 +35,7 @@ import com.kmp.vayone.navigation.Screen
 import com.kmp.vayone.ui.widget.LoadingBox
 import com.kmp.vayone.ui.widget.TopBar
 import com.kmp.vayone.viewmodel.MainViewModel
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import theme.C_2B2621
@@ -57,11 +58,13 @@ fun MessageScreen(
     val loadingState by viewModel.loadingState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.getMessageList()
-    }
-    LaunchedEffect(Unit) {
-        viewModel.errorEvent.collect { event ->
-            toast(event.showToast, event.message)
+        launch {
+            viewModel.getMessageList()
+        }
+        launch {
+            viewModel.errorEvent.collect { event ->
+                toast(event.showToast, event.message)
+            }
         }
     }
 

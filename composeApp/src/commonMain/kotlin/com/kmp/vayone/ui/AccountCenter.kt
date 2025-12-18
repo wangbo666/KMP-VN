@@ -163,9 +163,7 @@ fun AccountCenter(
                                 painter = painterResource(Res.drawable.accounts_add),
                                 contentDescription = null,
                                 modifier = Modifier.padding(vertical = 12.dp).size(32.dp)
-                                    .align(Alignment.CenterHorizontally).clickable {
-
-                                    }
+                                    .align(Alignment.CenterHorizontally)
                             )
                             Text(
                                 text = Strings["add_account"],

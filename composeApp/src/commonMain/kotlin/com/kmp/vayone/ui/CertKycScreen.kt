@@ -121,67 +121,39 @@ fun CertKycScreen(
     var backUploadState by remember { mutableStateOf(0) }
     var selfUploadState by remember { mutableStateOf(0) }
 
-    // Peekaboo 相机状态
-    val cameraState = rememberPeekabooCameraState(
-        initialCameraMode = CameraMode.Back,
-        onCapture = { imageBytes ->
-            "ImageByte:${imageBytes?.size}".log()
-            if (imageBytes == null) return@rememberPeekabooCameraState
-            scope.launch {
-                try {
-                    // 压缩图片
-                    val compressed = withContext(Dispatchers.IO) {
-                        compressImage(imageBytes, maxSizeKb = 250)
-                    }?.let {
-                        "ImageByte:${it.size}".log()
-                        if (currentCaptureType == "front") {
-                            frontByte = it
-                            certViewModel.submitKycCard("IDCARD_CARD_FRONT", it)
-                        }
-                        if (currentCaptureType == "back") {
-                            backByte = it
-                            certViewModel.submitKycCard("IDCARD_CARD_BACK", it)
-                        }
-                        if (currentCaptureType == "selfie") {
-                            selfByte = it
-                            certViewModel.submitKycSelf(it, null)
-                        }
-                    }
+    // ✅ 合并多个 LaunchedEffect
+    LaunchedEffect(Unit) {
+        // 初始化数据
+        launch { certViewModel.getKycConfig() }
+        launch { certViewModel.getKycInfo() }
 
-                } catch (e: Exception) {
-                    "SubmitError: ${e.message}".log()
+        // 收集事件
+        launch {
+            certViewModel.errorEvent.collect { event ->
+                toast(event.showToast, event.message)
+            }
+        }
+
+        launch {
+            certViewModel.kycSubmitCardResult.collect {
+                if (currentCaptureType == "front") {
+                    frontUploadState = if (it) 1 else -1
+                } else {
+                    backUploadState = if (it) 1 else -1
                 }
-                showCamera = false
             }
         }
-    )
 
-    LaunchedEffect(Unit) {
-        certViewModel.getKycConfig()
-        certViewModel.getKycInfo()
-    }
-    LaunchedEffect(Unit) {
-        certViewModel.errorEvent.collect { event ->
-            toast(event.showToast, event.message)
-        }
-    }
-    LaunchedEffect(Unit) {
-        certViewModel.kycSubmitCardResult.collect {
-            if (currentCaptureType == "front") {
-                frontUploadState = if (it) 1 else -1
-            } else {
-                backUploadState = if (it) 1 else -1
+        launch {
+            certViewModel.kycSubmitSelfResult.collect {
+                selfUploadState = if (it) 1 else -1
             }
         }
-    }
-    LaunchedEffect(Unit) {
-        certViewModel.kycSubmitSelfResult.collect {
-            selfUploadState = if (it) 1 else -1
-        }
-    }
-    LaunchedEffect(Unit) {
-        certViewModel.kycSubmitResult.collect {
-            it?.jumpCert(navigate)
+
+        launch {
+            certViewModel.kycSubmitResult.collect {
+                it?.jumpCert(navigate)
+            }
         }
     }
 
@@ -318,9 +290,6 @@ fun CertKycScreen(
                                                         isShowCameraPermissionDialog = it
                                                     }) {
                                                         currentCaptureType = "front"
-                                                        if (cameraState.cameraMode == CameraMode.Front) {
-                                                            cameraState.toggleCamera()
-                                                        }
                                                         showCamera = true
                                                     }
                                                 }
@@ -399,9 +368,6 @@ fun CertKycScreen(
                                                     isShowCameraPermissionDialog = it
                                                 }) {
                                                     currentCaptureType = "back"
-                                                    if (cameraState.cameraMode == CameraMode.Front) {
-                                                        cameraState.toggleCamera()
-                                                    }
                                                     showCamera = true
                                                 }
                                             }
@@ -545,9 +511,6 @@ fun CertKycScreen(
                                                 val isKyc = kycConfig?.FACE_COMPARE == 2
                                                 if (!isKyc) {
                                                     currentCaptureType = "selfie"
-                                                    if (cameraState.cameraMode == CameraMode.Back) {
-                                                        cameraState.toggleCamera()
-                                                    }
                                                     showCamera = true
                                                 }
                                             }
@@ -645,22 +608,78 @@ fun CertKycScreen(
         }
     }
     if (showCamera) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            PeekabooCamera(
-                state = cameraState,
-                modifier = Modifier.fillMaxSize(),
-            )
-            Spacer(
-                modifier = Modifier.padding(bottom = 100.dp)
-                    .clip(RoundedCornerShape((50.dp)))
-                    .size(80.dp).background(white, RoundedCornerShape(50.dp))
-                    .align(Alignment.BottomCenter)
-                    .clickable {
-                        cameraState.capture()
-                    }
-            )
+        TakPhoto(currentCaptureType) {
+            scope.launch {
+                showCamera = false
+            }
+            it?.let {
+                if (currentCaptureType == "front") {
+                    frontByte = it
+                    certViewModel.submitKycCard("IDCARD_CARD_FRONT", it)
+                }
+                if (currentCaptureType == "back") {
+                    backByte = it
+                    certViewModel.submitKycCard("IDCARD_CARD_BACK", it)
+                }
+                if (currentCaptureType == "selfie") {
+                    selfByte = it
+                    certViewModel.submitKycSelf(it, null)
+                }
+            }
         }
     }
+}
+
+@Composable
+fun TakPhoto(currentCaptureType: String, takeAction: (ByteArray?) -> Unit) {
+    val scope = rememberCoroutineScope()
+    // Peekaboo 相机状态
+    val cameraState = rememberPeekabooCameraState(
+        initialCameraMode = CameraMode.Back,
+        onCapture = { imageBytes ->
+            "ImageByte:${imageBytes?.size}".log()
+            if (imageBytes == null) return@rememberPeekabooCameraState
+            scope.launch {
+                try {
+                    // 压缩图片
+                    val compressed = withContext(Dispatchers.IO) {
+                        compressImage(imageBytes, maxSizeKb = 250)
+                    }
+                    takeAction.invoke(compressed)
+                } catch (e: Exception) {
+                    "SubmitError: ${e.message}".log()
+                    takeAction.invoke(null)
+                }
+            }
+        }
+    )
+//    if (cameraState.isCameraReady) {
+    if (currentCaptureType == "front" || currentCaptureType == "back") {
+        if (cameraState.cameraMode == CameraMode.Front) {
+            cameraState.toggleCamera()
+        }
+    }
+    if (currentCaptureType == "selfie") {
+        if (cameraState.cameraMode == CameraMode.Back) {
+            cameraState.toggleCamera()
+        }
+    }
+    Box(modifier = Modifier.fillMaxSize()) {
+        PeekabooCamera(
+            state = cameraState,
+            modifier = Modifier.fillMaxSize(),
+        )
+        Spacer(
+            modifier = Modifier.padding(bottom = 100.dp)
+                .clip(RoundedCornerShape((50.dp)))
+                .size(80.dp).background(white, RoundedCornerShape(50.dp))
+                .align(Alignment.BottomCenter)
+                .clickable {
+                    cameraState.capture()
+                }
+        )
+    }
+//    }
 }
 
 @Preview

@@ -38,6 +38,7 @@ import com.kmp.vayone.ui.widget.ConfirmDialog
 import com.kmp.vayone.ui.widget.LoadingDialog
 import com.kmp.vayone.ui.widget.TopBar
 import com.kmp.vayone.viewmodel.LoginViewModel
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import theme.C_132247
@@ -64,15 +65,17 @@ fun LogoutScreen(
     val isLoading by loginViewModel.isLoading.collectAsState()
 
     LaunchedEffect(Unit) {
-        loginViewModel.logoutResult.collect {
-            CacheManager.setToken("")
-            CacheManager.setLoginInfo(null)
-            onNavigate(Screen.LogoutSuccess)
+        launch {
+            loginViewModel.errorEvent.collect { event ->
+                toast(event.showToast, event.message)
+            }
         }
-    }
-    LaunchedEffect(Unit) {
-        loginViewModel.errorEvent.collect { event ->
-            toast(event.showToast, event.message)
+        launch {
+            loginViewModel.logoutResult.collect {
+                CacheManager.setToken("")
+                CacheManager.setLoginInfo(null)
+                onNavigate(Screen.LogoutSuccess)
+            }
         }
     }
     Scaffold(modifier = Modifier.fillMaxSize().statusBarsPadding(), topBar = {

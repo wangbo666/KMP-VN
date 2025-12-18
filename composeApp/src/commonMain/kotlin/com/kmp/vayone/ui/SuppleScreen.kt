@@ -101,44 +101,46 @@ fun SuppleScreen(
     var companyStatus by remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(Unit) {
-        certViewModel.errorEvent.collect { event ->
-            toast(event.showToast, event.message)
-        }
-    }
-    LaunchedEffect(Unit) {
-        if (isCert) {
-            certViewModel.getPersonalInfo()
-        }
-    }
-    LaunchedEffect(Unit) {
-        if (isCert) {
-            certViewModel.getContactInfo()
-        }
-    }
-    LaunchedEffect(Unit) {
-        certViewModel.personalInfoResult.collect {
-            it?.let {
-                reasonText = it.purposeStr ?: ""
-                emailText = it.email ?: ""
+        launch {
+            certViewModel.errorEvent.collect { event ->
+                toast(event.showToast, event.message)
             }
         }
-    }
-    LaunchedEffect(Unit) {
-        certViewModel.contactInfo.collect {
-            it?.let {
-                facebookText = it.facebookUid ?: ""
-                professionText = it.industryStr ?: ""
-                companyStatus = it.jobNature
-                companyNameText = it.companyName ?: ""
-                companyPhoneText = it.companyTel ?: ""
-                companyAddressText = it.companyAddress ?: ""
+        launch {
+            if (isCert) {
+                certViewModel.getPersonalInfo()
             }
         }
-    }
-    LaunchedEffect(Unit) {
-        certViewModel.submitSuppleResult.collect {
-            toast(true, Strings["submit_success"])
-            onBack()
+        launch {
+            if (isCert) {
+                certViewModel.getContactInfo()
+            }
+        }
+        launch {
+            certViewModel.personalInfoResult.collect {
+                it?.let {
+                    reasonText = it.purposeStr ?: ""
+                    emailText = it.email ?: ""
+                }
+            }
+        }
+        launch {
+            certViewModel.contactInfo.collect {
+                it?.let {
+                    facebookText = it.facebookUid ?: ""
+                    professionText = it.industryStr ?: ""
+                    companyStatus = it.jobNature
+                    companyNameText = it.companyName ?: ""
+                    companyPhoneText = it.companyTel ?: ""
+                    companyAddressText = it.companyAddress ?: ""
+                }
+            }
+        }
+        launch {
+            certViewModel.submitSuppleResult.collect {
+                toast(true, Strings["submit_success"])
+                onBack()
+            }
         }
     }
     Scaffold(

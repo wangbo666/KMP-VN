@@ -64,8 +64,9 @@ kotlin {
 
             implementation(libs.kotlinx.datetime)
 
-            implementation(libs.peekaboo.ui)
+            implementation(libs.peekaboo.ui)  // iOS 黑屏问题，改用 CameraK
 //            implementation(libs.peekaboo.image.picker)
+//            implementation(libs.camerak)
         }
         iosMain {
             dependencies {

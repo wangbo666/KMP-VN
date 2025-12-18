@@ -116,28 +116,30 @@ fun LoginScreen(
         }
     }
     LaunchedEffect(Unit) {
-        loginViewModel.sendOtpResult.collect {
-            isCounting = true
+        launch {
+            loginViewModel.sendOtpResult.collect {
+                isCounting = true
+            }
         }
-    }
-    LaunchedEffect(Unit) {
-        loginViewModel.errorEvent.collect { event ->
-            toast(event.showToast, event.message)
+        launch {
+            loginViewModel.errorEvent.collect { event ->
+                toast(event.showToast, event.message)
+            }
         }
-    }
-    LaunchedEffect(Unit) {
-        loginViewModel.loginResult.collect {
-            CacheManager.setLoginInfo(it)
-            CacheManager.setToken(it?.token ?: "")
-            loginViewModel.postDeviceInfo()
+        launch {
+            loginViewModel.loginResult.collect {
+                CacheManager.setLoginInfo(it)
+                CacheManager.setToken(it?.token ?: "")
+                loginViewModel.postDeviceInfo()
+            }
         }
-    }
-    LaunchedEffect(Unit) {
-        loginViewModel.postDeviceResult.collect {
-            if (CacheManager.getLoginInfo()?.passwdSign == 0) {
-                onNavigate(Screen.SetPassword)
-            } else {
-                onNavigate(Screen.Home(0))
+        launch {
+            loginViewModel.postDeviceResult.collect {
+                if (CacheManager.getLoginInfo()?.passwdSign == 0) {
+                    onNavigate(Screen.SetPassword)
+                } else {
+                    onNavigate(Screen.Home(0))
+                }
             }
         }
     }

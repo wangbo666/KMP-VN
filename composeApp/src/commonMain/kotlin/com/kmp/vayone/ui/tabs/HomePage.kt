@@ -65,6 +65,7 @@ import com.kmp.vayone.util.jumpCert
 import com.kmp.vayone.util.toAmountString
 import com.kmp.vayone.viewmodel.MainViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import theme.C_132247
@@ -128,23 +129,25 @@ fun HomePage(
     var showFillBankDialog by remember { mutableStateOf(isFromCertSuccess) }
 
     LaunchedEffect(Unit) {
-        mainViewModel.errorEvent.collect { event ->
-            toast(event.showToast, event.message)
-            when (event.code) {
-                401, 402 -> {
-                    CacheManager.setLoginInfo(null)
-                    CacheManager.setToken("")
-                    navigate(Screen.Login)
-                }
+        launch {
+            mainViewModel.errorEvent.collect { event ->
+                toast(event.showToast, event.message)
+                when (event.code) {
+                    401, 402 -> {
+                        CacheManager.setLoginInfo(null)
+                        CacheManager.setToken("")
+                        navigate(Screen.Login)
+                    }
 
-                300 -> {
-                    //VersionUpdate
+                    300 -> {
+                        //VersionUpdate
+                    }
                 }
             }
         }
-    }
-    LaunchedEffect(Unit) {
-        mainViewModel.getBannerList()
+        launch {
+            mainViewModel.getBannerList()
+        }
     }
     // 监听生命周期
     val lifecycleOwner = LocalLifecycleOwner.current

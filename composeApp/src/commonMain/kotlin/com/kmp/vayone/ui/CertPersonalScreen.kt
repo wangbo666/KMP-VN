@@ -139,37 +139,39 @@ fun CertPersonalScreen(
     var showAddressSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        certViewModel.errorEvent.collect { event ->
-            toast(event.showToast, event.message)
+        launch {
+            certViewModel.errorEvent.collect { event ->
+                toast(event.showToast, event.message)
+            }
         }
-    }
-    LaunchedEffect(Unit) {
-        certViewModel.getPersonalInfo()
-    }
-    LaunchedEffect(Unit) {
-        certViewModel.personalSubmitResult.collect {
-            it?.jumpCert(navigate)
+        launch {
+            certViewModel.getPersonalInfo()
         }
-    }
-    LaunchedEffect(certViewModel.personalInfoResult) {
-        certViewModel.personalInfoResult.collect {
-            it?.let {
-                nameText = it.firstName ?: ""
-                idNumText = it.cardNo ?: ""
-                genderText = it.sexStr ?: ""
-                birthText = it.birthDateStr?.convertYMDToDMY() ?: ""
-                educationText = it.educationStr ?: ""
-                monthlyText = if (it.salary == null) "" else it.salary.toString()
-                marryText = it.marryStateStr ?: ""
-                zaloText = it.zaloAccount ?: ""
-                provinceText = "${it.provinceStr ?: ""}${it.cityStr ?: ""}${it.regionStr ?: ""}"
-                addressText = it.currentAddress ?: ""
-                genderStatus = it.sex
-                educationStatus = it.education
-                marryStatus = it.marryState
-                provinceId = it.province
-                cityId = it.city
-                regionId = it.region
+        launch {
+            certViewModel.personalSubmitResult.collect {
+                it?.jumpCert(navigate)
+            }
+        }
+        launch {
+            certViewModel.personalInfoResult.collect {
+                it?.let {
+                    nameText = it.firstName ?: ""
+                    idNumText = it.cardNo ?: ""
+                    genderText = it.sexStr ?: ""
+                    birthText = it.birthDateStr?.convertYMDToDMY() ?: ""
+                    educationText = it.educationStr ?: ""
+                    monthlyText = if (it.salary == null) "" else it.salary.toString()
+                    marryText = it.marryStateStr ?: ""
+                    zaloText = it.zaloAccount ?: ""
+                    provinceText = "${it.provinceStr ?: ""}${it.cityStr ?: ""}${it.regionStr ?: ""}"
+                    addressText = it.currentAddress ?: ""
+                    genderStatus = it.sex
+                    educationStatus = it.education
+                    marryStatus = it.marryState
+                    provinceId = it.province
+                    cityId = it.city
+                    regionId = it.region
+                }
             }
         }
     }

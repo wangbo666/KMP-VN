@@ -84,22 +84,24 @@ fun AddAccountScreen(
     val isKeyboardVisible = rememberKeyboardVisible()
 
     LaunchedEffect(Unit) {
-        certViewModel.errorEvent.collect { event ->
-            toast(event.showToast, event.message)
+        launch {
+            certViewModel.errorEvent.collect { event ->
+                toast(event.showToast, event.message)
+            }
         }
-    }
-    LaunchedEffect(Unit) {
-        certViewModel.getPersonalInfo()
-    }
-    LaunchedEffect(Unit) {
-        certViewModel.personalInfoResult.collect {
-            holderNameText = it?.firstName ?: ""
+        launch {
+            certViewModel.getPersonalInfo()
         }
-    }
-    LaunchedEffect(Unit) {
-        certViewModel.addAccountResult.collect {
-            toast(true, Strings["toast_add_account_receivable"])
-            onBack()
+        launch {
+            certViewModel.personalInfoResult.collect {
+                holderNameText = it?.firstName ?: ""
+            }
+        }
+        launch {
+            certViewModel.addAccountResult.collect {
+                toast(true, Strings["toast_add_account_receivable"])
+                onBack()
+            }
         }
     }
     Scaffold(

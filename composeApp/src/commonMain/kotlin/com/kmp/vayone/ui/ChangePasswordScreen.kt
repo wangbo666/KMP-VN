@@ -56,6 +56,7 @@ import com.kmp.vayone.ui.widget.TopBar
 import com.kmp.vayone.util.isValidPhoneNumber
 import com.kmp.vayone.viewmodel.LoginViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import theme.C_2B2621
@@ -104,24 +105,25 @@ fun ChangePasswordScreen(
         }
     }
     LaunchedEffect(Unit) {
-        loginViewModel.sendOtpResult.collect {
-            isCounting = true
+        launch {
+            loginViewModel.sendOtpResult.collect {
+                isCounting = true
+            }
         }
-    }
-    LaunchedEffect(Unit) {
-        loginViewModel.errorEvent.collect { event ->
-            toast(event.showToast, event.message)
+        launch {
+            loginViewModel.errorEvent.collect { event ->
+                toast(event.showToast, event.message)
+            }
         }
-    }
-
-    LaunchedEffect(Unit) {
-        loginViewModel.changeResult.collect {
-            CacheManager.setToken(it?.token ?: "")
-            onNavigate(
-                Screen.SetPasswordSuccess(
-                    Strings["password_change_successful"]
+        launch {
+            loginViewModel.changeResult.collect {
+                CacheManager.setToken(it?.token ?: "")
+                onNavigate(
+                    Screen.SetPasswordSuccess(
+                        Strings["password_change_successful"]
+                    )
                 )
-            )
+            }
         }
     }
 

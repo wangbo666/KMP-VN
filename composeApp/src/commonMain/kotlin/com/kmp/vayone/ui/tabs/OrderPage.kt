@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.ProductBean
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
@@ -77,6 +78,17 @@ fun OrderPage(
     LaunchedEffect(Unit) {
         mainViewModel.errorEvent.collect { event ->
             toast(event.showToast, event.message)
+            when (event.code) {
+                401, 402 -> {
+                    CacheManager.setLoginInfo(null)
+                    CacheManager.setToken("")
+                    navigate(Screen.Login)
+                }
+
+                300 -> {
+                    //VersionUpdate
+                }
+            }
         }
     }
     val lifecycleOwner = LocalLifecycleOwner.current
