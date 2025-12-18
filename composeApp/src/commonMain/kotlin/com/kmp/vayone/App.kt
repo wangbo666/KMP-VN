@@ -36,6 +36,7 @@ import com.kmp.vayone.ui.MessageDetailScreen
 import com.kmp.vayone.ui.MessageScreen
 import com.kmp.vayone.ui.OrderCenterScreen
 import com.kmp.vayone.ui.PrivacyScreen
+import com.kmp.vayone.ui.ProductScreen
 import com.kmp.vayone.ui.SetPasswordScreen
 import com.kmp.vayone.ui.SetPasswordSuccessScreen
 import com.kmp.vayone.ui.SettingsScreen
@@ -328,6 +329,13 @@ fun App() {
 
                     is Screen.LoanResult -> LoanResultScreen(
                         screen.signPageParams, toast = { show, toast ->
+                            showToast = show
+                            toastMessage = toast
+                        },
+                        onBack = { goBack() }) { navigate(it) }
+
+                    is Screen.Product -> ProductScreen(
+                        screen.productDetail, toast = { show, toast ->
                             showToast = show
                             toastMessage = toast
                         },

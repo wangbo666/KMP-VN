@@ -1,6 +1,7 @@
 package com.kmp.vayone.navigation
 
 import com.kmp.vayone.data.MessageBean
+import com.kmp.vayone.data.ProductDetailBean
 import com.kmp.vayone.ui.widget.SignPageParams
 
 sealed interface Screen {
@@ -33,4 +34,5 @@ sealed interface Screen {
     data class SuppleInfo(val isCert: Boolean, val amount: String) : Screen
     data class Sign(val signPageParams: SignPageParams) : Screen
     data class LoanResult(val signPageParams: SignPageParams) : Screen
+    data class Product(val productDetail: ProductDetailBean) : Screen
 }

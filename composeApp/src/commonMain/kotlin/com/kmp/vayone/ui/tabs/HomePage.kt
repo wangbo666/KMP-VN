@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -156,6 +157,7 @@ fun HomePage(
         launch {
             mainViewModel.productDetailResult.collect {
                 it?.let {
+//                    CacheManager.setSignBackHome(false)
                     if (CacheManager.isSignBackHome()) {
                         val map: MutableMap<Long?, Int?> = HashMap()
                         if (!it.productInstallmentPlanDTOList.isNullOrEmpty()) {
@@ -188,7 +190,7 @@ fun HomePage(
                             )
                         )
                     } else {
-
+                        navigate(Screen.Product(it))
                     }
                 }
             }
@@ -1088,7 +1090,10 @@ fun ProductItem(
                     .clip(RoundedCornerShape(30.dp))
                     .background(C_FC7700, RoundedCornerShape(30.dp))
                     .padding(horizontal = 18.dp)
-                    .clickable(enabled = item.canApply) {
+                    .clickable(
+                        enabled = item.canApply,
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }) {
                         onClick(item)
                     }
             )

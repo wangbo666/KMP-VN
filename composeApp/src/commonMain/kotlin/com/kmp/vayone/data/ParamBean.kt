@@ -1,8 +1,11 @@
 package com.kmp.vayone.data
 
 import com.kmp.vayone.data.CacheManager.APPCODE
+import com.kmp.vayone.data.remote.json
 import com.kmp.vayone.util.isCertPass
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 const val ORDER_STATUS_NOT = -1
 const val ORDER_STATUS_SUCCESS = 10
@@ -563,7 +566,21 @@ data class ProductFeeBean(
     val name: String? = null,
     val nameConfig: String? = null,
     val amount: String? = null,
-)
+) {
+
+    fun getViName(): String? {
+        if (nameConfig.isNullOrBlank()) return null
+
+        return runCatching {
+            val jsonObject = json.parseToJsonElement(nameConfig!!).jsonObject
+            jsonObject.entries.firstOrNull()?.value?.jsonPrimitive?.content
+        }.getOrNull()
+    }
+
+    fun getFeeName(): String {
+        return (if (CacheManager.getLanguage() == "en") name else getViName()) ?: ""
+    }
+}
 
 @Serializable
 data class LoanTermBean(

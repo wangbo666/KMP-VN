@@ -33,7 +33,13 @@ fun String.format(vararg args: String): String {
 }
 
 fun String?.toAmountString(symbol: String?): String {
-    return "${this ?: ""}${symbol ?: ""}".replace(".00", "")
+//    return "${this ?: ""}${symbol ?: ""}"
+//        .replace(".00", "")
+//        .replace(".0", "")
+    return buildString {
+        append(this@toAmountString.orEmpty())
+        append(symbol.orEmpty())
+    }.replace(Regex("\\.0+$"), "")
 }
 
 fun String.convertYMDToDMY(): String {
@@ -92,7 +98,8 @@ fun String.isValidIDCard(): Boolean {
 }
 
 fun String?.isPositive(): Boolean {
-    return this != null && this != "0"
+    val i = this?.toDoubleOrNull() ?: 0.0
+    return i > 0
 }
 
 fun String?.permissionToString(): String {
@@ -115,4 +122,12 @@ fun String.isValidEmail(): Boolean {
         "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
     )
     return emailRegex.matches(this)
+}
+
+fun String?.maskString(): String? {
+    if (this == null || length <= 7) return this
+    val prefix = this.substring(0, 3)
+    val suffix = this.takeLast(4)
+    val stars = "*".repeat(this.length - 7)
+    return "$prefix$stars$suffix"
 }
