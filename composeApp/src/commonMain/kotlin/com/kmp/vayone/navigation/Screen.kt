@@ -1,5 +1,6 @@
 package com.kmp.vayone.navigation
 
+import com.kmp.vayone.data.HomeLoanBean
 import com.kmp.vayone.data.MessageBean
 import com.kmp.vayone.data.ProductDetailBean
 import com.kmp.vayone.ui.widget.SignPageParams
@@ -35,4 +36,5 @@ sealed interface Screen {
     data class Sign(val signPageParams: SignPageParams) : Screen
     data class LoanResult(val signPageParams: SignPageParams) : Screen
     data class Product(val productDetail: ProductDetailBean) : Screen
+    data class Together(val loanData: HomeLoanBean) : Screen
 }

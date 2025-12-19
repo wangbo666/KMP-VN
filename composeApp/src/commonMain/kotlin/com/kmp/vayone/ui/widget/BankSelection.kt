@@ -85,7 +85,9 @@ fun BankSelection(
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
-        sheetState = sheetState
+        sheetState = sheetState,
+        containerColor = white,
+        scrimColor = Color.Black.copy(alpha = 0.3f)
     ) {
         Column(
             modifier = Modifier

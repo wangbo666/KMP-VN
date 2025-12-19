@@ -286,6 +286,7 @@ fun HomePage(
                                                 navigate(Screen.BankCert(false))
                                                 return@clickable
                                             }
+                                            authData?.let { navigate(Screen.Together(it)) }
                                         },
                                     color = white,
                                     fontSize = 18.sp,

@@ -117,8 +117,8 @@ class CertViewModel : BaseViewModel() {
         }) {
             if (!isShowLoading) {
                 _loadingState.value = UiState.Success
-                _accountList.value = it ?: arrayListOf()
             }
+            _accountList.value = it ?: arrayListOf()
         }
     }
 

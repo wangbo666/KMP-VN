@@ -43,6 +43,7 @@ import com.kmp.vayone.ui.SettingsScreen
 import com.kmp.vayone.ui.SignScreen
 import com.kmp.vayone.ui.SplashScreen
 import com.kmp.vayone.ui.SuppleScreen
+import com.kmp.vayone.ui.TogetherScreen
 import com.kmp.vayone.ui.WebViewScreen
 import com.kmp.vayone.ui.widget.ToastHost
 import kotlinx.coroutines.delay
@@ -336,6 +337,13 @@ fun App() {
 
                     is Screen.Product -> ProductScreen(
                         screen.productDetail, toast = { show, toast ->
+                            showToast = show
+                            toastMessage = toast
+                        },
+                        onBack = { goBack() }) { navigate(it) }
+
+                    is Screen.Together -> TogetherScreen(
+                        screen.loanData, toast = { show, toast ->
                             showToast = show
                             toastMessage = toast
                         },
