@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,6 +38,7 @@ import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.ProductBean
 import com.kmp.vayone.data.Strings
 import com.kmp.vayone.navigation.Screen
+import com.kmp.vayone.ui.OrderDetailScreen
 import com.kmp.vayone.ui.widget.ColoredTextPart
 import com.kmp.vayone.ui.widget.LoadingBox
 import com.kmp.vayone.ui.widget.MultiColoredText
@@ -108,14 +110,16 @@ fun OrderPage(
     LoadingBox(
         state = loadingState, modifier = Modifier.fillMaxSize().padding(top = 38.dp), onRetry = {
             mainViewModel.getHomeAuthData(false)
+
         }) {
         PullToRefreshBox(
             isRefreshing = loadingState != UiState.Success, onRefresh = {
                 mainViewModel.getHomeAuthData(false)
-            }) {
+            }, modifier = Modifier.fillMaxSize()
+        ) {
             EmptyOrderPage(authData?.repayProducts.isNullOrEmpty())
             val list = authData?.repayProducts?.filter { it1 ->
-                it1.isPendingRepayment()||it1.isDue()
+                it1.isPendingRepayment() || it1.isDue()
             }
             val size = list?.size ?: 0
             OrderPageBatch(
@@ -123,7 +127,7 @@ fun OrderPage(
                 size.toString(),
                 navigate
             )
-            HomeOrderList(list ?: listOf(), navigate)
+            HomeOrderList(authData?.repayProducts ?: listOf(), navigate)
         }
     }
 }
@@ -381,8 +385,13 @@ fun HomeOrderItem(item: ProductBean, navigate: (Screen) -> Unit) {
     Column(
         modifier = Modifier.fillMaxWidth()
             .wrapContentHeight()
-            .background(white, RoundedCornerShape(12.dp))
             .padding(bottom = 10.dp)
+            .background(white, RoundedCornerShape(12.dp))
+            .padding(bottom = 10.dp).clickable(
+                indication = null, interactionSource = remember { MutableInteractionSource() }
+            ) {
+                navigate(Screen.OrderDetail(item.orderId))
+            }
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(

@@ -24,7 +24,7 @@ expect fun calculateAmount(list: List<String?>?): String
  * 特点：卸载应用后保持不变
  * 不需要任何权限
  */
-expect suspend fun getDeviceId(): String
+expect fun getDeviceId(): String
 
 /**
  * 打开系统的应用权限设置页
@@ -64,3 +64,9 @@ interface SignatureFileManager {
 }
 
 expect fun getSignatureFileManager(): SignatureFileManager
+
+// commonMain
+expect fun getLocalIpAddress(): String?
+
+expect fun readImageBytes(path: String): ByteArray
+

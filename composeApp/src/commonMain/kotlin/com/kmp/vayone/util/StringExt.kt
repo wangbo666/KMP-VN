@@ -4,6 +4,7 @@ package com.kmp.vayone.util
 
 import com.kmp.vayone.currentTimeMillis
 import com.kmp.vayone.data.Strings
+import com.kmp.vayone.data.remote.json
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.todayIn
@@ -130,4 +131,26 @@ fun String?.maskString(): String? {
     val suffix = this.takeLast(4)
     val stars = "*".repeat(this.length - 7)
     return "$prefix$stars$suffix"
+}
+
+fun String?.parseLongIntMap(): Map<Long, Int> {
+    if (this.isNullOrBlank()) return emptyMap()
+
+    return try {
+        json.decodeFromString<Map<String, Int>>(this)
+            .mapKeys { it.key.toLong() }
+    } catch (e: Exception) {
+        emptyMap()
+    }
+}
+
+fun String?.parseLongLongMap(): Map<Long, Long> {
+    if (this.isNullOrBlank()) return emptyMap()
+
+    return try {
+        json.decodeFromString<Map<String, Long>>(this)
+            .mapKeys { it.key.toLong() }
+    } catch (e: Exception) {
+        emptyMap()
+    }
 }

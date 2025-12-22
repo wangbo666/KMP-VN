@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -139,7 +140,9 @@ fun OrderCenterScreen(
                         .padding(top = 10.dp)
                 ) {
                     items(orderList.size, key = { it }) {
-                        OrderItem(orderList[it])
+                        OrderItem(orderList[it]) { item ->
+                            navigate(Screen.OrderDetail(item.id))
+                        }
                     }
                 }
             }
@@ -148,11 +151,16 @@ fun OrderCenterScreen(
 }
 
 @Composable
-fun OrderItem(item: OrderBean) {
+fun OrderItem(item: OrderBean, onClick: (OrderBean) -> Unit) {
     Box(
         modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 10.dp)
             .background(white, RoundedCornerShape(16.dp))
-            .border(width = 3.dp, color = C_FFE3BF, RoundedCornerShape(16.dp)),
+            .border(width = 3.dp, color = C_FFE3BF, RoundedCornerShape(16.dp))
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }) {
+                onClick(item)
+            },
     ) {
         Text(
             text = item.getStatusString(),
@@ -222,7 +230,7 @@ fun OrderItem(item: OrderBean) {
                     lineHeight = 19.sp,
                 )
                 Text(
-                    item.createTime.date(dateTimeFormatAllBack).ddMMyyyy(),
+                    item.createTime.orEmpty().substringBefore(" "),
                     fontSize = 14.sp,
                     color = C_202125,
                     lineHeight = 19.sp,

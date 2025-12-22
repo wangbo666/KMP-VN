@@ -35,8 +35,10 @@ import com.kmp.vayone.ui.LogoutSuccessScreen
 import com.kmp.vayone.ui.MessageDetailScreen
 import com.kmp.vayone.ui.MessageScreen
 import com.kmp.vayone.ui.OrderCenterScreen
+import com.kmp.vayone.ui.OrderDetailScreen
 import com.kmp.vayone.ui.PrivacyScreen
 import com.kmp.vayone.ui.ProductScreen
+import com.kmp.vayone.ui.RepaymentScreen
 import com.kmp.vayone.ui.SetPasswordScreen
 import com.kmp.vayone.ui.SetPasswordSuccessScreen
 import com.kmp.vayone.ui.SettingsScreen
@@ -344,6 +346,23 @@ fun App() {
 
                     is Screen.Together -> TogetherScreen(
                         screen.loanData, toast = { show, toast ->
+                            showToast = show
+                            toastMessage = toast
+                        },
+                        onBack = { goBack() }) { navigate(it) }
+
+                    is Screen.OrderDetail -> OrderDetailScreen(
+                        screen.orderId,
+                        screen.isFromBatch,
+                        toast = { show, toast ->
+                            showToast = show
+                            toastMessage = toast
+                        },
+                        onBack = { goBack() }) { navigate(it) }
+
+                    is Screen.Repayment -> RepaymentScreen(
+                        screen.orderId, screen.orderNo, screen.amount,
+                        toast = { show, toast ->
                             showToast = show
                             toastMessage = toast
                         },

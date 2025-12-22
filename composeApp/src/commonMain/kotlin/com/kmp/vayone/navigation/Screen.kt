@@ -37,4 +37,6 @@ sealed interface Screen {
     data class LoanResult(val signPageParams: SignPageParams) : Screen
     data class Product(val productDetail: ProductDetailBean) : Screen
     data class Together(val loanData: HomeLoanBean) : Screen
+    data class OrderDetail(val orderId: Long?, val isFromBatch: Boolean = false) : Screen
+    data class Repayment(val orderId: String?, val orderNo: String?, val amount: String?) : Screen
 }

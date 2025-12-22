@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -150,8 +151,7 @@ fun BatchRepayment(
                 .padding(paddingValues)
         ) {
             LazyColumn(
-                modifier = Modifier.fillMaxWidth()
-                    .wrapContentHeight()
+                modifier = Modifier.fillMaxSize()
                     .padding(
                         horizontal = 16.dp,
                         vertical = 10.dp
@@ -185,6 +185,11 @@ fun BatchRepaymentItem(
         modifier = Modifier.fillMaxWidth().padding(start = 13.dp, end = 13.dp, bottom = 8.dp)
             .wrapContentHeight()
             .background(shape = RoundedCornerShape(12.dp), color = white)
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }) {
+                navigate(Screen.OrderDetail(productBean.orderId, true))
+            }
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

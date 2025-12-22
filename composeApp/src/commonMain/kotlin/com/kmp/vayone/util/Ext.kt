@@ -58,3 +58,4 @@ fun UserAuthBean.jumpCert(navigate: (Screen) -> Unit, isFromAuthPage: Boolean = 
         }
     }
 }
+

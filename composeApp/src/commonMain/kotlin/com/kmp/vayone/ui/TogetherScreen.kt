@@ -22,14 +22,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
@@ -37,7 +37,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kmp.vayone.data.BankCardBean
-import com.kmp.vayone.data.CacheManager
 import com.kmp.vayone.data.CacheManager.LEASE_AGREEMENT
 import com.kmp.vayone.data.CacheManager.PAWN_AGREEMENT
 import com.kmp.vayone.data.CacheManager.getLoginInfo
@@ -47,14 +46,14 @@ import com.kmp.vayone.data.Strings
 import com.kmp.vayone.data.remote.json
 import com.kmp.vayone.getPhoneModel
 import com.kmp.vayone.navigation.Screen
-import com.kmp.vayone.ui.widget.ColoredTextPart
+import com.kmp.vayone.postAllPermissions
 import com.kmp.vayone.ui.widget.LoadingDialog
-import com.kmp.vayone.ui.widget.MultiColoredText
 import com.kmp.vayone.ui.widget.SignPageParams
 import com.kmp.vayone.ui.widget.TopBar
 import com.kmp.vayone.util.format
 import com.kmp.vayone.util.isPositive
 import com.kmp.vayone.util.log
+import com.kmp.vayone.util.maskString
 import com.kmp.vayone.util.toAmountString
 import com.kmp.vayone.viewmodel.CertViewModel
 import kotlinx.coroutines.launch
@@ -97,7 +96,16 @@ fun TogetherScreen(
     val pawnUrl = remember {
         PAWN_AGREEMENT + "userId=${getLoginInfo()?.id}"
     }
-    var cardInfo by remember { mutableStateOf<BankCardBean?>(null) }
+    var cardInfo by remember {
+        mutableStateOf<BankCardBean?>(
+            BankCardBean(
+                id = loanBean.bankInfoId,
+                bankNo = loanBean.bankNo
+            )
+        )
+    }
+    val termMap = remember { mutableStateMapOf<Long, Long>() }
+    val installmentMap = remember { mutableStateMapOf<Long, Int>() }
 
     val listState = rememberLazyListState()
 
@@ -106,6 +114,9 @@ fun TogetherScreen(
             certViewModel.errorEvent.collect { event ->
                 toast(event.showToast, event.message)
             }
+        }
+        launch {
+            certViewModel.getBankCardList(false)
         }
     }
 
@@ -122,12 +133,125 @@ fun TogetherScreen(
         }
         LazyColumn(state = listState, modifier = Modifier.weight(1f).padding(top = 6.dp)) {
             items(productList.size, key = { it }) { index ->
-                TogetherProduct(productList[index]) {
+                TogetherProduct(
+                    item = productList[index],
+                    onTermChanged = { productId, termId ->
+                        termMap[productId] = termId
+                    },
+                    onInstallmentChanged = { productId, planNums ->
+                        installmentMap[productId] = planNums
+                    }) {
                     scope.launch {
                         listState.animateScrollToItem(index, scrollOffset = if (it) 1000 else 0)
                     }
                 }
             }
+        }
+        Column(
+            modifier = Modifier.fillMaxWidth().background(white)
+                .padding(top = 8.dp, bottom = 16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = Strings["account_receivable"],
+                    fontSize = 13.sp,
+                    lineHeight = 18.sp,
+                    color = C_40495C,
+                )
+                Text(
+                    text = cardInfo?.bankNo.maskString().orEmpty(),
+                    fontSize = 14.sp,
+                    lineHeight = 18.sp,
+                    textAlign = TextAlign.End,
+                    color = C_40495C,
+                    modifier = Modifier.weight(1f).padding(end = 6.dp)
+                )
+                if (cardInfo?.bankNo == null) {
+                    cardInfo = cardList.firstOrNull { it.isDefault == 1 }
+                }
+                Text(
+                    text = Strings["change"],
+                    fontSize = 12.sp,
+                    lineHeight = 18.sp,
+                    color = white,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.background(C_FC7700, RoundedCornerShape(3.dp))
+                        .padding(horizontal = 5.dp).clip(RoundedCornerShape(3.dp))
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            showCardDialog = true
+                            if (cardList.isEmpty()) {
+                                certViewModel.getBankCardList(true)
+                            }
+                        })
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = Strings["total_repayment"],
+                    fontSize = 13.sp,
+                    lineHeight = 23.sp,
+                    color = C_40495C,
+                )
+                Text(
+                    text = loanBean.canApplyAmount.toAmountString(loanBean.currencySymbol),
+                    fontSize = 20.sp,
+                    lineHeight = 23.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = C_40495C,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.End
+                )
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, top = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = Strings["together_num"],
+                    fontSize = 13.sp,
+                    lineHeight = 23.sp,
+                    color = C_40495C,
+                )
+                Text(
+                    text = productList.size.toString(),
+                    fontSize = 20.sp,
+                    lineHeight = 23.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = C_40495C,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.End
+                )
+            }
+            Text(
+                text = Strings["apply"],
+                color = white,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+                lineHeight = 48.sp,
+                modifier = Modifier.navigationBarsPadding()
+                    .padding(start = 20.dp, end = 20.dp, top = 8.dp).fillMaxWidth()
+                    .height(48.dp).clip(RoundedCornerShape(30.dp)).background(
+                        Brush.horizontalGradient(
+                            colors = listOf(
+                                C_FC7700, C_FC7700
+                            ),
+                        ), RoundedCornerShape(30.dp)
+                    ).clickable {
+                        scope.launch {
+                            postAllPermissions {
+                                showLoanDialog = true
+                            }
+                        }
+                    })
         }
     }
     ShowLoanAgreementDialog(showLoanDialog, agreementClick = {
@@ -138,7 +262,25 @@ fun TogetherScreen(
             )
         )
     }, confirmClick = {
-
+        json.encodeToString(
+            installmentMap.toMap()
+        ).log()
+        json.encodeToString(termMap.toMap()).log()
+        navigate(
+            Screen.LoanResult(
+                SignPageParams(
+                    cardInfo?.id,
+                    productList,
+                    null,
+                    cardInfo?.id,
+                    null,
+                    if (installmentMap.isEmpty()) null else json.encodeToString(
+                        installmentMap.toMap()
+                    ),
+                    json.encodeToString(termMap.toMap()),
+                )
+            )
+        )
     }) {
         showLoanDialog = false
     }
@@ -160,11 +302,16 @@ fun TogetherScreen(
 @Preview
 @Composable
 fun PreTogether() {
-    TogetherProduct(ProductBean()) {}
+    TogetherScreen(HomeLoanBean(), onBack = {}) {}
 }
 
 @Composable
-fun TogetherProduct(item: ProductBean, onExpand: (Boolean) -> Unit) {
+fun TogetherProduct(
+    item: ProductBean,
+    onTermChanged: (Long, Long) -> Unit,
+    onInstallmentChanged: (Long, Int) -> Unit,
+    onExpand: (Boolean) -> Unit
+) {
     var showPlan by remember { mutableStateOf(false) }
     var showDetail by remember { mutableStateOf(false) }
     var timeLimit by remember { mutableStateOf(item.timeLimit) }
@@ -179,6 +326,14 @@ fun TogetherProduct(item: ProductBean, onExpand: (Boolean) -> Unit) {
             loanTermConfigDTOList?.indexOfFirst { it1 -> it1.defaultSign == 1 }
                 ?.coerceIn(0, Int.MAX_VALUE) ?: 0
         )
+    }
+    val data = loanTermConfigDTOList!![defaultSelectPlan]
+
+    LaunchedEffect(defaultSelectPlan) {
+        onTermChanged(item.productId, data.id!!)
+        data.productInstallmentPlanDTOList?.firstOrNull()?.let {
+            onInstallmentChanged(item.productId, it.planNums!!)
+        }
     }
     Box(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 10.dp)) {
         if (showDetail) {
@@ -286,8 +441,8 @@ fun TogetherProduct(item: ProductBean, onExpand: (Boolean) -> Unit) {
                         }
                     }
                     if (!loanTermConfigDTOList.isNullOrEmpty()) {
-                        val item = loanTermConfigDTOList!![defaultSelectPlan]
-                        if (item.installmentServiceFee.isPositive()) {
+                        val data = loanTermConfigDTOList!![defaultSelectPlan]
+                        if (data.installmentServiceFee.isPositive()) {
                             Row(
                                 modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
                                     .height(20.dp),
@@ -299,7 +454,7 @@ fun TogetherProduct(item: ProductBean, onExpand: (Boolean) -> Unit) {
                                     color = C_7E7B79,
                                 )
                                 Text(
-                                    text = item.installmentServiceFee.toAmountString(item.currencySymbol),
+                                    text = data.installmentServiceFee.toAmountString(item.currencySymbol),
                                     modifier = Modifier.weight(1f),
                                     textAlign = TextAlign.End,
                                     fontSize = 14.sp,
@@ -481,7 +636,7 @@ fun TogetherProduct(item: ProductBean, onExpand: (Boolean) -> Unit) {
                     contentDescription = null,
                     modifier = Modifier.padding(end = 16.dp).size(24.dp)
                         .graphicsLayer {
-                            rotationZ = if (showDetail) 90f else 270f
+                            rotationZ = if (showDetail) 270f else 90f
                         }.clickable(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }) {

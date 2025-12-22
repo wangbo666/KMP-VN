@@ -6,6 +6,8 @@ import com.kmp.vayone.data.AuthBean
 import com.kmp.vayone.data.BankCardBean
 import com.kmp.vayone.data.BannerBean
 import com.kmp.vayone.data.CacheManager
+import com.kmp.vayone.data.CacheManager.getLocation
+import com.kmp.vayone.data.CacheManager.getLoginInfo
 import com.kmp.vayone.data.ContactsInfoBean
 import com.kmp.vayone.data.HomeBean
 import com.kmp.vayone.data.HomeLoanBean
@@ -14,6 +16,7 @@ import com.kmp.vayone.data.KycInfoBean
 import com.kmp.vayone.data.LoginBean
 import com.kmp.vayone.data.MessagePageBean
 import com.kmp.vayone.data.OrderBean
+import com.kmp.vayone.data.OrderDetailBean
 import com.kmp.vayone.data.ParamBean
 import com.kmp.vayone.data.PayChannelBean
 import com.kmp.vayone.data.PersonalInfoBean
@@ -25,8 +28,13 @@ import com.kmp.vayone.data.TogetherRepaymentBean
 import com.kmp.vayone.data.UserAuthBean
 import com.kmp.vayone.data.WorkInfoEnumBean
 import com.kmp.vayone.data.version_Name
+import com.kmp.vayone.getDeviceId
+import com.kmp.vayone.getLocalIpAddress
 import com.kmp.vayone.mobileType
 import com.kmp.vayone.randomUUID
+import com.kmp.vayone.readImageBytes
+import com.kmp.vayone.util.parseLongIntMap
+import com.kmp.vayone.util.parseLongLongMap
 import io.ktor.client.request.forms.formData
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
@@ -36,6 +44,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonObject
+import kotlin.collections.set
+import kotlin.toString
 
 // 使用示例
 object UserRepository {
@@ -178,7 +188,7 @@ object UserRepository {
                     key = "faceFile",
                     value = faceFile,
                     headers = Headers.build {
-                        append(HttpHeaders.ContentType, "image/jpeg")
+                        append(HttpHeaders.ContentType, "image/*")
                         append(
                             HttpHeaders.ContentDisposition,
                             "filename=\"${currentTimeMillis()}\""
@@ -254,5 +264,119 @@ object UserRepository {
 
     suspend fun getProductDetail(paramBean: ParamBean): ApiResponse<ProductDetailBean?> {
         return networkManager.post("api/loan/app/productInfo/detail", paramBean)
+    }
+
+    suspend fun togetherLoan(
+        bankId: String,
+        productList: List<ProductBean>,
+        signPath: String?,
+        installmentMap: String?,
+        termIdMap: String?
+    ): ApiResponse<List<ProductBean>?> {
+        val list = withContext(Dispatchers.IO) {
+            formData {
+                append("mobileType", mobileType())
+                append("appCode", CacheManager.APPCODE)
+                append("version", version_Name)
+                append("bankInfoId", bankId)
+                append("userId", getLoginInfo()?.id.toString())
+                append("payWay", "CARD")
+                append("ip", getLocalIpAddress().orEmpty())
+                append("imei", getDeviceId())
+                append("coordinate", "${getLocation().first},${getLocation().second}")
+                append("auditKey", "auditKey")
+                if (installmentMap != null) {
+                    append("productInstallmentMap", installmentMap)
+                }
+                if (termIdMap != null) {
+                    append("productLoanTermIdMap", termIdMap)
+                }
+                append(
+                    "productIds",
+                    productList.joinToString(",") { it1 -> it1.productId.toString() })
+                val planNums = installmentMap.parseLongIntMap().values.firstOrNull()
+                if (planNums != null) {
+                    append("planNums", planNums.toString())
+                }
+                val termId = termIdMap.parseLongLongMap().values.firstOrNull()
+                if (termId != null) {
+                    append("loanTermId", termId.toString())
+                }
+                append(
+                    key = "signPic",
+                    value = readImageBytes(signPath.orEmpty()),
+                    headers = Headers.build {
+                        append(HttpHeaders.ContentType, "image/*")
+                        append(
+                            HttpHeaders.ContentDisposition,
+                            "filename=\"${currentTimeMillis()}\""
+                        )
+                    }
+                )
+            }
+        }
+        return networkManager.postMultipart("api/loan/app/order/commit/all/with/event", list)
+    }
+
+    suspend fun singleLoan(
+        productId: String,
+        amount: String,
+        bankId: String,
+        signPath: String?,
+        installmentMap: String?,
+        termIdMap: String?
+    ): ApiResponse<ProductBean?> {
+        val list = withContext(Dispatchers.IO) {
+            formData {
+                append("mobileType", mobileType())
+                append("appCode", CacheManager.APPCODE)
+                append("version", version_Name)
+                append("bankInfoId", bankId)
+                append("userId", getLoginInfo()?.id.toString())
+                append("payWay", "CARD")
+                append("ip", getLocalIpAddress().orEmpty())
+                append("imei", getDeviceId())
+                append("coordinate", "${getLocation().first},${getLocation().second}")
+                append("auditKey", "auditKey")
+                append("productId", productId)
+                append("amount", amount)
+                val planNums = installmentMap.parseLongIntMap().values.firstOrNull()
+                if (planNums != null) {
+                    append("planNums", planNums.toString())
+                }
+                val termId = termIdMap.parseLongLongMap().values.firstOrNull()
+                if (termId != null) {
+                    append("loanTermId", termId.toString())
+                }
+                append(
+                    key = "signPic",
+                    value = readImageBytes(signPath.orEmpty()),
+                    headers = Headers.build {
+                        append(HttpHeaders.ContentType, "image/*")
+                        append(
+                            HttpHeaders.ContentDisposition,
+                            "filename=\"${currentTimeMillis()}\""
+                        )
+                    }
+                )
+            }
+        }
+        return networkManager.postMultipart("api/loan/app/order/commit/with/event", list)
+    }
+
+    suspend fun getOrderDetail(orderId: Long?): ApiResponse<OrderDetailBean?> {
+        return networkManager.post("api/loan/app/order/detail", ParamBean(orderId = orderId))
+    }
+
+    suspend fun showRepaymentBorrow(): ApiResponse<TogetherRepaymentBean?> {
+        return networkManager.get("api/user/app/common/reloan/button/sign")
+    }
+
+    suspend fun installmentRepay(paramBean: ParamBean): ApiResponse<TogetherRepaymentBean?> {
+        return networkManager.post("api/finance/app/order/repay/url", paramBean)
+    }
+
+    suspend fun repayAndBorrow(id: Long?): ApiResponse<TogetherRepaymentBean?>{
+        return networkManager.post("api/loan/app/apply/again", ParamBean(orderId = id))
     }
 }

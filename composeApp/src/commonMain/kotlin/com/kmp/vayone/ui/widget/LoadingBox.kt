@@ -41,7 +41,7 @@ fun LoadingBox(
 ) {
     Box(
         modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.TopCenter
     ) {
         when (state) {
             is UiState.Loading -> {

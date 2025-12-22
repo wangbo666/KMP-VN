@@ -40,7 +40,18 @@ import kotlin.coroutines.resume
 import kotlinx.cinterop.*
 import platform.CoreGraphics.*
 import platform.UIKit.*
+import platform.darwin.ifaddrs
 import kotlin.math.sqrt
+import kotlinx.cinterop.*
+import platform.posix.*
+import platform.Foundation.*
+import kotlinx.cinterop.*
+import platform.darwin.freeifaddrs
+import platform.darwin.getifaddrs
+import platform.darwin.inet_ntoa
+import platform.darwin.inet_ntop
+import platform.posix.*
+
 
 // 实际实现
 @OptIn(ExperimentalForeignApi::class)
@@ -71,10 +82,8 @@ actual fun mobileType(): String {
 actual fun getPhoneModel(): String = UIDevice.currentDevice.model
 actual fun getPhoneBrand(): String = "Apple"
 
-actual suspend fun getDeviceId(): String {
-    return withContext(Dispatchers.IO) {
-        UIDevice.currentDevice.identifierForVendor?.UUIDString ?: ""
-    }.replace("-", "")
+actual fun getDeviceId(): String {
+    return UIDevice.currentDevice.identifierForVendor?.UUIDString.orEmpty().replace("-", "")
 }
 
 actual fun calculateAmount(list: List<String?>?): String {
@@ -238,11 +247,11 @@ actual suspend fun compressImage(
                 UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
                 image.drawInRect(
                     CGRectMake(
-                    0.0,
-                    0.0,
-                    newSize.useContents { width },
-                    newSize.useContents { height }
-                ))
+                        0.0,
+                        0.0,
+                        newSize.useContents { width },
+                        newSize.useContents { height }
+                    ))
                 image = UIGraphicsGetImageFromCurrentImageContext() ?: return null
                 UIGraphicsEndImageContext()
 
@@ -262,4 +271,62 @@ actual suspend fun compressImage(
 
 actual fun randomUUID(): String {
     return NSUUID().UUIDString()
+}
+
+actual fun getLocalIpAddress(): String? = memScoped {
+    val ifap = alloc<CPointerVar<ifaddrs>>()
+    if (getifaddrs(ifap.ptr) != 0) return null
+
+    var ptr = ifap.value
+    var result: String? = null
+
+    while (ptr != null) {
+        val ifa = ptr.pointed
+        val addrPtr = ifa.ifa_addr
+
+        if (addrPtr == null) {
+            ptr = ifa.ifa_next
+            continue
+        }
+
+        if (addrPtr.pointed.sa_family.toInt() == AF_INET) {
+            val sockaddrIn = addrPtr.reinterpret<sockaddr_in>().pointed
+            val buffer = allocArray<ByteVar>(INET_ADDRSTRLEN.toLong())
+
+            // 修复：使用 ptr 方法获取 sin_addr 的指针
+            val res = inet_ntop(
+                AF_INET,
+                sockaddrIn.sin_addr.ptr,  // 这里是正确的
+                buffer,
+                INET_ADDRSTRLEN.toUInt()
+            )
+
+            if (res != null) {
+                val ip = buffer.toKString()
+                val interfaceName = ifa.ifa_name?.toKString()
+
+                // 排除回环地址，优先选择 en0 (WiFi)
+                if (ip != "127.0.0.1" && !ip.startsWith("169.254")) {
+                    result = ip
+                    // 如果是 WiFi 接口，直接返回
+                    if (interfaceName == "en0") {
+                        break
+                    }
+                }
+            }
+        }
+
+        ptr = ifa.ifa_next
+    }
+
+    freeifaddrs(ifap.value)
+    result
+}
+
+actual fun readImageBytes(path: String): ByteArray {
+    val data = NSData.dataWithContentsOfFile(path)
+        ?: error("Cannot read image at $path")
+    return ByteArray(data.length.toInt()).also {
+        memcpy(it.refTo(0), data.bytes, data.length)
+    }
 }

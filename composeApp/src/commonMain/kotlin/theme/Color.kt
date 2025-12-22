@@ -52,3 +52,4 @@ val C_003BC3 = Color(0xFF003BC3)
 
 val C_DAE9FF = Color(0xFFDAE9FF)
 val C_B6DFFF = Color(0xFFB6DFFF)
+val C_F9A528 = Color(0xFFF9A528)

@@ -17,8 +17,11 @@ import com.hjq.permissions.permission.base.IPermission
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.FileOutputStream
 import java.math.BigDecimal
+import java.net.Inet4Address
+import java.net.NetworkInterface
 import java.security.MessageDigest
 import java.text.DecimalFormat
 import java.util.UUID
@@ -45,7 +48,7 @@ actual fun mobileType(): String {
 actual fun getPhoneModel(): String = Build.MODEL
 actual fun getPhoneBrand(): String = Build.BRAND
 
-actual suspend fun getDeviceId(): String {
+actual fun getDeviceId(): String {
     return DeviceUtil.getDeviceId()
 }
 
@@ -220,4 +223,24 @@ private fun fixImageOrientation(bitmap: Bitmap, imageBytes: ByteArray): Bitmap {
 
 actual fun randomUUID(): String {
     return UUID.randomUUID().toString()
+}
+
+actual fun getLocalIpAddress(): String? {
+    return try {
+        val interfaces = NetworkInterface.getNetworkInterfaces()
+        interfaces.toList().forEach { intf ->
+            intf.inetAddresses.toList().forEach { addr ->
+                if (!addr.isLoopbackAddress && addr is Inet4Address) {
+                    return addr.hostAddress
+                }
+            }
+        }
+        null
+    } catch (e: Exception) {
+        null
+    }
+}
+
+actual fun readImageBytes(path: String): ByteArray {
+    return File(path).readBytes()
 }

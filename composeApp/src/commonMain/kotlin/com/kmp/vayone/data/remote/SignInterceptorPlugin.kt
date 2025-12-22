@@ -156,6 +156,7 @@ private fun extractMultipartParamsForSign(
 val json = Json {
     encodeDefaults = true
     explicitNulls = false
+    isLenient = true
 }
 
 private fun generateSign(bodyJson: String): Pair<String, String> {
